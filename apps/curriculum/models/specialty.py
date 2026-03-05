@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from common.models import TimeStampModel
 
 
-class Specialty(models.Model):
+class Specialty(TimeStampModel):
     grade = models.ForeignKey(
         "Grade",
         on_delete=models.CASCADE,
