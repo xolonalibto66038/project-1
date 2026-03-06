@@ -4,11 +4,11 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from taggit.managers import TaggableManager
 
-from common.models import UUIDTaggedItem
+from common.models import UUIDTaggedItem, TimeStampModel
 from ..choices import DifficultyLevel, ResourceStatus, ResourceType, Term
 
 
-class Resource(models.Model):
+class Resource(TimeStampModel):
     """
     A resource is the atomic content unit attached to a course.
     Covers: Lesson, Exercise, Homework, Test, Exam.
@@ -179,6 +179,9 @@ class Resource(models.Model):
         ]
 
     def save(self, *args, **kwargs):
+        # Inherit course term automatically
+        if self.course:
+            self.term = self.course.term
         if not self.slug:
             parent_slug = self.course.slug if self.course else self.subject.slug
             self.slug = slugify(f"{parent_slug}-{self.resource_type}-{self.title}")
@@ -192,7 +195,17 @@ class Resource(models.Model):
             raise ValidationError(
                 _('has_solution must be True when a solution file is attached.')
             )
-
+        # Resource inside course must match course term
+        if self.course:
+            if self.term and self.term != self.course.term:
+                raise ValidationError(
+                    {
+                        "term": _(
+                            "Resource term must match the Course term (%(term)s)."
+                        ) % {"term": self.course.get_term_display()}
+                    }
+                )
+        
     # ── Metadata helpers ──
 
     @property

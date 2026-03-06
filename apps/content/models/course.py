@@ -1,13 +1,12 @@
-# apps/content/models.py
-
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from common.models import TimeStampModel
 from ..choices import DifficultyLevel, Term
 
 
-class Course(models.Model):
+class Course(TimeStampModel):
     """
     A course is a unit of content.
     It belongs to either:
@@ -81,14 +80,6 @@ class Course(models.Model):
         verbose_name=_('Is Active'),
         help_text=_('Inactive courses are hidden from students.'),
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_('Created At'),
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_('Updated At'),
-    )
 
     class Meta:
         ordering = ['chapter', 'order']
@@ -143,7 +134,22 @@ class Course(models.Model):
                     _('The grade subject must match the chapter\'s grade subject.')
                 )
 
+        # Course inside chapter must match chapter term
+        if self.chapter:
+            if self.term and self.term != self.chapter.term:
+                raise ValidationError(
+                    {
+                        "term": _(
+                            "Course term must match the chapter term (%(term)s)."
+                        ) % {"term": self.chapter.get_term_display()}
+                    }
+                )
+
     def save(self, *args, **kwargs):
+        # Inherit chapter term automatically
+        if self.chapter:
+            self.term = self.chapter.term
+
         if not self.slug:
             parent_slug = self.chapter.slug if self.chapter else (
                 f"{self.grade_subject.grade.short_name}"

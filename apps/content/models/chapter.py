@@ -1,13 +1,12 @@
 from django.db import models
-from django.conf import settings
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from apps.curriculum.models import GradeSubject
-from ..choices import DifficultyLevel, ResourceStatus, ResourceType, Term
+from common.models import TimeStampModel
+from ..choices import Term
 
 
-class Chapter(models.Model):
+class Chapter(TimeStampModel):
     """
     A chapter belongs to a GradeSubject.
     e.g. "Les Fractions" in Maths / 3AM
@@ -69,4 +68,4 @@ class Chapter(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.grade_subject} – {self.title}"
+        return f"{self.grade_subject} - {self.title}"
