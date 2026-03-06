@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'common',
     'apps.curriculum',
     'apps.content',
+    'apps.feedback',
 ]
 
 MIDDLEWARE = [
