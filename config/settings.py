@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     # thirdparty apps
     'allauth',
     'allauth.account',
@@ -61,6 +62,15 @@ INSTALLED_APPS = [
 ]
 
 SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -185,11 +195,13 @@ SOCIALACCOUNT_PROVIDERS = {
         'APP': {
             'client_id':     env('GOOGLE_CLIENT_ID',     default=''),
             'secret':        env('GOOGLE_CLIENT_SECRET', default=''),
-            'key':           '',
+            # 'key':           '',
         },
         'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
+        # 'AUTH_PARAMS': {'access_type': 'online'},
         'FETCH_USERINFO': True,
+        "AUTH_PARAMS": {"access_type": "online", "prompt": "select_account"},
+        "OAUTH_PKCE_ENABLED": True,
     }
 }
 

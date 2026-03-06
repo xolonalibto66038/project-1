@@ -10,6 +10,7 @@ class OnboardingMiddleware:
     EXEMPT_PREFIXES = (
         '/onboarding/',
         '/accounts/',
+        '/accounts/google/',
         '/admin/',
         '/ajax/',
         '/static/',
@@ -25,6 +26,8 @@ class OnboardingMiddleware:
         return self.get_response(request)
 
     def _should_redirect(self, request):
+        if request.path.startswith('/accounts/google/'):
+            return False
         if not request.user.is_authenticated:
             return False
         if request.user.is_staff or request.user.is_superuser:

@@ -7,8 +7,10 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.urls import reverse
 
 from apps.accounts.choices import UserRole
+from apps.accounts.models import StudentProfile, TeacherProfile
 from apps.curriculum.models import Specialty, Subject
 
 from .forms import StudentOnboardingForm, TeacherOnboardingForm
@@ -49,13 +51,13 @@ class OnboardingView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def _save_student(self, user, form):
-        profile          = user.student_profile
-        profile.grade    = form.cleaned_data['grade']
+        profile, _ = StudentProfile.objects.get_or_create(user=user)  # ✅ never crashes
+        profile.grade     = form.cleaned_data['grade']
         profile.specialty = form.cleaned_data.get('specialty')
         profile.save()
 
     def _save_teacher(self, user, form):
-        profile         = user.teacher_profile
+        profile, _ = TeacherProfile.objects.get_or_create(user=user)  # ✅ never crashes
         profile.level   = form.cleaned_data['level']
         profile.subject = form.cleaned_data['subject']
         profile.save()
@@ -93,6 +95,31 @@ def load_subjects(request):
         level_id=level_id
     ).order_by('name').values('id', 'name')
     return JsonResponse({'subjects': list(subjects)})
+
+
+class SocialRoleSelectView(FormView):
+    """
+    Shown before Google OAuth — captures role choice
+    and stores it in session before redirecting to Google.
+    """
+    template_name = 'account/role_select.html'
+
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response({})
+
+    def post(self, request, *args, **kwargs):
+        from apps.accounts.choices import UserRole
+        role = request.POST.get('role')
+
+        if role not in UserRole.values:
+            return self.render_to_response({'error': _('Please select a valid role.')})
+
+        # ✅ store in session — survives the OAuth redirect
+        request.session['pending_role'] = role
+
+        # redirect to Google
+        # from allauth.socialaccount.providers.google.views import oauth2_login
+        return redirect(reverse('google_login'))
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

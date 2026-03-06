@@ -1,11 +1,12 @@
 from django.urls import path, include
 
-from .views import OnboardingView, load_specialties, load_subjects, DashboardView
+from .views import OnboardingView, load_specialties, load_subjects, DashboardView, SocialRoleSelectView
 
 
 urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path("accounts/", include("allauth.socialaccount.urls")),
+    path('accounts/social/role/', SocialRoleSelectView.as_view(), name='social_role_select'),
     path('onboarding/', OnboardingView.as_view(), name='onboarding'),
     path('ajax/specialties/',      load_specialties,          name='ajax_specialties'),
     path('ajax/subjects/',         load_subjects,             name='ajax_subjects'),

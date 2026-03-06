@@ -85,12 +85,26 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         # role defaults to student for social signups
         if not user.role:
             from apps.accounts.choices import UserRole
-            user.role = UserRole.STUDENT
+            role       = request.session.pop('pending_role', UserRole.STUDENT)
+            user.role  = role
 
         user.is_verified = True   # Google already verified the email
         user.save()
+
+        self._ensure_profile(user)
+
         return user
 
     def is_auto_signup_allowed(self, request, sociallogin):
         """Allow auto-signup for Google — email is pre-verified."""
         return True
+    
+    def _ensure_profile(self, user):
+        """Guarantee profile exists regardless of signal timing."""
+        from apps.accounts.choices import UserRole
+        from apps.accounts.models import StudentProfile, TeacherProfile
+
+        if user.role == UserRole.STUDENT:
+            StudentProfile.objects.get_or_create(user=user)
+        elif user.role == UserRole.TEACHER:
+            TeacherProfile.objects.get_or_create(user=user)

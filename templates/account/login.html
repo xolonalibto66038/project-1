@@ -51,7 +51,7 @@
       <div class="social-auth-links text-center mb-3 mt-3">
         <p>{% trans "- OR -" %}</p>
         {% provider_login_url 'google' as google_url %}
-        <a href="{{ google_url }}" class="btn btn-danger btn-block">
+        <a href="{% url 'social_role_select' %}" class="btn btn-danger btn-block">
           <i class="fab fa-google mr-2"></i>{% trans "Sign in with Google" %}
         </a>
       </div>
