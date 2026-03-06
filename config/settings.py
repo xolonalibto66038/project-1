@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'apps.progress',
     'apps.accounts',
     'apps.authentication',
+    'apps.assessment',
 ]
 
 SITE_ID = 1
