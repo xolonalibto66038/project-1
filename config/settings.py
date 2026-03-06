@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.curriculum',
     'apps.content',
     'apps.feedback',
+    'apps.progress'
 ]
 
 MIDDLEWARE = [
