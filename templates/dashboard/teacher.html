@@ -1,0 +1,128 @@
+{# templates/dashboard/teacher.html #}
+
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Teacher Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+  <div class="container-fluid">
+    <h1 class="m-0">
+      👨‍🏫 {% trans "Welcome" %}, <strong>{{ user.first_name }}</strong>!
+    </h1>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title">{% trans "My Profile" %}</h3>
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless">
+              <tr>
+                <th>{% trans "Name" %}</th>
+                <td>{{ user.get_full_name }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Email" %}</th>
+                <td>{{ user.email }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Level" %}</th>
+                <td>
+                  {% if level %}
+                    <span class="badge badge-success">{{ level }}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Not set" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>{% trans "Subject" %}</th>
+                <td>
+                  {% if subject %}
+                    <span class="badge badge-primary">{{ subject }}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Not set" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>{% trans "Verified" %}</th>
+                <td>
+                  {% if profile.is_verified_teacher %}
+                    <span class="badge badge-success">
+                      <i class="fas fa-check mr-1"></i>{% trans "Verified" %}
+                    </span>
+                  {% else %}
+                    <span class="badge badge-secondary">
+                      <i class="fas fa-clock mr-1"></i>{% trans "Pending" %}
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-primary">
+                <i class="fas fa-file-alt"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Resources" %}</span>
+                <span class="info-box-number">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-success">
+                <i class="fas fa-eye"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Total Views" %}</span>
+                <span class="info-box-number">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-warning">
+                <i class="fas fa-star"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Avg Rating" %}</span>
+                <span class="info-box-number">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if not profile.is_verified_teacher %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle mr-2"></i>
+          {% trans "Your teacher account is pending verification by an admin. You can browse content but cannot publish resources yet." %}
+        </div>
+        {% else %}
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle mr-2"></i>
+          {% trans "Your account is verified. You can publish resources." %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

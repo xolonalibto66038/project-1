@@ -1,0 +1,94 @@
+{# templates/account/signup.html #}
+
+{% extends "layouts/auth.html" %}
+{% load i18n allauth account %}
+
+{% block title %}{% trans "Register" %}{% endblock %}
+
+{% block auth_card %}
+<div class="register-box">
+  <div class="register-logo">
+    <a href="/"><b>Edu</b>GDZ</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body register-card-body">
+      <p class="login-box-msg">{% trans "Register a new account" %}</p>
+
+      <form method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+
+        {# ── Role selector ── #}
+        <div class="form-group mb-3">
+          <label>{% trans "I am a" %}</label>
+          <div class="d-flex gap-3">
+            {% for value, label in form.role.field.choices %}
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="role"
+                id="role_{{ value }}"
+                value="{{ value }}"
+                {% if form.role.value == value %}checked{% endif %}
+              >
+              <label class="form-check-label" for="role_{{ value }}">{{ label }}</label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          {{ form.first_name }}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.last_name }}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.email }}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.password1 }}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.password2 }}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-8">
+            <p class="mb-0">
+              <a href="{% url 'account_login' %}">{% trans "Already have an account?" %}</a>
+            </p>
+          </div>
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">
+              {% trans "Register" %}
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      {# ── Google ── #}
+      <div class="social-auth-links text-center mt-3">
+        <p>{% trans "- OR -" %}</p>
+        {% url provider_login_url 'google' as google_url %}
+        <a href="{{ google_url }}" class="btn btn-danger btn-block">
+          <i class="fab fa-google mr-2"></i>{% trans "Sign up with Google" %}
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

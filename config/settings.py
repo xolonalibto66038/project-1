@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # thirdparty apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     "taggit",
     # internal apps
     'common',
@@ -53,7 +57,10 @@ INSTALLED_APPS = [
     'apps.feedback',
     'apps.progress',
     'apps.accounts',
+    'apps.authentication',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,6 +70,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # thirdparty
+    'allauth.account.middleware.AccountMiddleware',
+    # internal
+    'apps.authentication.middleware.OnboardingMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -70,7 +81,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -130,9 +141,57 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ── allauth core ──
+ACCOUNT_LOGIN_METHODS         = {'email'}
+ACCOUNT_SIGNUP_FIELDS         = ['email*', 'first_name*', 'last_name*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION    = 'mandatory'
+ACCOUNT_CONFIRM_EMAIL_ON_GET  = True
+ACCOUNT_EMAIL_SUBJECT_PREFIX  = '[EduGDZ] '
+ACCOUNT_MAX_EMAIL_ADDRESSES   = 2
+ACCOUNT_SESSION_REMEMBER      = True  # remember me by default
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED    = False
+
+# ── redirects ──
+LOGIN_URL                  = 'account_login'
+LOGIN_REDIRECT_URL         = '/dashboard/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+
+# ── adapter ──
+ACCOUNT_ADAPTER            = 'apps.authentication.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER      = 'apps.authentication.adapters.CustomSocialAccountAdapter'
+
+# -- forms --- 
+ACCOUNT_FORMS = {
+    'signup':         'apps.authentication.forms.CustomSignupForm',
+    'login':          'apps.authentication.forms.CustomLoginForm',
+    'reset_password': 'apps.authentication.forms.CustomResetPasswordForm',
+    'change_password':'apps.authentication.forms.CustomChangePasswordForm',
+}
+
+# ── social ──
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id':     env('GOOGLE_CLIENT_ID',     default=''),
+            'secret':        env('GOOGLE_CLIENT_SECRET', default=''),
+            'key':           '',
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'FETCH_USERINFO': True,
+    }
+}
+
+# ── email backend (dev) ──
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

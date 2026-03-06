@@ -1,0 +1,128 @@
+{# templates/dashboard/student.html #}
+
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Student Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+  <div class="container-fluid">
+    <h1 class="m-0">
+      👋 {% trans "Welcome back" %}, <strong>{{ user.first_name }}</strong>!
+    </h1>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── Profile summary ── #}
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title">{% trans "My Profile" %}</h3>
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless">
+              <tr>
+                <th>{% trans "Name" %}</th>
+                <td>{{ user.get_full_name }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Email" %}</th>
+                <td>{{ user.email }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Level" %}</th>
+                <td>
+                  {% if level %}
+                    <span class="badge badge-success">{{ level }}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Not set" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>{% trans "Grade" %}</th>
+                <td>
+                  {% if grade %}
+                    <span class="badge badge-primary">{{ grade }}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Not set" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% if specialty %}
+              <tr>
+                <th>{% trans "Specialty" %}</th>
+                <td>
+                  <span class="badge badge-info">{{ specialty }}</span>
+                </td>
+              </tr>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {# ── Quick stats ── #}
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-info">
+                <i class="fas fa-book"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Courses" %}</span>
+                <span class="info-box-number">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-success">
+                <i class="fas fa-check-circle"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Completed" %}</span>
+                <span class="info-box-number">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-box">
+              <span class="info-box-icon bg-warning">
+                <i class="fas fa-star"></i>
+              </span>
+              <div class="info-box-content">
+                <span class="info-box-text">{% trans "Bookmarks" %}</span>
+                <span class="info-box-number">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ── Onboarding status ── #}
+        {% if not grade %}
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          {% trans "Your profile is incomplete." %}
+          <a href="{% url 'onboarding' %}" class="alert-link ml-2">
+            {% trans "Complete it now →" %}
+          </a>
+        </div>
+        {% else %}
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle mr-2"></i>
+          {% trans "Your profile is complete. Start learning!" %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

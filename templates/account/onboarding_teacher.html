@@ -1,0 +1,87 @@
+{# templates/authentication/onboarding_teacher.html #}
+
+{% extends "layouts/auth.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Complete Your Profile" %}{% endblock %}
+{% block body_class %}register-page{% endblock %}
+
+{% block auth_card %}
+<div class="register-box">
+  <div class="register-logo">
+    <a href="/"><b>Edu</b>GDZ</a>
+  </div>
+  <div class="card">
+    <div class="card-body register-card-body">
+
+      <p class="login-box-msg">
+        👋 {% trans "Welcome" %}, <strong>{{ user.first_name }}</strong>!
+        {% trans "Tell us what you teach." %}
+      </p>
+
+      <form method="post" id="teacher-onboarding-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id_level">{% trans "Level" %}</label>
+          {{ form.level }}
+          {% if form.level.errors %}
+            <span class="text-danger">{{ form.level.errors }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group" id="subject-group" style="display:none;">
+          <label for="id_subject">{% trans "Subject" %}</label>
+          {{ form.subject }}
+          {% if form.subject.errors %}
+            <span class="text-danger">{{ form.subject.errors }}</span>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-block">
+          {% trans "Continue to Dashboard" %} →
+        </button>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+
+  const $level    = $('#id_level');
+  const $subject  = $('#id_subject');
+  const $subGroup = $('#subject-group');
+
+  $level.on('change', function () {
+    const levelId = $(this).val();
+    if (!levelId) {
+      $subGroup.hide();
+      $subject.html('<option value="">---------</option>');
+      return;
+    }
+
+    $.getJSON("{% url 'ajax_subjects' %}", { level_id: levelId }, function (data) {
+      $subject.html('<option value="">{% trans "Select your subject" %}</option>');
+      if (data.subjects.length > 0) {
+        $.each(data.subjects, function (_, s) {
+          $subject.append($('<option>', { value: s.id, text: s.name }));
+        });
+        $subGroup.show();
+      } else {
+        $subGroup.hide();
+      }
+    });
+  });
+
+  if ($level.val()) $level.trigger('change');
+});
+</script>
+{% endblock %}

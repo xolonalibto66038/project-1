@@ -1,0 +1,72 @@
+{% extends "layouts/auth.html" %}
+{% load i18n allauth account socialaccount %}
+
+{% block title %}{% trans "Sign In" %}{% endblock %}
+
+{% block auth_card %}
+<div class="login-box">
+  <div class="login-logo">
+    <a href="/"><b>Edu</b>GDZ</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">{% trans "Sign in to start your session" %}</p>
+
+      <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+
+        <div class="input-group mb-3">
+          {{ form.login }}
+          <div class="input-group-append">
+            <div class="input-group-text"><span class="fas fa-envelope"></span></div>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          {{ form.password }}
+          <div class="input-group-append">
+            <div class="input-group-text"><span class="fas fa-lock"></span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-8">
+            <div class="form-check">
+              {{ form.remember }}
+              <label class="form-check-label">{% trans "Remember Me" %}</label>
+            </div>
+          </div>
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">
+              {% trans "Sign In" %}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {# ── Google ── #}
+      {% get_providers as socialaccount_providers %}
+      {% if socialaccount_providers %}
+      <div class="social-auth-links text-center mb-3 mt-3">
+        <p>{% trans "- OR -" %}</p>
+        {% provider_login_url 'google' as google_url %}
+        <a href="{{ google_url }}" class="btn btn-danger btn-block">
+          <i class="fab fa-google mr-2"></i>{% trans "Sign in with Google" %}
+        </a>
+      </div>
+      {% endif %}
+
+      <p class="mb-1">
+        <a href="{% url 'account_reset_password' %}">{% trans "Forgot your password?" %}</a>
+      </p>
+      <p class="mb-0">
+        <a href="{% url 'account_signup' %}" class="text-center">
+          {% trans "Register a new account" %}
+        </a>
+      </p>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
