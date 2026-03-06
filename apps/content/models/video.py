@@ -1,8 +1,12 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
+
 from taggit.managers import TaggableManager
 
 from common.models import UUIDTaggedItem, TimeStampModel
+
+User = get_user_model()
 
 
 class VideoResource(TimeStampModel):
@@ -35,14 +39,15 @@ class VideoResource(TimeStampModel):
         verbose_name=_("Tags"),
     )
 
-    # author = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL,
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     related_name='resources',
-    #     verbose_name=_('Author'),
-    #     help_text=_('The teacher who created this resource.'),
-    # )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='videos',
+        verbose_name=_('Author'),
+        help_text=_('The teacher who created this resource.'),
+        limit_choices_to={"role": "teacher"}
+    )
 
     class Meta:
         ordering = ["order"]

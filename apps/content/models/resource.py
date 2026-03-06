@@ -1,11 +1,14 @@
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from taggit.managers import TaggableManager
 
 from common.models import UUIDTaggedItem, TimeStampModel
 from ..choices import DifficultyLevel, ResourceStatus, ResourceType, Term
+
+User = get_user_model()
 
 
 class Resource(TimeStampModel):
@@ -132,14 +135,15 @@ class Resource(TimeStampModel):
         verbose_name=_("Tags"),
     )
 
-    # author = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL,
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     related_name='resources',
-    #     verbose_name=_('Author'),
-    #     help_text=_('The teacher who created this resource.'),
-    # )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='resources',
+        verbose_name=_('Author'),
+        help_text=_('The teacher who created this resource.'),
+        limit_choices_to={"role": "teacher"}
+    )
 
     class Meta:
         ordering = ['course', 'order']

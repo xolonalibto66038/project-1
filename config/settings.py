@@ -34,7 +34,7 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-
+AUTH_USER_MODEL = "accounts.CustomUser"
 # Application definition
 
 INSTALLED_APPS = [
@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'apps.curriculum',
     'apps.content',
     'apps.feedback',
-    'apps.progress'
+    'apps.progress',
+    'apps.accounts',
 ]
 
 MIDDLEWARE = [

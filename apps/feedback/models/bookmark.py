@@ -10,6 +10,7 @@ from common.models import TimeStampModel
 
 User = get_user_model()
 
+
 class Bookmark(TimeStampModel):
     """
     Generic bookmark allowing a student to save any curriculum object.
