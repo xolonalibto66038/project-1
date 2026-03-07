@@ -1,0 +1,156 @@
+{% extends "layouts/base-full.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Landing" %}{% endblock title %}
+
+{% block content %}
+
+<!-- Content Header -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Welcome to EduPlatform</h1>
+        <p class="text-muted">Learn. Teach. Grow together.</p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><i class="fas fa-home"></i>{% trans "Home" %}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <!-- HERO CARD -->
+  <div class="card card-primary card-outline">
+    <div class="card-body text-center py-5">
+      <h1 class="display-4 font-weight-bold">
+        The Smart Education Platform
+      </h1>
+      <p class="lead mt-3">
+        A modern learning management system designed for students and teachers.
+      </p>
+      <div class="mt-4">
+        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mr-2">
+          <i class="fas fa-user-graduate mr-1"></i> I'm a Student
+        </a>
+        <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg">
+          <i class="fas fa-chalkboard-teacher mr-1"></i> I'm a Teacher
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="card bg-gradient-primary mt-4">
+    <div class="card-body text-center py-5">
+      <h2 class="font-weight-bold">Start Your Learning Journey Today</h2>
+      <p class="mt-2">
+        Join thousands of students and teachers already using EduPlatform.
+      </p>
+      <a href="{% url 'curriculum:level:level-list' %}" class="btn btn-light btn-lg mt-3">
+        <i class="fas fa-rocket mr-1"></i> Get Started
+      </a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ courses_count }}</h3>
+          <p>Courses</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-book"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ students_count }}+</h3>
+          <p>Students</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-user-graduate"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ teachers_count }}+</h3>
+          <p>Teachers</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>24/7</h3>
+          <p>Access</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="row">
+    <!-- STUDENTS -->
+    <div class="col-md-6">
+      <div class="card card-outline card-info h-100">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-user-graduate mr-2"></i>For Students
+          </h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Interactive courses</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Track learning progress</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Assignments & quizzes</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Certificates & achievements</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div class="col-md-6">
+      <div class="card card-outline card-success h-100">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-chalkboard-teacher mr-2"></i>For Teachers
+          </h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Create & manage courses</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Student performance analytics</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Assignments & grading</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Live sessions & discussions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+<!-- /.content -->
+
+{% endblock %}

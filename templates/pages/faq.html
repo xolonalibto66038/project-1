@@ -1,0 +1,136 @@
+{% extends "layouts/base-full.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "FAQ" %}{% endblock %}
+
+{% block content %}
+
+{# ── Breadcrumb ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="font-weight-bold">
+          <i class="fas fa-question-circle text-primary mr-2"></i>
+          {{ page_title }}
+        </h1>
+        <p class="text-muted">{{ page_subtitle }}</p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item active">{% trans "FAQ" %}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── Search ── #}
+    <div class="row mb-4">
+      <div class="col-md-6 offset-md-3">
+        <div class="input-group">
+          <input
+            type="text"
+            id="faq-search"
+            class="form-control"
+            placeholder="{% trans 'Search a question or keyword...' %}"
+            autocomplete="off"
+          >
+          <div class="input-group-append">
+            <span class="input-group-text bg-primary">
+              <i class="fas fa-search text-white"></i>
+            </span>
+          </div>
+        </div>
+        {# shown when no results match #}
+        <p id="faq-no-results" class="text-muted text-center mt-3" style="display:none;">
+          {% trans "No questions matched your search." %}
+        </p>
+      </div>
+    </div>
+
+    {# ── FAQ Accordion ── #}
+    <div id="faq-accordion">
+      {% for faq in faqs %}
+      <div class="card card-{{ faq.color }} card-outline faq-item">
+        <a class="d-block w-100" data-toggle="collapse" href="#{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+          <div class="card-header">
+            <h5 class="card-title mb-0 d-flex justify-content-between align-items-center">
+              <span>
+                <i class="{{ faq.icon }} mr-2"></i>
+                <span class="faq-question">{{ faq.question }}</span>
+              </span>
+              <i class="fas fa-angle-down ml-auto"></i>
+            </h5>
+          </div>
+        </a>
+        <div id="{{ faq.id }}" class="collapse {% if forloop.first %}show{% endif %}" data-parent="#faq-accordion">
+          <div class="card-body faq-answer">
+            {{ faq.answer }}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-center text-muted py-5">
+        <i class="fas fa-inbox fa-3x mb-3"></i>
+        <p>{% trans "No FAQs available at the moment." %}</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# ── CTA ── #}
+    <div class="row mt-5">
+      <div class="col-12 text-center">
+        <p class="lead">
+          {% trans "Didn't find what you were looking for?" %}
+          <a href="{% url 'pages:contact-us' %}" class="font-weight-bold ml-1">
+            {% trans "Contact us" %}
+          </a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const searchInput    = document.getElementById('faq-search');
+  const noResults      = document.getElementById('faq-no-results');
+  const faqItems       = document.querySelectorAll('.faq-item');
+
+  searchInput.addEventListener('input', function () {
+    const query   = this.value.trim().toLowerCase();
+    let   visible = 0;
+
+    faqItems.forEach(card => {
+      const question = card.querySelector('.faq-question').textContent.toLowerCase();
+      const answer   = card.querySelector('.faq-answer').textContent.toLowerCase();
+      const matches  = !query || question.includes(query) || answer.includes(query);
+
+      card.style.display = matches ? '' : 'none';
+      if (matches) visible++;
+    });
+
+    // ✅ collapse all open items when searching so results are scannable
+    if (query) {
+      faqItems.forEach(card => {
+        const collapseEl = card.querySelector('.collapse');
+        if (collapseEl) $(collapseEl).collapse('hide');
+      });
+    }
+
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

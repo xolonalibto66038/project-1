@@ -35,6 +35,8 @@ class CustomSignupForm(SignupForm):
         choices=UserRole.choices,
         label=_('I am a'),
         widget=forms.RadioSelect(attrs={'class': 'role-selector'}),
+        initial=UserRole.STUDENT,
+        required=True
     )
 
     # ── Email field override for Bootstrap styling ──

@@ -1,0 +1,178 @@
+{% extends "layouts/base-full.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Contact Us" %}{% endblock %}
+
+{% block content %}
+
+{# ── Breadcrumb ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>{{ page_title }}</h1>
+        <p class="text-muted">{{ page_subtitle }}</p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item active">{% trans "Contact" %}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="card card-primary card-outline">
+    <div class="card-body">
+      <div class="row">
+
+        {# ── Left: info panel ── #}
+        <div class="col-md-4 border-right d-flex align-items-center justify-content-center">
+          <div class="text-center px-3">
+
+            <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+            <h4 class="font-weight-bold">Edu<span class="text-primary">GDZ</span></h4>
+
+            <hr>
+
+            <p class="mb-1">
+              <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+              Algiers, Algeria
+            </p>
+            <p class="mb-1">
+              <i class="fas fa-envelope text-primary mr-2"></i>
+              <a href="mailto:contact@edugdz.dz">contact@edugdz.dz</a>
+            </p>
+            <p class="mb-3">
+              <i class="fas fa-phone text-primary mr-2"></i>
+              +213 XX XX XX XX
+            </p>
+
+            <hr>
+
+            <p class="text-muted small mb-3">
+              {% trans "Follow us on social media" %}
+            </p>
+
+            <div>
+              <a href="#" class="btn btn-outline-primary btn-sm mx-1" title="Facebook">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#" class="btn btn-outline-info btn-sm mx-1" title="Twitter">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#" class="btn btn-outline-danger btn-sm mx-1" title="Instagram">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#" class="btn btn-outline-dark btn-sm mx-1" title="GitHub">
+                <i class="fab fa-github"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        {# ── Right: form ── #}
+        <div class="col-md-8">
+          <div class="px-3 pt-3">
+            <h5 class="font-weight-bold mb-4">
+              <i class="fas fa-paper-plane text-primary mr-2"></i>
+              {% trans "Send us a message" %}
+            </h5>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+
+              {# ── Name + Email side by side ── #}
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">
+                      {% trans "Full Name" %} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                      <div class="invalid-feedback d-block">
+                        {{ form.name.errors.0 }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">
+                      {% trans "Email Address" %} <span class="text-danger">*</span>
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                      <div class="invalid-feedback d-block">
+                        {{ form.email.errors.0 }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              {# ── Subject ── #}
+              <div class="form-group">
+                <label for="{{ form.subject.id_for_label }}">
+                  {% trans "Subject" %}
+                </label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                  <div class="invalid-feedback d-block">
+                    {{ form.subject.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+
+              {# ── Message ── #}
+              <div class="form-group">
+                <label for="{{ form.message.id_for_label }}">
+                  {% trans "Message" %} <span class="text-danger">*</span>
+                </label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                  <div class="invalid-feedback d-block">
+                    {{ form.message.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+
+              {# ── Non-field errors ── #}
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  <div>{{ error }}</div>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              {# ── Submit ── #}
+              <div class="form-group d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  <span class="text-danger">*</span> {% trans "Required fields" %}
+                </small>
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="fas fa-paper-plane mr-1"></i>
+                  {% trans "Send Message" %}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

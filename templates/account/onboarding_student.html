@@ -45,6 +45,9 @@
         <button type="submit" class="btn btn-primary btn-block">
           {% trans "Continue to Dashboard" %} →
         </button>
+        <a href="{% url 'account_logout' %}" class="btn btn-danger btn-block">
+          <i class="fas fa-sign-out-alt mr-1"></i>{% trans "Sign Out" %}
+        </a>
       </form>
 
     </div>

@@ -1,0 +1,6 @@
+/* rtl.css */
+[dir="rtl"] .rtl-ml-0 { margin-left: 0 !important; }
+[dir="rtl"] .rtl-mr-auto { margin-right: auto !important; }
+[dir="rtl"] .nav-sidebar .right {
+  transform: rotate(180deg);
+}

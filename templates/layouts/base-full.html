@@ -1,0 +1,110 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} | EMS</title>
+
+{% include "includes/styles.html" %}
+{% block extra_css %}{% endblock extra_css %}
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-top-nav layout-navbar-fixed">
+
+<div class="wrapper">
+
+{# ================= Navbar ================= #}
+{% include "includes/navbar-full.html" %}
+
+{# ================= Content Wrapper ================= #}
+
+<div class="content-wrapper">
+
+{# ================= Global Notifications ================= #}
+{% if request.user.is_authenticated %}
+<section class="content">
+  <div class="container">
+
+    {# -------- Profile Completion Alert -------- #}
+    {% comment %} {% if not request.user.is_profile_complete %}
+    <div class="alert alert-warning alert-dismissible shadow-sm border-0">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+
+      <div class="d-flex align-items-center">
+        <i class="fas fa-user-check mr-3"></i>
+
+        <div>
+          <strong>
+            {% trans "Profile" %} {{ request.user.get_profile_completion_percentage }}% {% trans "complete" %}.
+          </strong>
+          <span class="d-none d-md-inline">
+            {% trans "Complete your profile to unlock all features." %}
+          </span>
+        </div>
+
+        <a href="{% url 'accounts:student-profile' %}"
+           class="btn btn-sm btn-dark ml-auto">
+           {% trans "Complete" %}
+        </a>
+      </div>
+    </div>
+    {% endif %} {% endcomment %}
+
+
+    {# -------- Email Verification Alert -------- #}
+    {% comment %} {% if not request.user.is_email_verified %}
+    <div class="alert alert-info alert-dismissible shadow-sm border-0">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+
+      <div class="d-flex align-items-center">
+        <i class="fas fa-envelope mr-3"></i>
+
+        <div>
+          <strong>{% trans "Verify your email." %}</strong>
+          <span class="d-none d-md-inline">
+            {% trans "Check inbox for" %} <b>{{ request.user.email }}</b>
+          </span>
+        </div>
+
+        <a href="{% url 'account_email' %}"
+           class="btn btn-sm btn-outline-light border-0 ml-auto">
+           {% trans "Resend" %}
+        </a>
+      </div>
+    </div>
+    {% endif %} {% endcomment %}
+
+  </div>
+</section>
+{% endif %}
+
+
+
+{# ================= Page Content ================= #}
+<section class="content pt-4 pb-5">
+  <div class="container">
+    {% block content %}{% endblock content %}
+  </div>
+</section>
+
+</div>
+{# /.content-wrapper #}
+
+{# ================= Footer ================= #}
+{% include "includes/footer.html" %}
+
+</div>
+{# /.wrapper #}
+
+{% include "includes/scripts.html" %}
+{% include "includes/toasts.html" %}
+{% block extra_js %}{% endblock extra_js %}
+
+</body>
+</html>

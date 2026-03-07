@@ -1,0 +1,187 @@
+{% extends "layouts/base-full.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Terms of Service" %}{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="font-weight-bold">
+          <i class="fas fa-file-contract text-primary mr-2"></i>
+          {{ page_title }}
+        </h1>
+        <p class="text-muted">{{ page_subtitle }}</p>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item active">{% trans "Terms of Service" %}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 d-none d-md-block">
+        <div class="card card-outline card-primary sticky-top" style="top: 70px;">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-list mr-2"></i>{% trans "Contents" %}
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <ul class="nav flex-column">
+              {% for section in sections %}
+              <li class="nav-item">
+                <a href="#{{ section.id }}"
+                   class="nav-link py-2 toc-link text-{{ section.color }}">
+                  <i class="{{ section.icon }} mr-2"></i>
+                  {{ forloop.counter }}. {{ section.title }}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        {# ── Last updated ── #}
+        <div class="alert alert-info alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <i class="fas fa-calendar-alt mr-2"></i>
+          <strong>{% trans "Last Updated:" %}</strong> {{ last_updated }}
+        </div>
+
+        {# ── Intro ── #}
+        <div class="card card-outline card-primary mb-4">
+          <div class="card-body">
+            <p class="mb-0">
+              {% blocktrans %}
+                Welcome to <strong>EduGDZ</strong>. These Terms of Service govern your
+                access to and use of our platform. By registering or using EduGDZ in
+                any capacity, you agree to be legally bound by these terms.
+                Please read them carefully.
+              {% endblocktrans %}
+            </p>
+          </div>
+        </div>
+
+        {# ── Sections ── #}
+        {% for section in sections %}
+        <div class="card card-outline card-{{ section.color }} mb-4"
+             id="{{ section.id }}">
+          <div class="card-header">
+            <h3 class="card-title font-weight-bold">
+              <i class="{{ section.icon }} mr-2"></i>
+              {{ forloop.counter }}. {{ section.title }}
+            </h3>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              {% for item in section.content %}
+              <li class="mb-2 d-flex align-items-start">
+                <i class="fas fa-angle-right text-{{ section.color }} mt-1 mr-2 flex-shrink-0"></i>
+                <span>{{ item }}</span>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endfor %}
+
+        {# ── Agreement banner ── #}
+        <div class="card bg-gradient-dark mb-4">
+          <div class="card-body py-4">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h5 class="text-white font-weight-bold mb-1">
+                  <i class="fas fa-handshake mr-2"></i>
+                  {% trans "By using EduGDZ, you agree to these terms." %}
+                </h5>
+                <p class="text-white-50 mb-0 small">
+                  {% trans "If you disagree with any part, please discontinue use of the platform." %}
+                </p>
+              </div>
+              <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                <a href="{% url 'pages:privacy' %}"
+                   class="btn btn-outline-light btn-sm mr-2">
+                  <i class="fas fa-user-shield mr-1"></i>
+                  {% trans "Privacy Policy" %}
+                </a>
+                <a href="{% url 'pages:contact-us' %}"
+                   class="btn btn-light btn-sm">
+                  <i class="fas fa-envelope mr-1"></i>
+                  {% trans "Contact Us" %}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {# ── Contact ── #}
+        <div class="card card-outline card-secondary">
+          <div class="card-body text-center py-4">
+            <p class="mb-2 text-muted">
+              <i class="fas fa-envelope mr-1"></i>
+              {% trans "Legal enquiries:" %}
+              <a href="mailto:{{ contact_email }}" class="font-weight-bold ml-1">
+                {{ contact_email }}
+              </a>
+            </p>
+            <p class="mb-0 text-muted small">
+              {% trans "We respond to all legal enquiries within 5 business days." %}
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── Highlight active TOC link on scroll ──
+  const sections = document.querySelectorAll('.card[id]');
+  const tocLinks = document.querySelectorAll('.toc-link');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active', 'font-weight-bold'));
+        const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active', 'font-weight-bold');
+      }
+    });
+  }, { threshold: 0.4 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── Smooth scroll ──
+  tocLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        window.scrollTo({
+          top:      target.getBoundingClientRect().top + window.scrollY - 80,
+          behavior: 'smooth',
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

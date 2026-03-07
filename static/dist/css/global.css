@@ -1,0 +1,3 @@
+/* global.css */
+[dir="ltr"] .navbar-nav-end { margin-left: auto; }
+[dir="rtl"] .navbar-nav-end { margin-right: auto; }

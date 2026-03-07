@@ -1,0 +1,26 @@
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "timeOut": "4000",
+      "extendedTimeOut": "1000",
+    };
+
+    {% for message in messages %}
+      {% if message.tags == "error" %}
+        toastr.error("{{ message|escapejs }}");
+      {% elif message.tags == "success" %}
+        toastr.success("{{ message|escapejs }}");
+      {% elif message.tags == "warning" %}
+        toastr.warning("{{ message|escapejs }}");
+      {% else %}
+        toastr.info("{{ message|escapejs }}");
+      {% endif %}
+    {% endfor %}
+  });
+</script>
+{% endif %}

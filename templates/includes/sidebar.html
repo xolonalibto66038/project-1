@@ -1,0 +1,214 @@
+{% load static %}
+{% load i18n %}
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+  <!-- Brand Logo -->
+  <a href="{% url 'pages:landing' %}" class="brand-link text-center">
+    <img src="{% static 'dist/img/AdminLTELogo.png' %}"
+         alt="EMS Logo"
+         class="brand-image img-circle elevation-3">
+    <span class="brand-text font-weight-light ml-2">EMS</span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <!-- User Panel -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+      <div class="image">
+        <img src="{% static 'dist/img/user2-160x160.jpg' %}"
+             class="img-circle elevation-2"
+             alt="User Image">
+      </div>
+      <div class="info">
+        <a href="#" class="d-block font-weight-bold">
+          {{ user.first_name }} {{ user.last_name }}
+        </a>
+        {% if request.user.is_student %}
+        <small class="text-muted">
+          {{ request.user.student_profile.grade.name }}
+        </small>
+        {% else %}
+        <small class="text-muted">
+          {{ request.user.teacher_profile.grade.name }}
+        </small>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar Search -->
+    <div class="form-inline mb-2">
+      <div class="input-group" data-widget="sidebar-search">
+        <input class="form-control form-control-sidebar"
+               type="search"
+               placeholder="Search..."
+               aria-label="Search">
+        <div class="input-group-append">
+          <button class="btn btn-sidebar">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column"
+          data-widget="treeview"
+          role="menu"
+          data-accordion="false">
+
+        <!-- Dashboard -->
+        <li class="nav-item">
+          <a href="{% if user.is_student %}{% url 'pages:dashboard' %}{% elif user.is_teacher %}{% url 'pages:teacher-dashboard' %}{% endif %}"
+             class="nav-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+            <i class="nav-icon fas fa-chart-pie"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+
+        <!-- Academic Section -->
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-university"></i>
+            <p>
+              {% if request.user.is_student %}
+                {{ request.user.student_profile.grade.level.name }}
+              {% else %}
+                {{ request.user.teacher_profile.level.name }}
+              {% endif %}
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+
+          <ul class="nav nav-treeview">
+
+            <!-- Grade -->
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-signal"></i>
+                <p>
+                  {% if request.user.is_student %}
+                    {{ request.user.student_profile.grade.name }}
+                  {% elif request.user.is_teacher %}
+                    {{ request.user.teacher_profile.level.name }}
+                  {% endif %}
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+
+              <ul class="nav nav-treeview">
+                {% if user.is_student %}
+                <li class="nav-item">
+                  <a href="{% url 'curriculum:grade-detail' user.student_profile.grade.pk %}"
+                     class="nav-link">
+                    <i class="nav-icon fas fa-book-open"></i>
+                    <p>Subjects</p>
+                  </a>
+                </li>
+                {% elif user.is_teacher %}
+                <li class="nav-item">
+                  <a href="#"
+                     class="nav-link">
+                    <i class="nav-icon fas fa-book-open"></i>
+                    <p>My Subjects</p>
+                  </a>
+                </li>
+                {% endif %}
+
+                <li class="nav-item">
+                  <a href="#"
+                     class="nav-link">
+                    <i class="nav-icon fas fa-lightbulb"></i>
+                    <p>Tips & Guidance</p>
+                  </a>
+                </li>
+
+              </ul>
+            </li>
+
+            <!-- Resources -->
+            {% if user.is_student %}
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-folder-open"></i>
+                <p>
+                  Resources
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="far fa-file-alt nav-icon"></i>
+                    <p>Tests</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="far fa-file-pdf nav-icon"></i>
+                    <p>Exams</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="fas fa-video nav-icon"></i>
+                    <p>Lessons</p>
+                  </a>
+                </li>
+                {% if request.user.is_teacher %}
+                <li class="nav-item">
+                  <a href="{% url 'content:resource-create' %}" class="nav-link">
+                    <i class="fas fa-add nav-icon"></i>
+                    <p>Create</p>
+                  </a>
+                </li>
+                {% endif %}
+              </ul>
+            </li>
+            {% elif user.is_teacher %}
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-folder-open"></i>
+                <p>
+                  My Resources
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="far fa-file-alt nav-icon"></i>
+                    <p>Tests</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="far fa-file-pdf nav-icon"></i>
+                    <p>Exams</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="fas fa-video nav-icon"></i>
+                    <p>Lessons</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'content:resource-create' %}" class="nav-link">
+                    <i class="fas fa-add nav-icon"></i>
+                    <p>Create</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            {% endif %}
+
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>

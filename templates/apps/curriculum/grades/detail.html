@@ -1,0 +1,229 @@
+{% extends "layouts/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ grade.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .subject-card {
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 160px;
+  }
+  .subject-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .subject-link:hover .subject-card {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.1);
+  }
+  .subject-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+    transition: transform 0.2s ease;
+  }
+  .subject-link:hover .subject-icon-wrapper {
+    transform: scale(1.1);
+  }
+  .stat-pill {
+    background: #f1f3f5;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    color: #6c757d;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .subject-arrow {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.2s ease;
+    font-size: 12px;
+  }
+  .subject-link:hover .subject-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .progress-xs {
+    height: 5px;
+    border-radius: 4px;
+    background: #eef1f4;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2 align-items-center">
+      <div class="col-sm-6">
+        <h1 class="font-weight-bold">
+          <i class="fas fa-graduation-cap text-primary mr-2"></i>
+          {{ grade.name }}
+        </h1>
+        <small class="text-muted">
+          {{ grade.level.get_name_display }} —
+          {% blocktrans with count=enriched_subjects|length %}
+            {{ count }} subject(s)
+          {% endblocktrans %}
+        </small>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=grade.level.pk %}">
+              {{ grade.level.get_name_display }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">
+            {{ grade.short_name }}
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── Section label ── #}
+    <div class="row mb-3">
+      <div class="col-12">
+        <h5 class="text-uppercase text-muted font-weight-bold">
+          <i class="fas fa-book-open mr-2"></i>{% trans "Subjects" %}
+        </h5>
+      </div>
+    </div>
+
+    {# ── Subject grid ── #}
+    <div class="row">
+
+      {% for item in enriched_subjects %}
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4 d-flex">
+
+        <a href="{% url 'curriculum:subject:subject-detail' item.subject.pk %}"
+           class="subject-link w-100">
+
+          <div class="card border-0 shadow-sm subject-card w-100">
+            <div class="card-body d-flex flex-column p-3">
+
+              {# ── Header ── #}
+              <div class="d-flex align-items-center mb-3">
+
+                <div class="subject-icon-wrapper bg-primary mr-3"
+                     style="background: rgba(78,115,223,0.1) !important;">
+                  <i class="{{ item.subject.icon|default:'fas fa-book' }} text-primary"></i>
+                </div>
+
+                <div class="flex-grow-1 overflow-hidden">
+                  <h6 class="mb-0 font-weight-bold text-truncate">
+                    {{ item.subject.name }}
+                  </h6>
+                  <small class="text-muted">
+                    {{ item.subject.short_name }}
+                  </small>
+                </div>
+
+                <div class="subject-arrow text-muted ml-2">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+
+              </div>
+
+              {# ── Stat pills ── #}
+              <div class="d-flex flex-wrap gap-1 mb-3" style="gap: 4px;">
+
+                <span class="stat-pill">
+                  <i class="fas fa-layer-group"></i>
+                  {{ item.courses_count }}
+                  {% trans "Courses" %}
+                </span>
+
+                <span class="stat-pill">
+                  <i class="fas fa-folder-open"></i>
+                  {{ item.resources_count }}
+                  {% trans "Resources" %}
+                </span>
+
+              </div>
+
+              {# ── Progress (students only) ── #}
+              {% if item.show_progress %}
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between mb-1">
+                  <small class="text-muted">
+                    {{ item.completed_courses }}/{{ item.total_courses }}
+                    {% trans "completed" %}
+                  </small>
+                  <small class="font-weight-bold text-primary">
+                    {{ item.progress }}%
+                  </small>
+                </div>
+                <div class="progress progress-xs">
+                  <div class="progress-bar bg-primary"
+                       role="progressbar"
+                       style="width: {{ item.progress }}%"
+                       aria-valuenow="{{ item.progress }}"
+                       aria-valuemin="0"
+                       aria-valuemax="100">
+                  </div>
+                </div>
+              </div>
+
+              {% else %}
+              <div class="mt-auto">
+                {% if not request.user.is_authenticated %}
+                <small class="text-muted">
+                  <i class="fas fa-lock mr-1"></i>
+                  {% trans "Login to track progress" %}
+                </small>
+                {% endif %}
+              </div>
+              {% endif %}
+
+            </div>
+          </div>
+
+        </a>
+      </div>
+
+      {% empty %}
+      <div class="col-12">
+        <div class="card card-outline card-warning">
+          <div class="card-body text-center py-5">
+            <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+            <h5 class="font-weight-bold">{% trans "No subjects available" %}</h5>
+            <p class="text-muted mb-0">
+              {% trans "Subjects for this grade have not been added yet." %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

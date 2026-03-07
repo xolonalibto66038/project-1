@@ -1,38 +1,25 @@
-{# templates/layouts/auth.html #}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}EduGDZ{% endblock %} | EduGDZ</title>
+  <title>{% block title %}EduGDZ{% endblock %}</title>
 
-  {# ── Google Fonts ── #}
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Favicon -->
+  <link rel="icon" href="/static/img/favicon.ico">
 
-  {# ── Font Awesome ── #}
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-  {# ── AdminLTE ── #}
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
-
-  {% block extra_css %}{% endblock %}
+  {% include "includes/styles.html" %}
+  {% block extra_css %}{% endblock extra_css %}
 </head>
 
-<body class="hold-transition {% block body_class %}login-page{% endblock %}">
+<body class="hold-transition {% block body_class %}register-page{% endblock body_class %}">
 
-  {% block auth_card %}{% endblock %}
+<div class="auth-wrapper">
+    {% block auth_card %}{% endblock auth_card %}
+</div>
 
-  {# ── jQuery ── #}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-  {# ── Bootstrap 4 ── #}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
-
-  {# ── AdminLTE ── #}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
-
-  {% block extra_js %}{% endblock %}
+{% include "includes/scripts.html" %}
+{% block extra_js %}{% endblock extra_js %}
 
 </body>
 </html>

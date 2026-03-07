@@ -1,0 +1,186 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {{ subject.name }} — {% trans "Courses" %} ({{ quarter_display }})
+{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="fas fa-layer-group mr-2 text-info"></i>
+          {{ subject.name }}
+          <span class="badge badge-info ml-2">{{ quarter_display }}</span>
+        </h1>
+        <small class="text-muted">
+          {% trans "Courses for this term" %}
+        </small>
+      </div>
+
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
+              {{ level.name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">
+              {{ subject.short_name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">
+            {% trans "Courses" %} — {{ quarter_display }}
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="card card-info card-outline">
+
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-book mr-2"></i>
+          {{ subject.name }} —
+          {% trans "Courses" %}
+          <span class="badge badge-secondary ml-2">
+            {{ quarter_display }}
+          </span>
+        </h3>
+        <div class="card-tools">
+          <span class="badge badge-info">
+            {{ page_obj.paginator.count }}
+            {% trans "total" %}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+
+        {% if courses %}
+        <div class="list-group list-group-flush">
+
+          {% for course in courses %}
+          {% comment %} {% url 'content:course:course-detail' pk=course.pk %} {% endcomment %}
+          <a href="#" class="list-group-item list-group-item-action px-4 py-3">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+              {# ── Left: title + description ── #}
+              <div class="d-flex align-items-center flex-grow-1 mr-3">
+                <i class="fas fa-layer-group text-info mr-3"></i>
+                <div>
+                  <div class="font-weight-bold">{{ course.title }}</div>
+                  {% if course.description %}
+                  <small class="text-muted d-block text-truncate" style="max-width:400px;">
+                    {{ course.description }}
+                  </small>
+                  {% endif %}
+                </div>
+              </div>
+
+              {# ── Right: badges ── #}
+              <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
+
+                {# Difficulty #}
+                <span class="badge border"
+                      style="
+                        background: {{ course.difficulty }}20;
+                        color: #555;
+                        border-color: #ccc !important;
+                      ">
+                  <i class="fas fa-signal mr-1 small"></i>
+                  {{ course.get_difficulty_display }}
+                </span>
+
+                {# Exercises #}
+                <span class="badge badge-primary px-2 py-1">
+                  <i class="fas fa-pencil-alt mr-1 small"></i>
+                  {{ course.exercises_count }}
+                  {% trans "Exercises" %}
+                </span>
+
+                {# Resources #}
+                <span class="badge badge-success px-2 py-1">
+                  <i class="fas fa-folder mr-1 small"></i>
+                  {{ course.resources_count }}
+                  {% trans "Resources" %}
+                </span>
+
+                {# Progress (students only) #}
+                {% if is_student %}
+                  {% if course.progress_obj %}
+                    {% if course.progress_obj.is_completed %}
+                    <span class="badge badge-success px-2 py-1">
+                      <i class="fas fa-check-circle mr-1"></i>
+                      {% trans "Completed" %}
+                    </span>
+                    {% else %}
+                    <span class="badge badge-warning px-2 py-1">
+                      <i class="fas fa-spinner mr-1"></i>
+                      {% trans "In progress" %}
+                    </span>
+                    {% endif %}
+                  {% else %}
+                  <span class="badge badge-secondary px-2 py-1">
+                    <i class="fas fa-circle-notch mr-1"></i>
+                    {% trans "Not started" %}
+                  </span>
+                  {% endif %}
+                {% endif %}
+
+                {# Arrow #}
+                <i class="fas fa-chevron-right text-muted ml-2"></i>
+
+              </div>
+            </div>
+
+          </a>
+          {% endfor %}
+
+        </div>
+
+        {% else %}
+        <div class="p-5 text-center text-muted">
+          <i class="fas fa-info-circle fa-3x mb-3"></i>
+          <p class="mb-0">
+            {% trans "No courses available for this term." %}
+          </p>
+        </div>
+        {% endif %}
+
+      </div>
+
+      {# Pagination in card footer #}
+      {% if is_paginated %}
+      <div class="card-footer">
+        {% include "includes/pagination.html" %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

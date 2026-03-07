@@ -1,0 +1,139 @@
+{% load static %}
+{% load i18n %}
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+  <!-- Brand Logo -->
+  <a href="{% url 'pages:landing' %}" class="brand-link text-center">
+    <img src="{% static 'dist/img/AdminLTELogo.png' %}"
+         alt="EMS Logo"
+         class="brand-image img-circle elevation-3">
+    <span class="brand-text font-weight-light ml-2">EMS</span>
+  </a>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <!-- User Panel -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+      <div class="image">
+        <img src="{% static 'dist/img/user2-160x160.jpg' %}"
+             class="img-circle elevation-2"
+             alt="User Image">
+      </div>
+      <div class="info">
+        <a href="#" class="d-block font-weight-bold">
+          {{ user.first_name }} {{ user.last_name }}
+        </a>
+        {% if request.user.is_teacher %}
+        <small class="text-muted">
+          {{ request.user.teacher_profile.grade.name }}
+        </small>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar Search -->
+    <div class="form-inline mb-2">
+      <div class="input-group" data-widget="sidebar-search">
+        <input class="form-control form-control-sidebar"
+               type="search"
+               placeholder="Search..."
+               aria-label="Search">
+        <div class="input-group-append">
+          <button class="btn btn-sidebar">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column"
+          data-widget="treeview"
+          role="menu"
+          data-accordion="false">
+
+        <!-- Dashboard -->
+        <li class="nav-item">
+          <a href="{% if user.is_teacher %}{% url 'pages:teacher-dashboard' %}{% endif %}"
+            class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+            <i class="nav-icon fas fa-chart-pie"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <!-- Resources -->
+        {% if user.is_teacher %}
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-folder-open"></i>
+            <p>
+              My Resources
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{% url 'content:teacher-my-resources' %}" class="nav-link">
+                <i class="fas fa-list-ul nav-icon"></i>
+                <p>List</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'content:resource-create' %}" class="nav-link">
+                <i class="fas fa-plus nav-icon"></i>
+                <p>Create</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-clipboard-list"></i>
+            <p>
+              My Quizzes
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{% url 'assessement:quiz-list' %}" class="nav-link">
+                <i class="fas fa-list nav-icon"></i>
+                <p>List</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'assessement:quiz-create' %}" class="nav-link">
+                <i class="fas fa-plus nav-icon"></i>
+                <p>Create</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'assessement:question-list' %}" class="nav-link">
+                <i class="fas fa-question-circle nav-icon"></i>
+                <p>Question bank</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a href="{% url "tutoring:teacher-sessions" %}"
+              class="nav-link">
+            <i class="nav-icon fas fa-calendar-check"></i>
+            <p>My sessions</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#"
+              class="nav-link">
+            <i class="nav-icon fas fa-lightbulb"></i>
+            <p>Tips & Guidance</p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>
