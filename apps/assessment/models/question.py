@@ -51,6 +51,21 @@ class BaseQuestion(TimeStampModel):
         blank=True,
         limit_choices_to={"role": "teacher"},
     )
+    subject = models.ForeignKey(
+        "curriculum.Subject",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        null=True,
+        blank=True,
+    )
+
+    course = models.ForeignKey(
+        "content.Course",
+        on_delete=models.CASCADE,
+        related_name="questions",
+        null=True,
+        blank=True,
+    )
     is_active = models.BooleanField(default=True)
 
     class Meta:
