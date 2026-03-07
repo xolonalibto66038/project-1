@@ -64,7 +64,7 @@ class AttemptAdmin(admin.ModelAdmin):
             "Timing & Status",
             {
                 "fields": (
-                    # "started_at",
+                    "started_at",
                     "submitted_at",
                     "time_taken",
                     "is_completed",

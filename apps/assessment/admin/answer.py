@@ -63,10 +63,15 @@ class AnswerAdmin(admin.ModelAdmin):
 
     # ── Custom display methods ──
 
+    # @admin.display(description=_('Question Type'))
+    # def question_type_display(self, obj):
+    #     return obj.content_type.model.replace('question', '').title() \
+    #         if obj.question_content_type else '—'
     @admin.display(description=_('Question Type'))
     def question_type_display(self, obj):
-        return obj.content_type.model.replace('question', '').title() \
-            if obj.question_content_type else '—'
+        if obj.question_content_type:
+            return obj.question_content_type.model.replace('question', '').title()
+        return '—'
 
     @admin.display(description=_('Answer'))
     def answer_preview_display(self, obj):

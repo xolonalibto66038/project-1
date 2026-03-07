@@ -75,40 +75,87 @@ class AnswerAdminForm(forms.ModelForm):
 
 
 class AttemptForm(forms.ModelForm):
+    submitted_at = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local"},
+            format="%Y-%m-%dT%H:%M",
+        ),
+        input_formats=["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"],
+    )
+
+    started_at = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local"},
+            format="%Y-%m-%dT%H:%M",
+        ),
+        input_formats=["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"],
+    )
+
     class Meta:
         model = Attempt
         fields = "__all__"
-        widgets = {
-            "started_at": forms.DateTimeInput(
-                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
-            ),
-            "submitted_at": forms.DateTimeInput(
-                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
-            ),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Set default for started_at if creating new attempt
-        if not self.instance.pk and "started_at" in self.fields:
-            self.fields["started_at"].initial = timezone.now()
-            self.fields["started_at"].help_text = (
-                "Automatically set to current time if left blank"
+        if not self.instance.pk:
+            self.fields["started_at"].initial = timezone.now().strftime("%Y-%m-%dT%H:%M")
+            self.fields["started_at"].help_text = _(
+                "Automatically set to current time if left blank."
             )
 
     def clean(self):
         cleaned_data = super().clean()
-        started_at = cleaned_data.get("started_at")
+        started_at   = cleaned_data.get("started_at")
         submitted_at = cleaned_data.get("submitted_at")
 
-        # Auto-set started_at if not provided
-        if not started_at:
+        if not started_at: 
             cleaned_data["started_at"] = timezone.now()
             started_at = cleaned_data["started_at"]
 
-        # Validate time relationship
         if started_at and submitted_at and submitted_at < started_at:
-            raise ValidationError("Submission time cannot be before start time")
+            raise ValidationError(
+                _("Submission time cannot be before start time.")
+            )
 
         return cleaned_data
+    
+    # class Meta:
+    #     model = Attempt
+    #     fields = "__all__"
+    #     widgets = {
+    #         "started_at": forms.DateTimeInput(
+    #             attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+    #         ),
+    #         "submitted_at": forms.DateTimeInput(
+    #             attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+    #         ),
+    #     }
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+
+    #     # Set default for started_at if creating new attempt
+    #     if not self.instance.pk and "started_at" in self.fields:
+    #         self.fields["started_at"].initial = timezone.now()
+    #         self.fields["started_at"].help_text = (
+    #             "Automatically set to current time if left blank"
+    #         )
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     started_at = cleaned_data.get("started_at")
+    #     submitted_at = cleaned_data.get("submitted_at")
+
+    #     # Auto-set started_at if not provided
+    #     if not started_at:
+    #         cleaned_data["started_at"] = timezone.now()
+    #         started_at = cleaned_data["started_at"]
+
+    #     # Validate time relationship
+    #     if started_at and submitted_at and submitted_at < started_at:
+    #         raise ValidationError("Submission time cannot be before start time")
+
+    #     return cleaned_data

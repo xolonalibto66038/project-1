@@ -199,10 +199,10 @@ class Attempt(TimeStampModel):
             )
 
         # Ensure submitted_at is not in the future
-        if self.submitted_at and self.submitted_at > timezone.now():
-            raise ValidationError(
-                {"submitted_at": _("submitted_at cannot be in the future")}
-            )
+        # if self.submitted_at and self.submitted_at > timezone.now():
+        #     raise ValidationError(
+        #         {"submitted_at": _("submitted_at cannot be in the future")}
+        #     )
 
     @property
     def is_passed(self):
