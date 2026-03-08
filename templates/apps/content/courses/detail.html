@@ -1,0 +1,165 @@
+{# templates/content/courses/detail.html #}
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+{% include "apps/content/courses/_header.html" with active_tab="details" %}
+
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="card card-primary card-outline">
+
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center w-100">
+
+          <h3 class="card-title mb-0">
+            <i class="fas fa-info-circle mr-2"></i>
+            {% trans "Course Details" %}
+          </h3>
+
+          {# Mark complete button — students only #}
+          {% if user.is_authenticated and user.is_student %}
+          <form method="post"
+                action="{% url 'content:course-mark-completed' course.pk %}"
+                class="mb-0 d-inline">
+            {% csrf_token %}
+            {% if progress and progress.is_completed %}
+            <button type="submit" class="btn btn-outline-success btn-sm">
+              <i class="fas fa-check-circle mr-1"></i>
+              {% trans "Completed" %}
+            </button>
+            {% else %}
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fas fa-check-circle mr-1"></i>
+              {% trans "Mark as completed" %}
+            </button>
+            {% endif %}
+          </form>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        {# ── Meta badges ── #}
+        <div class="mb-4">
+
+          <span class="badge badge-info mr-2">
+            <i class="fas fa-calendar mr-1"></i>
+            {{ term_display }}
+          </span>
+
+          <span class="badge badge-warning mr-2">
+            <i class="fas fa-signal mr-1"></i>
+            {{ course.get_difficulty_display }}
+          </span>
+
+          <span class="badge badge-success mr-2">
+            <i class="fas fa-folder-open mr-1"></i>
+            {{ course.resources_count }} {% trans "Resources" %}
+          </span>
+
+          {% if chapter %}
+          <span class="badge badge-secondary mr-2">
+            <i class="fas fa-bookmark mr-1"></i>
+            {{ chapter.title }}
+          </span>
+          {% endif %}
+
+        </div>
+
+        {# ── Description ── #}
+        {% if course.description %}
+        <div class="mb-4">
+          <h5 class="font-weight-bold">
+            <i class="fas fa-align-left mr-2 text-primary"></i>
+            {% trans "Description" %}
+          </h5>
+          <p class="text-muted">{{ course.description }}</p>
+        </div>
+        {% endif %}
+
+        {# ── Progress bar (students only) ── #}
+        {% if user.is_authenticated and user.is_student and progress %}
+        <div class="mb-4">
+          <h5 class="font-weight-bold">
+            <i class="fas fa-chart-line mr-2 text-primary"></i>
+            {% trans "Your Progress" %}
+          </h5>
+          {% if progress.is_completed %}
+          <div class="alert alert-success mb-0">
+            <i class="fas fa-check-circle mr-2"></i>
+            {% trans "You have completed this course." %}
+            <small class="ml-2 text-muted">
+              {{ progress.completed_at|date:"d M Y" }}
+            </small>
+          </div>
+          {% else %}
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-spinner mr-2"></i>
+            {% trans "Course in progress." %}
+            <small class="ml-2 text-muted">
+              {% trans "Started" %}: {{ progress.first_viewed_at|date:"d M Y" }}
+            </small>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {# ── Resource summary ── #}
+        <div class="row mb-4">
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-info">{{ course.lessons_count }}</div>
+              <small class="text-muted">{% trans "Lessons" %}</small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-success">{{ course.exercises_count }}</div>
+              <small class="text-muted">{% trans "Exercises" %}</small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-warning">{{ course.homeworks_count }}</div>
+              <small class="text-muted">{% trans "Homeworks" %}</small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-secondary">{{ course.summaries_count }}</div>
+              <small class="text-muted">{% trans "Summaries" %}</small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-primary">{{ course.notes_count }}</div>
+              <small class="text-muted">{% trans "Notes" %}</small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-danger">{{ course.series_count }}</div>
+              <small class="text-muted">{% trans "Series" %}</small>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

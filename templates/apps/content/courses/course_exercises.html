@@ -1,0 +1,285 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {{ course.title }} — {% trans "Exercises" %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .exercise-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: 0.75rem;
+  }
+  .exercise-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.13);
+  }
+  .filter-bar .form-control,
+  .filter-bar .custom-select {
+    font-size: 0.85rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="fas fa-pencil-alt mr-2 text-warning"></i>
+          {% trans "Exercises" %}
+          <small class="text-muted font-weight-normal ml-2">
+            — {{ course.title }}
+          </small>
+        </h1>
+        <small class="text-muted">
+          {% blocktrans with count=page_obj.paginator.count %}
+            {{ count }} exercise(s) found
+          {% endblocktrans %}
+        </small>
+      </div>
+
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          {% if level %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
+              {{ level.name }}
+            </a>
+          </li>
+          {% endif %}
+          {% if subject %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">
+              {{ subject.short_name }}
+            </a>
+          </li>
+          {% endif %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'content:course:course-detail' pk=course.pk %}">
+              {{ course.title }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">
+            {% trans "Exercises" %}
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="card card-warning card-outline">
+
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-pencil-alt mr-2"></i>
+          {% trans "Exercises" %}
+        </h3>
+        <div class="card-tools">
+          <span class="badge badge-warning">
+            {{ page_obj.paginator.count }} {% trans "total" %}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        {# ── Filter bar ── #}
+        <form method="get" class="filter-bar mb-4">
+          <div class="row">
+
+            {# Search #}
+            <div class="col-lg-4 col-md-6 mb-2">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                  </span>
+                </div>
+                <input type="text"
+                       name="q"
+                       class="form-control"
+                       placeholder="{% trans 'Search exercises…' %}"
+                       value="{{ filter_q }}">
+              </div>
+            </div>
+
+            {# Difficulty #}
+            <div class="col-lg-3 col-md-6 mb-2">
+              <select name="difficulty" class="custom-select custom-select-sm">
+                <option value="">{% trans "— Difficulty —" %}</option>
+                {% for val, label in difficulty_choices %}
+                <option value="{{ val }}"
+                  {% if filter_difficulty == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            {# Has solution #}
+            <div class="col-lg-3 col-md-6 mb-2">
+              <select name="has_solution" class="custom-select custom-select-sm">
+                {% for val, label in has_solution_choices %}
+                <option value="{{ val }}"
+                  {% if filter_has_solution == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            {# Completed (students only) #}
+            {% if is_student %}
+            <div class="col-lg-2 col-md-6 mb-2">
+              <select name="completed" class="custom-select custom-select-sm">
+                <option value="">{% trans "— Status —" %}</option>
+                <option value="1" {% if filter_completed == '1' %}selected{% endif %}>
+                  {% trans "Completed" %}
+                </option>
+                <option value="0" {% if filter_completed == '0' %}selected{% endif %}>
+                  {% trans "Not done" %}
+                </option>
+              </select>
+            </div>
+            {% endif %}
+
+            {# Submit / Reset #}
+            <div class="col-12 mb-2 d-flex" style="gap:8px;">
+              <button type="submit" class="btn btn-warning btn-sm">
+                <i class="fas fa-filter mr-1"></i>{% trans "Apply" %}
+              </button>
+              <a href="{% url 'content:course:course-exercises' pk=course.pk %}"
+                 class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+              </a>
+            </div>
+
+          </div>
+        </form>
+
+        {# ── Exercise grid ── #}
+        {% if exercises %}
+        <div class="row">
+          {% for exercise in exercises %}
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+            <div class="card exercise-card border-0 shadow-sm h-100">
+              <div class="card-body d-flex flex-column">
+
+                {# Title + difficulty #}
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="font-weight-bold mb-0 flex-grow-1 mr-2">
+                    {{ exercise.title }}
+                  </h6>
+                  <span class="badge badge-pill badge-light border">
+                    {{ exercise.get_difficulty_display }}
+                  </span>
+                </div>
+
+                {# Metadata pills #}
+                <div class="d-flex flex-wrap mb-3" style="gap:6px;">
+
+                  {% if exercise.total_marks %}
+                  <span class="badge badge-info px-2 py-1">
+                    <i class="fas fa-star mr-1 small"></i>
+                    {{ exercise.total_marks }} {% trans "pts" %}
+                  </span>
+                  {% endif %}
+
+                  {% if exercise.has_solution %}
+                  <span class="badge badge-success px-2 py-1">
+                    <i class="fas fa-check-circle mr-1 small"></i>
+                    {% trans "Solution" %}
+                  </span>
+                  {% endif %}
+
+                  {% if exercise.is_free %}
+                  <span class="badge badge-warning px-2 py-1">
+                    <i class="fas fa-unlock mr-1 small"></i>
+                    {% trans "Free" %}
+                  </span>
+                  {% endif %}
+
+                </div>
+
+                {# Progress (students) #}
+                {% if is_student %}
+                <div class="mt-auto">
+                  {% if exercise.progress_obj %}
+                    {% if exercise.progress_obj.is_completed %}
+                    <span class="badge badge-success px-2 py-1">
+                      <i class="fas fa-check-circle mr-1"></i>
+                      {% trans "Completed" %}
+                    </span>
+                    {% else %}
+                    <span class="badge badge-warning px-2 py-1">
+                      <i class="fas fa-spinner mr-1"></i>
+                      {% trans "In progress" %}
+                    </span>
+                    {% endif %}
+                  {% else %}
+                  <span class="badge badge-secondary px-2 py-1">
+                    <i class="fas fa-circle-notch mr-1"></i>
+                    {% trans "Not started" %}
+                  </span>
+                  {% endif %}
+                </div>
+                {% endif %}
+
+                {# Action #}
+                {% comment %} {% url 'content:resource:resource-detail' pk=exercise.pk %} {% endcomment %}
+                <a href="{% url 'content:resource:resource-detail' pk=exercise.pk %}"
+                   class="btn btn-outline-warning btn-sm mt-3">
+                  <i class="fas fa-eye mr-1"></i>
+                  {% trans "View Exercise" %}
+                </a>
+
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="fas fa-pencil-alt fa-3x mb-3"></i>
+          <p class="mb-0">{% trans "No exercises found matching your filters." %}</p>
+          {% if filter_q or filter_difficulty or filter_has_solution or filter_completed %}
+          <a href="{% url 'content:course-exercises' pk=course.pk %}"
+             class="btn btn-outline-secondary btn-sm mt-3">
+            <i class="fas fa-times mr-1"></i>{% trans "Clear filters" %}
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+      </div>
+
+      {# Pagination #}
+      {% if is_paginated %}
+      <div class="card-footer">
+        {% include "includes/pagination.html" %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
