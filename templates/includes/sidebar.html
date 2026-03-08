@@ -60,7 +60,7 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-          <a href="{% if user.is_student %}{% url 'pages:dashboard' %}{% elif user.is_teacher %}{% url 'pages:teacher-dashboard' %}{% endif %}"
+          <a href="{% if user.is_student %}#{% elif user.is_teacher %}#{% endif %}"
              class="nav-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
             <i class="nav-icon fas fa-chart-pie"></i>
             <p>Dashboard</p>
@@ -100,7 +100,7 @@
               <ul class="nav nav-treeview">
                 {% if user.is_student %}
                 <li class="nav-item">
-                  <a href="{% url 'curriculum:grade-detail' user.student_profile.grade.pk %}"
+                  <a href="{% url 'curriculum:grade:grade-detail' user.student_profile.grade.pk %}"
                      class="nav-link">
                     <i class="nav-icon fas fa-book-open"></i>
                     <p>Subjects</p>

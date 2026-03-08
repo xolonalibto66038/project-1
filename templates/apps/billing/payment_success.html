@@ -1,0 +1,65 @@
+{% extends "layouts/base-full.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payment successful" %}{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container">
+    <div class="row justify-content-center" style="min-height:70vh; align-items:center;">
+      <div class="col-lg-5 col-md-7 text-center">
+
+        <div class="card border-0 shadow-lg" style="border-radius:20px;">
+          <div class="card-body p-5">
+
+            <div class="mb-4">
+              <div style="
+                width:80px; height:80px;
+                background:linear-gradient(135deg,#2e7d32,#43a047);
+                border-radius:50%;
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+              ">
+                <i class="fas fa-check text-white" style="font-size:2rem;"></i>
+              </div>
+            </div>
+
+            <h2 class="font-weight-bold mb-2">{% trans "You're all set!" %}</h2>
+
+            <p class="text-muted mb-4">
+              {% trans "Your subscription is now active. Start exploring premium content right away." %}
+            </p>
+
+            {% if user_subscription %}
+            <div class="alert alert-success border-0 mb-4" style="border-radius:12px;">
+              <strong>{{ user_subscription.plan.offer.name }}</strong>
+              —
+              {{ user_subscription.plan.get_interval_display }}
+              <div class="small mt-1 text-muted">
+                {% trans "Status" %}: {{ user_subscription.get_status_display }}
+              </div>
+            </div>
+            {% endif %}
+
+            <a href="{% url 'curriculum:level:level-list' %}"
+               class="btn btn-primary btn-block btn-lg mb-3"
+               style="border-radius:50px;">
+              <i class="fas fa-graduation-cap mr-2"></i>
+              {% trans "Start learning" %}
+            </a>
+
+            <a href="{% url 'pages:landing' %}"
+               class="btn btn-outline-secondary btn-block"
+               style="border-radius:50px;">
+              {% trans "Go to home" %}
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.authentication',
     'apps.assessment',
+    'apps.billing'
 ]
 
 SITE_ID = 1
@@ -222,3 +223,13 @@ SOCIALACCOUNT_PROVIDERS = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CONTACT_EMAIL = "xolonalibto66038@gmail.com"
+
+
+# Stripe settings
+
+STRIPE_TEST_SECRET_KEY = env('STRIPE_SECRET_KEY',     default='')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY',     default='')
+STRIPE_ENDPOINT_SECRET = env('STRIPE_ENDPOINT_SECRET',     default='')
+# STRIPE_PRICE_ID = env('STRIPE_PRICE_ID',     default='')
+PLATFORM_FEE_PERCENT = env('PLATFORM_FEE_PERCENT',     default='20')
+STRIPE_CURRENCY = env('STRIPE_CURRENCY',     default='usd')
