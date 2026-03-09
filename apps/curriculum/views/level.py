@@ -1,7 +1,7 @@
 from django.views.generic import ListView, DetailView
 from django.utils.translation import gettext_lazy as _
 
-from ..selectors import get_grade_groups, get_level_stats
+from ..selectors import get_grade_groups, get_level_stats, get_grade_groups_with_specialties
 from ..mixins import LevelQuerySetMixin
 from ..models import Level
 
@@ -66,6 +66,7 @@ class LevelListView(LevelQuerySetMixin, ListView):
         context['enriched_levels'] = enriched
         return context
 
+
 class LevelDetailView(DetailView):
     model                = Level
     template_name        = 'apps/curriculum/levels/detail.html'
@@ -78,7 +79,9 @@ class LevelDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         level   = self.object
 
-        context['grade_groups'] = get_grade_groups(level)
+        # context['grade_groups'] = get_grade_groups(level)
+        context['grade_groups'] = get_grade_groups_with_specialties(level)
+        print(context['grade_groups'])
         context['stats']        = get_level_stats(level)
 
         return context

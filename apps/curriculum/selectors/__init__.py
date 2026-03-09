@@ -1,3 +1,3 @@
 from .level import get_active_levels
-from .grade import get_grade_groups, get_grades_for_level, get_level_by_pk, get_level_stats
+from .grade import get_grade_groups, get_grades_for_level, get_level_by_pk, get_level_stats, get_grade_groups_with_specialties
 from .subject import get_course_counts_for_subjects, get_course_resource_counts_for_subjects, get_grade_by_pk, get_grade_subjects_for_grade, get_progress_counts_for_student, get_resource_counts_for_subjects, get_subjects_for_grade
