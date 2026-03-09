@@ -66,10 +66,14 @@ class TutoringSession(TimeStampModel):
 
     # Zoom
     zoom_meeting_id = models.CharField(max_length=255, null=True)
-
     zoom_join_url = models.URLField(null=True)
-
     zoom_start_url = models.URLField(null=True)
+
+    # Meet
+    meeting_id        = models.CharField(max_length=255, null=True)
+    meeting_join_url  = models.URLField(null=True)
+    meeting_start_url = models.URLField(null=True)
+    meeting_event_id  = models.CharField(max_length=255, null=True) 
 
     # Completion
     started_at = models.DateTimeField(null=True)

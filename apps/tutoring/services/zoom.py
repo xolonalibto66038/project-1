@@ -41,8 +41,17 @@ class ZoomService:
                 "type": 2,
                 "start_time": session.scheduled_at.isoformat(),
                 "duration": session.duration_minutes,
-                "password":   "",
-                "settings": {"waiting_room": True, "join_before_host": False, "password_required": False, "use_pmi": False,},
+                "settings": {
+                    "waiting_room":             True,
+                    "join_before_host":         False,
+                    "meeting_authentication":   False,
+                    "password":                 "",
+                    "passcode":                 "",
+                    "auto_recording":           "none",
+                    "use_pmi":                  False,
+                    "enforce_login":            False,
+                },
+                # "settings": {"waiting_room": True, "join_before_host": False, "password_required": False, "use_pmi": False,},
             },
             timeout=10,
         )
@@ -50,3 +59,23 @@ class ZoomService:
         response.raise_for_status()
 
         return response.json()
+
+    @staticmethod
+    def disable_passcode_requirement():
+        """
+        Run this once to disable passcode at account level.
+        Zoom account settings override per-meeting settings.
+        """
+        token = ZoomService.get_access_token()
+
+        requests.patch(
+            url=f"{settings.ZOOM_BASE_URL}/accounts/me/settings",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "security": {
+                    "meeting_password":         False,
+                    "require_password_for_all": False,
+                }
+            },
+            timeout=10,
+        )

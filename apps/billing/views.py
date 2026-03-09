@@ -81,7 +81,7 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
             session = stripe.checkout.Session.create(
                 payment_method_types=payment_methods,
                 mode='subscription',
-                customer_email=request.user.email,
+                # customer_email=request.user.email,
                 customer=stripe_customer_id,
                 line_items=[{
                     'price':    plan.stripe_price_id,

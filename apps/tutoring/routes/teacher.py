@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ..views.teacher import confirm_session, teacher_sessions
+from ..views.teacher import confirm_session, confirm_meet_session, teacher_sessions
 
 app_name = "teacher"
 
@@ -15,5 +15,10 @@ urlpatterns = [
         "sessions/<uuid:session_id>/confirm/",
         confirm_session,
         name="confirm-session",
+    ),
+    path(
+        "sessions/<uuid:session_id>/confirm_session/",
+        confirm_meet_session,
+        name="confirm-meet-session",
     ),
 ]
