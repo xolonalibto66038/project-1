@@ -56,7 +56,7 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-          <a href="{% if user.is_teacher %}{% url 'pages:teacher-dashboard' %}{% endif %}"
+          <a href="{% if user.is_teacher %}{% url 'dashboard' %}{% endif %}"
             class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
             <i class="nav-icon fas fa-chart-pie"></i>
             <p>Dashboard</p>
@@ -75,13 +75,13 @@
 
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'content:teacher-my-resources' %}" class="nav-link">
+              <a href="#" class="nav-link">
                 <i class="fas fa-list-ul nav-icon"></i>
                 <p>List</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'content:resource-create' %}" class="nav-link">
+              <a href="#" class="nav-link">
                 <i class="fas fa-plus nav-icon"></i>
                 <p>Create</p>
               </a>
@@ -99,19 +99,19 @@
 
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'assessement:quiz-list' %}" class="nav-link">
+              <a href="#" class="nav-link">
                 <i class="fas fa-list nav-icon"></i>
                 <p>List</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'assessement:quiz-create' %}" class="nav-link">
+              <a href="#" class="nav-link">
                 <i class="fas fa-plus nav-icon"></i>
                 <p>Create</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'assessement:question-list' %}" class="nav-link">
+              <a href="#" class="nav-link">
                 <i class="fas fa-question-circle nav-icon"></i>
                 <p>Question bank</p>
               </a>
@@ -120,7 +120,7 @@
         </li>
         {% endif %}
         <li class="nav-item">
-          <a href="{% url "tutoring:teacher-sessions" %}"
+          <a href="{% url 'tutoring:teacher:teacher-sessions' %}"
               class="nav-link">
             <i class="nav-icon fas fa-calendar-check"></i>
             <p>My sessions</p>

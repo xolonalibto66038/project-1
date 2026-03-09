@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
+from django.utils.html import format_html
 
 from common.models import TimeStampModel
 from ..choices import Gender, UserRole, Wilaya
@@ -113,3 +114,24 @@ class CustomUser(AbstractUser, TimeStampModel):
         if self.is_teacher:
             return getattr(self, 'teacher_profile', None)
         return None
+
+    @property
+    def avatar_url(self):
+        if self.avatar:
+            return self.avatar.url
+        return None
+
+    @property
+    def avatar_display(self):
+        if self.avatar:
+            return format_html(
+                '<img src="{}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">',
+                self.avatar.url
+            )
+
+        initials = f"{self.first_name[:1]}{self.last_name[:1]}".upper()
+
+        return format_html(
+            '<div style="width:36px;height:36px;border-radius:50%;background:#007bff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.8em;">{}</div>',
+            initials
+        )

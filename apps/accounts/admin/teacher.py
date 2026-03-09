@@ -57,7 +57,7 @@ class TeacherProfileAdmin(admin.ModelAdmin):
             ),
         }),
         (_('Profile'), {
-            'fields': ('bio',),
+            'fields': ('bio', 'hour_price'),
         }),
         (_('Timestamps'), {
             'fields': ('created_at', 'updated_at'),

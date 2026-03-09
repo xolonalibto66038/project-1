@@ -91,7 +91,7 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
                     'user_id': str(request.user.id),
                     'plan_id': str(plan.id),
                 },
-                success_url=request.build_absolute_uri('/billing/success/'),
+                success_url=request.build_absolute_uri('/billing/subscription_success/'),
                 cancel_url=request.build_absolute_uri('/billing/pricing/'),
             )
         except stripe.error.StripeError as e:
@@ -100,12 +100,21 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
         return JsonResponse({'checkout_url': session.url})
 
 
+class SubscriptionSuccessView(LoginRequiredMixin, TemplateView):
+    template_name = 'apps/billing/subscription_success.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_subscription'] = get_user_subscription(self.request.user)
+        return context
+
+
 class PaymentSuccessView(LoginRequiredMixin, TemplateView):
     template_name = 'apps/billing/payment_success.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user_subscription'] = get_user_subscription(self.request.user)
+        # context['user_subscription'] = get_user_subscription(self.request.user)
         return context
 
 

@@ -2,13 +2,16 @@ import stripe
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .models import Plan, Subscription
 from apps.accounts.models.custom_user import CustomUser
+from apps.tutoring.models import TutoringSession
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
 
 @csrf_exempt
 @require_POST
@@ -69,42 +72,78 @@ def _handle_subscription_created(subscription_obj):
 
 def _handle_checkout_completed(session):
 
-    if session["mode"] != "subscription":
-        return
+    if session["mode"] == "subscription":
+        # if session["mode"] != "subscription":
+        #         return
+        user_id = session["metadata"].get("user_id")
+        plan_id = session["metadata"].get("plan_id")
+        subscription_id = session.get("subscription")
+        customer_id = session.get("customer")
 
-    user_id = session["metadata"].get("user_id")
-    plan_id = session["metadata"].get("plan_id")
-    subscription_id = session.get("subscription")
-    customer_id = session.get("customer")
+        if not user_id or not plan_id or not subscription_id:
+            return
 
-    if not user_id or not plan_id or not subscription_id:
-        return
+        try:
+            user = CustomUser.objects.get(id=user_id)
+            plan = Plan.objects.get(id=plan_id)
+        except (CustomUser.DoesNotExist, Plan.DoesNotExist):
+            return
 
-    try:
-        user = CustomUser.objects.get(id=user_id)
-        plan = Plan.objects.get(id=plan_id)
-    except (CustomUser.DoesNotExist, Plan.DoesNotExist):
-        return
-    
-    subscription = stripe.Subscription.retrieve(subscription_id)
+        subscription = stripe.Subscription.retrieve(subscription_id)
 
-    current_period_end = None
-    if hasattr(subscription, "current_period_end"):
-        current_period_end = timezone.datetime.fromtimestamp(
-            subscription.current_period_end,
-            tz=timezone.utc,
+        current_period_end = None
+        if hasattr(subscription, "current_period_end"):
+            current_period_end = timezone.datetime.fromtimestamp(
+                subscription.current_period_end,
+                tz=timezone.utc,
+            )
+
+        Subscription.objects.update_or_create(
+            user=user,
+            defaults={
+                "plan": plan,
+                "stripe_subscription_id": subscription.id,
+                "stripe_customer_id": customer_id,
+                "status": subscription.status,
+                "current_period_end": current_period_end,
+            },
         )
+    elif session["mode"] == "payment":
+        session_id = session["metadata"]["session_id"]
 
-    Subscription.objects.update_or_create(
-        user=user,
-        defaults={
-            "plan": plan,
-            "stripe_subscription_id": subscription.id,
-            "stripe_customer_id": customer_id,
-            "status": subscription.status,
-            "current_period_end": current_period_end,
-        },
-    )
+        try:
+
+            with transaction.atomic():
+
+                tutoring_session = TutoringSession.objects.select_for_update().get(
+                    id=session_id
+                )
+
+                # idempotency protection
+                if tutoring_session.status == TutoringSession.Status.PAYMENT_AUTHORIZED:
+
+                    return HttpResponse(status=200)
+
+                tutoring_session.status = TutoringSession.Status.PAYMENT_AUTHORIZED
+
+                tutoring_session.stripe_checkout_session_id = session["id"]
+
+                tutoring_session.stripe_payment_intent_id = session["payment_intent"]
+
+                tutoring_session.payment_authorized_at = timezone.now()
+
+                tutoring_session.save(
+                    update_fields=[
+                        "status",
+                        "stripe_checkout_session_id",
+                        "stripe_payment_intent_id",
+                        "payment_authorized_at",
+                        "updated_at",
+                    ]
+                )
+        except TutoringSession.DoesNotExist:
+            return HttpResponse(status=200)
+
 
 def _handle_subscription_updated(subscription_obj):
     try:

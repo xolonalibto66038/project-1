@@ -155,6 +155,19 @@
             </div>
             {% endif %}
 
+            {% if request.user.is_authenticated %}
+              {% if request.user.subscription and request.user.subscription.is_active %}
+              
+              <div class="text-center">
+                <a href="{% url 'tutoring:student:available-teachers' subject.pk %}"
+                  class="btn btn-primary btn-block">
+                  <i class="fas fa-user-graduate mr-2"></i>
+                  {% trans "Ask for an Online Tutor" %}
+                </a>
+              </div>
+              {% endif %}
+            {% endif %}
+
             <hr>
 
             {# level badge #}

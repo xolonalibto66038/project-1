@@ -56,6 +56,14 @@ class TeacherProfile(TimeStampModel):
         ),
     )
 
+    hour_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=0,
+        verbose_name=_("Hourly Price"),
+        help_text=_("Price per hour for tutoring sessions."),
+    )
+
     class Meta:
         verbose_name        = _('Teacher Profile')
         verbose_name_plural = _('Teacher Profiles')

@@ -61,7 +61,7 @@
         <!-- Dashboard -->
         <li class="nav-item">
           <a href="{% if user.is_student %}#{% elif user.is_teacher %}#{% endif %}"
-             class="nav-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+             class="nav-link active">
             <i class="nav-icon fas fa-chart-pie"></i>
             <p>Dashboard</p>
           </a>
@@ -207,6 +207,15 @@
             {% endif %}
 
           </ul>
+        </li>
+
+        {% comment %} My sessions {% endcomment %}
+        <li class="nav-item">
+          <a href="{% url 'tutoring:student:student-sessions' %}"
+             class="nav-link">
+            <i class="nav-icon fas fa-calendar-check"></i>
+            <p>My sessions</p>
+          </a>
         </li>
       </ul>
     </nav>

@@ -62,10 +62,13 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.authentication',
     'apps.assessment',
-    'apps.billing'
+    'apps.billing',
+    'apps.tutoring',
 ]
 
 SITE_ID = 1
+
+DOMAIN = "http://localhost:8000"
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -233,3 +236,13 @@ STRIPE_ENDPOINT_SECRET = env('STRIPE_ENDPOINT_SECRET',     default='')
 # STRIPE_PRICE_ID = env('STRIPE_PRICE_ID',     default='')
 PLATFORM_FEE_PERCENT = env('PLATFORM_FEE_PERCENT',     default='20')
 STRIPE_CURRENCY = env('STRIPE_CURRENCY',     default='usd')
+
+# Zoom settings
+
+ZOOM_ACCOUNT_ID = env('ZOOM_ACCOUNT_ID',     default='')
+ZOOM_CLIENT_ID = env('ZOOM_CLIENT_ID',     default='')
+ZOOM_CLIENT_SECRET = env('ZOOM_CLIENT_SECRET',     default='')
+ZOOM_BASE_URL = env('ZOOM_BASE_URL',     default='')
+ZOMM_SECRET_TOKEN = env('ZOMM_SECRET_TOKEN',     default='')
+ZOOM_WEBHOOK_SECRET = env('ZOOM_WEBHOOK_SECRET',     default='')
+ZOOM_HOST_EMAIL = env('ZOOM_HOST_EMAIL',     default='')

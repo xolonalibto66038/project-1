@@ -28,7 +28,7 @@ class TeacherProfileInline(admin.StackedInline):
     can_delete      = False
     show_change_link = True
     verbose_name    = _('Teacher Profile')
-    fields          = ('level', 'subject', 'bio', 'is_verified_teacher')
+    fields          = ('level', 'subject', 'bio', 'is_verified_teacher', 'hour_price')
     autocomplete_fields = ('level', 'subject')
 
 
