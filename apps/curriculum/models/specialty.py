@@ -42,4 +42,4 @@ class Specialty(TimeStampModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.grade.short_name} – {self.short_name}"
+        return f"{self.grade.short_name} - {self.short_name}"

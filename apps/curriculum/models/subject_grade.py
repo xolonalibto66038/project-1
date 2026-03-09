@@ -28,6 +28,7 @@ class GradeSubject(TimeStampModel):
         verbose_name=_('Specialty'),
         help_text=_('The filière this subject is restricted to. Leave blank if the subject applies to all specialties of this grade.'),
     )
+    is_active = models.BooleanField(default=True, blank=True, null=True)
 
     class Meta:
         unique_together = ('grade', 'subject', 'specialty')

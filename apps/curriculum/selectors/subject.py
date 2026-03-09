@@ -56,17 +56,24 @@ def get_grade_groups(level):
     ]
 
 
-def get_grade_subjects_for_grade(grade):
+def get_grade_subjects_for_grade(grade, specialty=None):
     """
     Returns GradeSubject rows for this grade with subject pre-fetched.
     Used to build the subject list on the grade detail page.
     """
-    return (
+    qs = (
         GradeSubject.objects
-        .filter(grade=grade)
+        .filter(grade=grade, is_active=True)
         .select_related('subject', 'specialty')
         .order_by('subject__name')
     )
+
+    if specialty is not None:
+        qs = qs.filter(specialty=specialty)
+    else:
+        qs = qs.filter(specialty__isnull=True)
+
+    return qs
 
 
 def get_subjects_for_grade(grade):

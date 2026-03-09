@@ -25,7 +25,7 @@ class GradeSubjectAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (_('Assignment'), {
-            'fields': ('grade', 'subject', 'specialty'),
+            'fields': ('grade', 'subject', 'specialty', 'is_active'),
             'description': _(
                 'Assign a subject to a grade. '
                 'Leave specialty blank if the subject applies to all specialties of this grade.'
