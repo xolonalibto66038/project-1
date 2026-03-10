@@ -3,11 +3,11 @@ from django.utils.translation import gettext_lazy as _
 
 
 class RatingChoice(models.IntegerChoices):
-    ONE   = 1, _('★☆☆☆☆')
-    TWO   = 2, _('★★☆☆☆')
-    THREE = 3, _('★★★☆☆')
-    FOUR  = 4, _('★★★★☆')
-    FIVE  = 5, _('★★★★★')
+    ONE = 1, _("★☆☆☆☆")
+    TWO = 2, _("★★☆☆☆")
+    THREE = 3, _("★★★☆☆")
+    FOUR = 4, _("★★★★☆")
+    FIVE = 5, _("★★★★★")
     __empty__ = _("Rate this")
 
 

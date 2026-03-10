@@ -22,7 +22,9 @@ class StripeService:
                             "product_data": {
                                 "name": f"Tutoring session with {session.teacher.get_full_name()}",
                             },
-                            "unit_amount": int(session.teacher.teacher_profile.hour_price * 100),
+                            "unit_amount": int(
+                                session.teacher.teacher_profile.hour_price * 100
+                            ),
                         },
                         "quantity": 1,
                     }

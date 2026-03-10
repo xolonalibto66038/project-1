@@ -1,9 +1,9 @@
 # apps/curriculum/migrations/0003_seed_levels.py
 
-from django.db import migrations
-from django.utils.text import slugify
 import uuid
 
+from django.db import migrations
+from django.utils.text import slugify
 
 LEVELS = [
     {'name': 'primaire',   'slug': 'primaire',   'order': 1},

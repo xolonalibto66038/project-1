@@ -14,19 +14,17 @@ def validate_answer_choices(sender, instance, action, **kwargs):
     Fires after selected_choices M2M is modified.
     Ensures no conflict with text/boolean answers.
     """
-    if action not in ('post_add', 'post_remove'):
+    if action not in ("post_add", "post_remove"):
         return
 
     has_choices = instance.selected_choices.exists()
 
     if has_choices and instance.answer_text:
-        raise ValidationError(
-            _('Cannot have both selected choices and a text answer.')
-        )
+        raise ValidationError(_("Cannot have both selected choices and a text answer."))
 
     if has_choices and instance.answer_boolean is not None:
         raise ValidationError(
-            _('Cannot have both selected choices and a boolean answer.')
+            _("Cannot have both selected choices and a boolean answer.")
         )
 
 
@@ -47,25 +45,3 @@ def validate_mcq_after_choice_save(sender, instance, **kwargs):
         #     f'MCQ validation warning for question {question.pk}: {e}'
         # )
         print(f"erro : {e}")
-
-
-@receiver(m2m_changed, sender=Answer.selected_choices.through)
-def validate_answer_choices(sender, instance, action, **kwargs):
-    """
-    Fires after selected_choices M2M is modified.
-    Ensures no conflict with text/boolean answers.
-    """
-    if action not in ('post_add', 'post_remove'):
-        return
-
-    has_choices = instance.selected_choices.exists()
-
-    if has_choices and instance.answer_text:
-        raise ValidationError(
-            _('Cannot have both selected choices and a text answer.')
-        )
-
-    if has_choices and instance.answer_boolean is not None:
-        raise ValidationError(
-            _('Cannot have both selected choices and a boolean answer.')
-        )

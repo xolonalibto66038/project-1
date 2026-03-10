@@ -8,11 +8,11 @@ class GradeLoggingMixin:
 
     def dispatch(self, request, *args, **kwargs):
         logger.info(
-            f'{self.__class__.__name__} accessed',
+            f"{self.__class__.__name__} accessed",
             extra={
-                'user_id':  request.user.id if request.user.is_authenticated else None,
-                'grade_pk': str(kwargs.get('pk', '')),
-                'path':     request.path,
+                "user_id": request.user.id if request.user.is_authenticated else None,
+                "grade_pk": str(kwargs.get("pk", "")),
+                "path": request.path,
             },
         )
         return super().dispatch(request, *args, **kwargs)

@@ -8,32 +8,34 @@ class GradeSubject(TimeStampModel):
     grade = models.ForeignKey(
         "Grade",
         on_delete=models.CASCADE,
-        related_name='grade_subjects',
-        verbose_name=_('Grade'),
-        help_text=_('The grade in which this subject is taught.'),
+        related_name="grade_subjects",
+        verbose_name=_("Grade"),
+        help_text=_("The grade in which this subject is taught."),
     )
     subject = models.ForeignKey(
         "Subject",
         on_delete=models.CASCADE,
-        related_name='grade_subjects',
-        verbose_name=_('Subject'),
-        help_text=_('The subject taught in this grade.'),
+        related_name="grade_subjects",
+        verbose_name=_("Subject"),
+        help_text=_("The subject taught in this grade."),
     )
     specialty = models.ForeignKey(
         "Specialty",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='grade_subjects',
-        verbose_name=_('Specialty'),
-        help_text=_('The filière this subject is restricted to. Leave blank if the subject applies to all specialties of this grade.'),
+        related_name="grade_subjects",
+        verbose_name=_("Specialty"),
+        help_text=_(
+            "The filière this subject is restricted to. Leave blank if the subject applies to all specialties of this grade."
+        ),
     )
     is_active = models.BooleanField(default=True, blank=True, null=True)
 
     class Meta:
-        unique_together = ('grade', 'subject', 'specialty')
-        verbose_name = _('Grade Subject')
-        verbose_name_plural = _('Grade Subjects')
+        unique_together = ("grade", "subject", "specialty")
+        verbose_name = _("Grade Subject")
+        verbose_name_plural = _("Grade Subjects")
 
     def __str__(self):
         spec = f" [{self.specialty.short_name}]" if self.specialty else ""

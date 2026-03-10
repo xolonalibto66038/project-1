@@ -42,14 +42,14 @@ class ZoomService:
                 "start_time": session.scheduled_at.isoformat(),
                 "duration": session.duration_minutes,
                 "settings": {
-                    "waiting_room":             True,
-                    "join_before_host":         False,
-                    "meeting_authentication":   False,
-                    "password":                 "",
-                    "passcode":                 "",
-                    "auto_recording":           "none",
-                    "use_pmi":                  False,
-                    "enforce_login":            False,
+                    "waiting_room": True,
+                    "join_before_host": False,
+                    "meeting_authentication": False,
+                    "password": "",
+                    "passcode": "",
+                    "auto_recording": "none",
+                    "use_pmi": False,
+                    "enforce_login": False,
                 },
                 # "settings": {"waiting_room": True, "join_before_host": False, "password_required": False, "use_pmi": False,},
             },
@@ -73,7 +73,7 @@ class ZoomService:
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "security": {
-                    "meeting_password":         False,
+                    "meeting_password": False,
                     "require_password_for_all": False,
                 }
             },

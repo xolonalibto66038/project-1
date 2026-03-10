@@ -33,6 +33,7 @@
 #     return wrapper
 
 from functools import wraps
+
 from django.shortcuts import redirect
 
 
@@ -47,7 +48,7 @@ def subscription_required(view_func):
         user = request.user
 
         if not user.is_authenticated:
-            return redirect('account_login')
+            return redirect("account_login")
 
         # Staff bypass
         if user.is_staff or user.is_superuser:
@@ -58,6 +59,6 @@ def subscription_required(view_func):
         if subscription and subscription.is_active:
             return view_func(request, *args, **kwargs)
 
-        return redirect('billing:pricing')
+        return redirect("billing:pricing")
 
     return wrapper

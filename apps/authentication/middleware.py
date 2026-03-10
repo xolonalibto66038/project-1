@@ -8,13 +8,13 @@ class OnboardingMiddleware:
     """
 
     EXEMPT_PREFIXES = (
-        '/onboarding/',
-        '/accounts/',
-        '/accounts/google/',
-        '/admin/',
-        '/ajax/',
-        '/static/',
-        '/media/',
+        "/onboarding/",
+        "/accounts/",
+        "/accounts/google/",
+        "/admin/",
+        "/ajax/",
+        "/static/",
+        "/media/",
     )
 
     def __init__(self, get_response):
@@ -22,11 +22,11 @@ class OnboardingMiddleware:
 
     def __call__(self, request):
         if self._should_redirect(request):
-            return redirect('onboarding')
+            return redirect("onboarding")
         return self.get_response(request)
 
     def _should_redirect(self, request):
-        if request.path.startswith('/accounts/google/'):
+        if request.path.startswith("/accounts/google/"):
             return False
         if not request.user.is_authenticated:
             return False
@@ -38,14 +38,11 @@ class OnboardingMiddleware:
 
     def _profile_complete(self, user):
         from apps.accounts.choices import UserRole
+
         if user.role == UserRole.STUDENT:
-            profile = getattr(user, 'student_profile', None)
+            profile = getattr(user, "student_profile", None)
             return profile and profile.grade is not None
         if user.role == UserRole.TEACHER:
-            profile = getattr(user, 'teacher_profile', None)
-            return (
-                profile and
-                profile.level is not None and
-                profile.subject is not None
-            )
+            profile = getattr(user, "teacher_profile", None)
+            return profile and profile.level is not None and profile.subject is not None
         return True

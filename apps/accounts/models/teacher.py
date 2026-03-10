@@ -15,44 +15,44 @@ class TeacherProfile(TimeStampModel):
     """
 
     user = models.OneToOneField(
-        'accounts.CustomUser',
+        "accounts.CustomUser",
         on_delete=models.CASCADE,
-        related_name='teacher_profile',
-        verbose_name=_('User'),
-        help_text=_('The user account associated with this teacher profile.'),
+        related_name="teacher_profile",
+        verbose_name=_("User"),
+        help_text=_("The user account associated with this teacher profile."),
     )
     level = models.ForeignKey(
-        'curriculum.Level',
+        "curriculum.Level",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='teachers',
-        verbose_name=_('Level'),
-        help_text=_('The education level this teacher teaches (e.g. Moyen).'),
+        related_name="teachers",
+        verbose_name=_("Level"),
+        help_text=_("The education level this teacher teaches (e.g. Moyen)."),
     )
     subject = models.ForeignKey(
-        'curriculum.Subject',
+        "curriculum.Subject",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='teachers',
-        verbose_name=_('Subject'),
+        related_name="teachers",
+        verbose_name=_("Subject"),
         help_text=_(
-            'The subject this teacher specializes in. '
-            'Must belong to the selected level.'
+            "The subject this teacher specializes in. "
+            "Must belong to the selected level."
         ),
     )
     bio = models.TextField(
         blank=True,
-        verbose_name=_('Bio'),
-        help_text=_('Optional teacher bio or professional description.'),
+        verbose_name=_("Bio"),
+        help_text=_("Optional teacher bio or professional description."),
     )
     is_verified_teacher = models.BooleanField(
         default=False,
-        verbose_name=_('Is Verified Teacher'),
+        verbose_name=_("Is Verified Teacher"),
         help_text=_(
-            'Designates whether this teacher has been verified by an admin. '
-            'Only verified teachers can publish resources.'
+            "Designates whether this teacher has been verified by an admin. "
+            "Only verified teachers can publish resources."
         ),
     )
 
@@ -65,15 +65,16 @@ class TeacherProfile(TimeStampModel):
     )
 
     class Meta:
-        verbose_name        = _('Teacher Profile')
-        verbose_name_plural = _('Teacher Profiles')
+        verbose_name = _("Teacher Profile")
+        verbose_name_plural = _("Teacher Profiles")
 
     def clean(self):
         from django.core.exceptions import ValidationError
+
         if self.level and self.subject:
             if self.subject.level != self.level:
                 raise ValidationError(
-                    _('The selected subject does not belong to the selected level.')
+                    _("The selected subject does not belong to the selected level.")
                 )
 
     def save(self, *args, **kwargs):

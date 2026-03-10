@@ -1,8 +1,8 @@
 # apps/curriculum/migrations/0004_seed_grades.py
 
 import uuid
-from django.db import migrations
 
+from django.db import migrations
 
 GRADES = {
     'primaire': [

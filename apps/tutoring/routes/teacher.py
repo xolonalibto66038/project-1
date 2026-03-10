@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ..views.teacher import confirm_session, confirm_meet_session, teacher_sessions
+from ..views.teacher import confirm_meet_session, confirm_session, teacher_sessions
 
 app_name = "teacher"
 

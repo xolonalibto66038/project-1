@@ -3,7 +3,7 @@ from .student import StudentProfileAdmin
 from .teacher import TeacherProfileAdmin
 
 __all__ = [
-    'CustomUserAdmin',
-    'StudentProfileAdmin',
-    'TeacherProfileAdmin',
+    "CustomUserAdmin",
+    "StudentProfileAdmin",
+    "TeacherProfileAdmin",
 ]

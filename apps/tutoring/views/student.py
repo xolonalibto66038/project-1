@@ -1,20 +1,19 @@
 import stripe
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from apps.authentication.decorators import student_required
 from apps.accounts.choices import UserRole
 from apps.accounts.models import CustomUser
+from apps.authentication.decorators import student_required
 from apps.billing.decorators import subscription_required
 from apps.billing.services import StripeService
-from django.conf import settings
 
-from ..services import SessionService
 from ..models import TutoringSession
+from ..services import SessionService
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
@@ -38,7 +37,7 @@ def available_teachers(request, subject_pk=None):
         CustomUser.objects.filter(
             role=UserRole.TEACHER,
             is_active=True,
-            teacher_profile__is_verified_teacher =True,
+            teacher_profile__is_verified_teacher=True,
         )
         .select_related("teacher_profile")
         .prefetch_related("teacher_profile__subject")
@@ -118,7 +117,7 @@ def select_teacher(request, teacher_id):
 
         return redirect(
             "tutoring:student:available-teachers",
-            subject_pk=teacher.teacher_profile.subject.pk
+            subject_pk=teacher.teacher_profile.subject.pk,
         )
 
 

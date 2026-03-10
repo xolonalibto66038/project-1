@@ -1,3 +1,7 @@
-from .level import LevelListView, LevelDetailView
 from .grade import GradeDetailView
-from .subject import SubjectDetailView, SubjectCoursesByQuarterView
+from .level import LevelDetailView, LevelListView
+from .subject import (
+    SubjectCoursesByQuarterView,
+    SubjectDetailView,
+    SubjectResourceListView,
+)

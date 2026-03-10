@@ -1,7 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 
 from ..models import Quiz
 from .quiz_question import QuizQuestionInline
@@ -44,7 +45,10 @@ class QuizAdmin(admin.ModelAdmin):
 
     # Form configuration
     fieldsets = (
-        ("Basic Information", {"fields": ("title", "description", "instructions", "subject", "course")}),
+        (
+            "Basic Information",
+            {"fields": ("title", "description", "instructions", "subject", "course")},
+        ),
         (
             "Quiz Settings",
             {
@@ -192,17 +196,19 @@ class QuizAdmin(admin.ModelAdmin):
         duplicated = 0
         for quiz in queryset:
             questions = list(quiz.quiz_questions.all())
-            quiz.pk          = None
-            quiz.title       = f"Copy of {quiz.title}"
+            quiz.pk = None
+            quiz.title = f"Copy of {quiz.title}"
             quiz.is_published = False
-            quiz.created_by  = request.user
+            quiz.created_by = request.user
             quiz.save()
             for qq in questions:
-                qq.pk   = None
+                qq.pk = None
                 qq.quiz = quiz
                 qq.save()
             duplicated += 1
 
-        self.message_user(request, _(f'{duplicated} quiz(es) duplicated.'), messages.SUCCESS)
+        self.message_user(
+            request, _(f"{duplicated} quiz(es) duplicated."), messages.SUCCESS
+        )
 
     duplicate_quiz.short_description = "Duplicate selected quizzes"

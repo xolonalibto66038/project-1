@@ -1,7 +1,7 @@
 # apps/authentication/signals.py
 
-from django.dispatch import receiver
 from allauth.socialaccount.signals import social_account_added
+from django.dispatch import receiver
 
 from apps.accounts.choices import UserRole
 from apps.accounts.models import StudentProfile, TeacherProfile

@@ -1,3 +1,3 @@
-from .level import LevelQuerySetMixin
 from .grade import GradeLoggingMixin
-from .subject import SubjectQuarterMixin
+from .level import LevelQuerySetMixin
+from .subject import SubjectMixin, SubjectQuarterMixin

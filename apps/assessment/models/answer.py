@@ -125,14 +125,16 @@ class Answer(TimeStampModel):
         # ── Check mutually exclusive answer types ──
         # M2M (selected_choices) is checked separately via post-save signal
         # Here we only validate the non-M2M fields
-        non_m2m_filled = sum([
-            bool(self.answer_text),
-            self.answer_boolean is not None,
-        ])
+        non_m2m_filled = sum(
+            [
+                bool(self.answer_text),
+                self.answer_boolean is not None,
+            ]
+        )
 
         if non_m2m_filled > 1:
             raise ValidationError(
-                _('Only one type of answer can be provided at a time.')
+                _("Only one type of answer can be provided at a time.")
             )
 
         # ── For existing instances, also check M2M doesn't conflict ──
@@ -140,21 +142,17 @@ class Answer(TimeStampModel):
             has_choices = self.selected_choices.exists()
             if has_choices and non_m2m_filled > 0:
                 raise ValidationError(
-                    _('Cannot combine selected choices with text or boolean answer.')
+                    _("Cannot combine selected choices with text or boolean answer.")
                 )
 
         # ── Validate points_earned is not negative ──
         if self.points_earned is not None and self.points_earned < 0:
-            raise ValidationError(
-                _('Points earned cannot be negative.')
-            )
+            raise ValidationError(_("Points earned cannot be negative."))
 
         # ── Validate grading consistency ──
         if self.graded_at and not self.graded_by and self.is_correct is None:
-            raise ValidationError(
-                _('A graded answer must have is_correct set.')
-            )
-    
+            raise ValidationError(_("A graded answer must have is_correct set."))
+
     @property
     def is_graded(self):
         """Check if the answer has been graded"""

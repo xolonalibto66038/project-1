@@ -9,32 +9,34 @@ class Specialty(TimeStampModel):
     grade = models.ForeignKey(
         "Grade",
         on_delete=models.CASCADE,
-        related_name='specialties',
-        verbose_name=_('Grade'),
-        help_text=_('The Secondaire grade this specialty (filière) belongs to.'),
+        related_name="specialties",
+        verbose_name=_("Grade"),
+        help_text=_("The Secondaire grade this specialty (filière) belongs to."),
     )
     name = models.CharField(
         max_length=100,
-        verbose_name=_('Name'),
+        verbose_name=_("Name"),
         help_text=_('Full specialty name (e.g. "Sciences Expérimentales").'),
     )
     short_name = models.CharField(
         max_length=20,
-        verbose_name=_('Short Name'),
+        verbose_name=_("Short Name"),
         help_text=_('Abbreviated specialty name used in UI and slugs (e.g. "SE").'),
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
         blank=True,
-        verbose_name=_('Slug'),
-        help_text=_('URL-friendly identifier, auto-generated from grade and short name.'),
+        verbose_name=_("Slug"),
+        help_text=_(
+            "URL-friendly identifier, auto-generated from grade and short name."
+        ),
     )
 
     class Meta:
-        unique_together = ('grade', 'name')
-        verbose_name = _('Specialty')
-        verbose_name_plural = _('Specialties')
+        unique_together = ("grade", "name")
+        verbose_name = _("Specialty")
+        verbose_name_plural = _("Specialties")
 
     def save(self, *args, **kwargs):
         if not self.slug:

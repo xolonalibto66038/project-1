@@ -1,10 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
-
 from taggit.managers import TaggableManager
 
-from common.models import UUIDTaggedItem, TimeStampModel
+from common.models import TimeStampModel, UUIDTaggedItem
 
 User = get_user_model()
 
@@ -43,10 +42,10 @@ class VideoResource(TimeStampModel):
         User,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='videos',
-        verbose_name=_('Author'),
-        help_text=_('The teacher who created this resource.'),
-        limit_choices_to={"role": "teacher"}
+        related_name="videos",
+        verbose_name=_("Author"),
+        help_text=_("The teacher who created this resource."),
+        limit_choices_to={"role": "teacher"},
     )
 
     class Meta:

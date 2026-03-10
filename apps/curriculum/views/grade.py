@@ -10,24 +10,24 @@ logger = logging.getLogger(__name__)
 
 
 class GradeDetailView(GradeLoggingMixin, DetailView):
-    model               = Grade
-    template_name       = 'apps/curriculum/grades/detail.html'
-    context_object_name = 'grade'
+    model = Grade
+    template_name = "apps/curriculum/grades/detail.html"
+    context_object_name = "grade"
 
     def get_queryset(self):
-        return Grade.objects.select_related('level').all()
+        return Grade.objects.select_related("level").all()
 
     def get_context_data(self, **kwargs):
-        context   = super().get_context_data(**kwargs)
-        grade     = self.object
-        user      = self.request.user
+        context = super().get_context_data(**kwargs)
+        grade = self.object
+        user = self.request.user
         specialty = self._resolve_specialty(user, grade)
-        context['enriched_subjects'] = build_enriched_subjects(
+        context["enriched_subjects"] = build_enriched_subjects(
             grade=grade,
             user=user,
             specialty=specialty,
         )
-        context['specialty'] = specialty
+        context["specialty"] = specialty
         return context
 
     def _resolve_specialty(self, user, grade):
@@ -38,7 +38,7 @@ class GradeDetailView(GradeLoggingMixin, DetailView):
         3. None
         """
         # 1. Student profile
-        if user.is_authenticated and getattr(user, 'is_student', False):
+        if user.is_authenticated and getattr(user, "is_student", False):
             try:
                 sp = user.student_profile.specialty
                 if sp and sp.grade_id == grade.pk:
@@ -47,7 +47,7 @@ class GradeDetailView(GradeLoggingMixin, DetailView):
                 pass
 
         # 2. Query param fallback
-        specialty_pk = self.request.GET.get('specialty')
+        specialty_pk = self.request.GET.get("specialty")
         if specialty_pk:
             return Specialty.objects.filter(
                 pk=specialty_pk,
@@ -55,7 +55,8 @@ class GradeDetailView(GradeLoggingMixin, DetailView):
             ).first()
 
         return None
-    
+
+
 # class GradeDetailView(GradeLoggingMixin, DetailView):
 #     model               = Grade
 #     template_name       = 'apps/curriculum/grades/detail.html'

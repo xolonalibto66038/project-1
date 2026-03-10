@@ -4,19 +4,17 @@ from django.utils.translation import gettext_lazy as _
 
 class ResourceType(TextChoices):
     # Course-specific resource types
-    LESSON   = 'lesson',   _('Lesson')
-    EXERCISE = 'exercise', _('Exercise')
-    HOMEWORK = 'homework', _('Homework')
-    SUMMARY  = "summary",  _("Summary")
-    NOTES    = "notes",    _("Notes")
-    SERIES   = "series",   _("Series")
+    LESSON = "lesson", _("Lesson")
+    EXERCISE = "exercise", _("Exercise")
+    HOMEWORK = "homework", _("Homework")
+    SUMMARY = "summary", _("Summary")
+    NOTES = "notes", _("Notes")
+    SERIES = "series", _("Series")
 
     # Subject-specific resource types
     TEST = "test", _("Test")
     EXAM = "exam", _("Exam")
-    PAST_PAPER = "past_paper", _(
-        "Past Paper"
-    )
+    PAST_PAPER = "past_paper", _("Past Paper")
     MOCK_EXAM = "mock_exam", _("Mock Exam")
     TEXTBOOK = "textbook", _("Textbook")
     FOREIGN_BOOK = "foreign_book", _("Foreign Book")
@@ -50,7 +48,14 @@ class ResourceType(TextChoices):
     @classmethod
     def get_course_values(cls):
         """Get resource type values available for courses."""
-        return [cls.LESSON, cls.EXERCISE, cls.HOMEWORK, cls.SUMMARY, cls.NOTES, cls.SERIES]
+        return [
+            cls.LESSON,
+            cls.EXERCISE,
+            cls.HOMEWORK,
+            cls.SUMMARY,
+            cls.NOTES,
+            cls.SERIES,
+        ]
 
     @classmethod
     def get_subject_values(cls):
@@ -77,9 +82,9 @@ class ResourceType(TextChoices):
 
 
 class DifficultyLevel(TextChoices):
-    EASY   = 'easy',   _('Easy')
-    MEDIUM = 'medium', _('Medium')
-    HARD   = 'hard',   _('Hard')
+    EASY = "easy", _("Easy")
+    MEDIUM = "medium", _("Medium")
+    HARD = "hard", _("Hard")
     ADVANCED = "advanced", _("Advanced")
 
     @classmethod
@@ -93,12 +98,12 @@ class DifficultyLevel(TextChoices):
 
 
 class ResourceStatus(TextChoices):
-    DRAFT     = 'draft',     _('Draft')
-    PUBLISHED = 'published', _('Published')
-    ARCHIVED  = 'archived',  _('Archived')
+    DRAFT = "draft", _("Draft")
+    PUBLISHED = "published", _("Published")
+    ARCHIVED = "archived", _("Archived")
 
 
 class Term(TextChoices):
-    FIRST  = 'first',  _('First Term')
-    SECOND = 'second', _('Second Term')
-    THIRD  = 'third',  _('Third Term')
+    FIRST = "first", _("First Term")
+    SECOND = "second", _("Second Term")
+    THIRD = "third", _("Third Term")

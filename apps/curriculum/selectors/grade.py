@@ -1,7 +1,8 @@
 from collections import defaultdict
+
 from django.db.models import Count, Prefetch
 
-from ..models import Level, Grade, Specialty
+from ..models import Grade, Level, Specialty
 
 
 def get_level_by_pk(pk):
@@ -14,14 +15,13 @@ def get_grades_for_level(level):
     Grouped by order for the accordion UI.
     """
     grades_qs = (
-        Grade.objects
-        .filter(level=level)
+        Grade.objects.filter(level=level)
         .annotate(
-            subjects_count   = Count('grade_subjects__subject', distinct=True),
-            specialties_count= Count('specialties', distinct=True),
+            subjects_count=Count("grade_subjects__subject", distinct=True),
+            specialties_count=Count("specialties", distinct=True),
         )
-        .order_by('order', 'name')
-        .select_related('level')
+        .order_by("order", "name")
+        .select_related("level")
     )
     return grades_qs
 
@@ -41,7 +41,7 @@ def get_grade_groups(level):
         grouped[grade.order].append(grade)
 
     return [
-        {'order': order, 'grades': grade_list}
+        {"order": order, "grades": grade_list}
         for order, grade_list in sorted(grouped.items())
     ]
 
@@ -56,15 +56,12 @@ def get_level_stats(level):
 
     grades_qs = Grade.objects.filter(level=level)
 
-    subjects_count = (
-        level.subjects.count()
-    )
+    subjects_count = level.subjects.count()
 
     grades_count = grades_qs.count()
 
     students_count = (
-        CustomUser.objects
-        .filter(
+        CustomUser.objects.filter(
             role=UserRole.STUDENT,
             student_profile__grade__level=level,
         )
@@ -73,9 +70,9 @@ def get_level_stats(level):
     )
 
     return {
-        'grades'  : grades_count,
-        'subjects': subjects_count,
-        'students': students_count,
+        "grades": grades_count,
+        "subjects": subjects_count,
+        "students": students_count,
     }
 
 
@@ -100,54 +97,58 @@ def get_grade_groups_with_specialties(level):
         ]
     """
     grades = (
-        Grade.objects
-        .filter(level=level)
+        Grade.objects.filter(level=level)
         .prefetch_related(
             Prefetch(
-                'specialties',
-                queryset=Specialty.objects.order_by('name'),
+                "specialties",
+                queryset=Specialty.objects.order_by("name"),
             )
         )
-        .select_related('level')
-        .order_by('order', 'name')
+        .select_related("level")
+        .order_by("order", "name")
     )
 
-    grouped = defaultdict(lambda: {'grade': None, 'entries': []})
+    grouped = defaultdict(lambda: {"grade": None, "entries": []})
 
     for grade in grades:
         specialties = list(grade.specialties.all())
 
         group = grouped[grade.order]
-        group['grade'] = grade  # representative grade for the group header
+        group["grade"] = grade  # representative grade for the group header
 
         if specialties:
             for specialty in specialties:
-                group['entries'].append({
-                    'grade':     grade,
-                    'specialty': specialty,
-                    'label':     f"{grade.short_name} – {specialty.short_name}",
-                    'url_kwargs': {
-                        'grade_pk':     grade.pk,
-                        'specialty_pk': specialty.pk,
-                    },
-                })
+                group["entries"].append(
+                    {
+                        "grade": grade,
+                        "specialty": specialty,
+                        "label": f"{grade.short_name} – {specialty.short_name}",
+                        "url_kwargs": {
+                            "grade_pk": grade.pk,
+                            "specialty_pk": specialty.pk,
+                        },
+                    }
+                )
         else:
-            group['entries'].append({
-                'grade':     grade,
-                'specialty': None,
-                'label':     grade.name,
-                'url_kwargs': {
-                    'grade_pk':     grade.pk,
-                    'specialty_pk': None,
-                },
-            })
+            group["entries"].append(
+                {
+                    "grade": grade,
+                    "specialty": None,
+                    "label": grade.name,
+                    "url_kwargs": {
+                        "grade_pk": grade.pk,
+                        "specialty_pk": None,
+                    },
+                }
+            )
 
     return [
         {
-            'order':   order,
-            'grade':   data['grade'],
-            'entries': data['entries'],
-            'single':  len(data['entries']) == 1,  # hint for template (no accordion needed)
+            "order": order,
+            "grade": data["grade"],
+            "entries": data["entries"],
+            "single": len(data["entries"])
+            == 1,  # hint for template (no accordion needed)
         }
         for order, data in sorted(grouped.items())
     ]

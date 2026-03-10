@@ -1,6 +1,11 @@
 from django.urls import path
 
-from ..views.student import available_teachers, select_teacher, session_detail, student_sessions
+from ..views.student import (
+    available_teachers,
+    select_teacher,
+    session_detail,
+    student_sessions,
+)
 
 app_name = "student"
 

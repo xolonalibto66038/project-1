@@ -1,15 +1,15 @@
 from django.contrib import messages
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
 from ..forms import ContactForm
 
 
 class ContactUsView(FormView):
-    template_name = 'pages/contact-us.html'
-    form_class    = ContactForm
-    success_url   = reverse_lazy('pages:contact')
+    template_name = "pages/contact-us.html"
+    form_class = ContactForm
+    success_url = reverse_lazy("pages:contact")
 
     def form_valid(self, form):
         try:
@@ -35,6 +35,6 @@ class ContactUsView(FormView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['page_title']    = _('Contact Us')
-        ctx['page_subtitle'] = _("We'd love to hear from you")
+        ctx["page_title"] = _("Contact Us")
+        ctx["page_subtitle"] = _("We'd love to hear from you")
         return ctx

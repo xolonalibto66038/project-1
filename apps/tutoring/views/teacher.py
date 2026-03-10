@@ -11,7 +11,7 @@ from apps.authentication.decorators import teacher_required
 
 from ..helpers import convert_to_browser_join_url
 from ..models import TutoringSession
-from ..services import ZoomService, MeetService
+from ..services import MeetService, ZoomService
 
 
 @login_required
@@ -69,25 +69,25 @@ def confirm_meet_session(request, session_id):
         raise ValidationError("Payment not authorized")
 
     scheduled_at_str = request.POST.get("scheduled_at")
-    scheduled_at     = parse_datetime(scheduled_at_str)
+    scheduled_at = parse_datetime(scheduled_at_str)
 
     if not scheduled_at:
         raise ValidationError("Invalid datetime")
 
-    scheduled_at         = timezone.make_aware(scheduled_at)
+    scheduled_at = timezone.make_aware(scheduled_at)
     session.scheduled_at = scheduled_at
-    session.save(update_fields=['scheduled_at'])  # save before API call
+    session.save(update_fields=["scheduled_at"])  # save before API call
 
     meeting = MeetService.create_meeting(session)
 
-    session.meeting_id        = meeting['event_id']
-    session.meeting_join_url  = meeting['join_url']
-    session.meeting_start_url = meeting['start_url']
-    session.status            = TutoringSession.Status.CONFIRMED
-    session.confirmed_at      = timezone.now()
+    session.meeting_id = meeting["event_id"]
+    session.meeting_join_url = meeting["join_url"]
+    session.meeting_start_url = meeting["start_url"]
+    session.status = TutoringSession.Status.CONFIRMED
+    session.confirmed_at = timezone.now()
     session.save()
 
-    return redirect('tutoring:teacher:teacher-sessions')
+    return redirect("tutoring:teacher:teacher-sessions")
 
 
 @login_required

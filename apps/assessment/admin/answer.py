@@ -1,9 +1,9 @@
 # apps/assessment/admin/answer_admin.py
 
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
-from django.utils.html import format_html
 from django.utils import timezone
+from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 
 from ..models import Answer
 
@@ -11,54 +11,83 @@ from ..models import Answer
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
 
-    list_display        = (
-        'student', 'question_type_display', 'answer_preview_display',
-        'correctness_badge', 'points_earned', 'is_graded_display',
-        'submitted_at',
+    list_display = (
+        "student",
+        "question_type_display",
+        "answer_preview_display",
+        "correctness_badge",
+        "points_earned",
+        "is_graded_display",
+        "submitted_at",
     )
-    list_display_links  = ('student',)
-    list_filter         = (
-        'question_content_type',
-        'is_correct',
-        'answer_boolean',
-        'submitted_at',
+    list_display_links = ("student",)
+    list_filter = (
+        "question_content_type",
+        "is_correct",
+        "answer_boolean",
+        "submitted_at",
     )
-    search_fields       = (
-        'student__email',
-        'student__first_name',
-        'student__last_name',
-        'answer_text',
-        'feedback',
+    search_fields = (
+        "student__email",
+        "student__first_name",
+        "student__last_name",
+        "answer_text",
+        "feedback",
     )
-    ordering            = ('-submitted_at',)
-    list_per_page       = 25
-    list_max_show_all   = 200
-    save_on_top         = True
-    preserve_filters    = True
+    ordering = ("-submitted_at",)
+    list_per_page = 25
+    list_max_show_all = 200
+    save_on_top = True
+    preserve_filters = True
     show_full_result_count = True
-    autocomplete_fields = ('student',)
+    autocomplete_fields = ("student",)
 
     readonly_fields = (
-        'submitted_at', 'graded_at',
-        'created_at',   'updated_at',
-        'answer_preview_display',
+        "submitted_at",
+        "graded_at",
+        "created_at",
+        "updated_at",
+        "answer_preview_display",
     )
 
     fieldsets = (
-        (_('Who & What'), {
-            'fields': ('student', 'attempt', 'question_content_type', 'question_object_id'),
-        }),
-        (_('Answer'), {
-            'fields': ('answer_text', 'answer_boolean', 'selected_choices'),
-            'description': _('Only one answer type should be filled.'),
-        }),
-        (_('Grading'), {
-            'fields': ('is_correct', 'points_earned', 'feedback', 'graded_by', 'graded_at'),
-        }),
-        (_('Timestamps'), {
-            'fields': ('submitted_at', 'created_at', 'updated_at'),
-            'classes': ('collapse',),
-        }),
+        (
+            _("Who & What"),
+            {
+                "fields": (
+                    "student",
+                    "attempt",
+                    "question_content_type",
+                    "question_object_id",
+                ),
+            },
+        ),
+        (
+            _("Answer"),
+            {
+                "fields": ("answer_text", "answer_boolean", "selected_choices"),
+                "description": _("Only one answer type should be filled."),
+            },
+        ),
+        (
+            _("Grading"),
+            {
+                "fields": (
+                    "is_correct",
+                    "points_earned",
+                    "feedback",
+                    "graded_by",
+                    "graded_at",
+                ),
+            },
+        ),
+        (
+            _("Timestamps"),
+            {
+                "fields": ("submitted_at", "created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
     # ── Custom display methods ──
@@ -67,17 +96,17 @@ class AnswerAdmin(admin.ModelAdmin):
     # def question_type_display(self, obj):
     #     return obj.content_type.model.replace('question', '').title() \
     #         if obj.question_content_type else '—'
-    @admin.display(description=_('Question Type'))
+    @admin.display(description=_("Question Type"))
     def question_type_display(self, obj):
         if obj.question_content_type:
-            return obj.question_content_type.model.replace('question', '').title()
-        return '—'
+            return obj.question_content_type.model.replace("question", "").title()
+        return "—"
 
-    @admin.display(description=_('Answer'))
+    @admin.display(description=_("Answer"))
     def answer_preview_display(self, obj):
         return obj.answer_preview
 
-    @admin.display(description=_('Correct'))
+    @admin.display(description=_("Correct"))
     def correctness_badge(self, obj):
         if obj.is_correct is None:
             return format_html(
@@ -91,23 +120,24 @@ class AnswerAdmin(admin.ModelAdmin):
             '<span style="background:#dc3545; color:#fff; padding:2px 8px; border-radius:4px;">✗ Wrong</span>'
         )
 
-    @admin.display(description=_('Graded'), boolean=True)
+    @admin.display(description=_("Graded"), boolean=True)
     def is_graded_display(self, obj):
         return obj.is_graded
 
     # ── Actions ──
 
-    @admin.action(description=_('Mark selected answers as correct'))
+    @admin.action(description=_("Mark selected answers as correct"))
     def mark_correct(self, request, queryset):
         from django.utils import timezone
+
         updated = queryset.update(
             is_correct=True,
             graded_at=timezone.now(),
             graded_by=request.user,
         )
-        self.message_user(request, _(f'{updated} answer(s) marked correct.'))
+        self.message_user(request, _(f"{updated} answer(s) marked correct."))
 
-    @admin.action(description=_('Mark selected answers as incorrect'))
+    @admin.action(description=_("Mark selected answers as incorrect"))
     def mark_incorrect(self, request, queryset):
         updated = queryset.update(
             is_correct=False,
@@ -115,9 +145,10 @@ class AnswerAdmin(admin.ModelAdmin):
             graded_at=timezone.now(),
             graded_by=request.user,
         )
-        self.message_user(request, _(f'{updated} answer(s) marked incorrect.'))
+        self.message_user(request, _(f"{updated} answer(s) marked incorrect."))
 
-    actions = ['mark_correct', 'mark_incorrect']
+    actions = ["mark_correct", "mark_incorrect"]
+
 
 # from django.contrib import admin
 # from django.urls import reverse

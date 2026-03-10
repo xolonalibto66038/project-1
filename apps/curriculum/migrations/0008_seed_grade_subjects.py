@@ -1,6 +1,7 @@
 # apps/curriculum/migrations/0008_seed_grade_subjects.py
 
 import uuid
+
 from django.db import migrations
 
 

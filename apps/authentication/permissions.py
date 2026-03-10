@@ -41,14 +41,10 @@ def can_edit_resource(user, resource):
 def assert_can_publish(user):
     """Raises PermissionDenied if user cannot publish. Use in views."""
     if not can_publish_resource(user):
-        raise PermissionDenied(
-            _('Only verified teachers can publish resources.')
-        )
+        raise PermissionDenied(_("Only verified teachers can publish resources."))
 
 
 def assert_can_edit_resource(user, resource):
     """Raises PermissionDenied if user cannot edit the resource."""
     if not can_edit_resource(user, resource):
-        raise PermissionDenied(
-            _('You do not have permission to edit this resource.')
-        )
+        raise PermissionDenied(_("You do not have permission to edit this resource."))

@@ -1,6 +1,10 @@
 from django.urls import path
 
-from ..views import SubjectDetailView, SubjectCoursesByQuarterView
+from ..views import (
+    SubjectCoursesByQuarterView,
+    SubjectDetailView,
+    SubjectResourceListView,
+)
 
 app_name = "subject"
 
@@ -14,5 +18,10 @@ urlpatterns = [
         "<uuid:pk>/<str:quarter>/courses/",
         SubjectCoursesByQuarterView.as_view(),
         name="subject-courses-by-quarter",
+    ),
+    path(
+        "subjects/<uuid:pk>/resources/<str:resource_slug>/",
+        SubjectResourceListView.as_view(),
+        name="subject-resources",
     ),
 ]

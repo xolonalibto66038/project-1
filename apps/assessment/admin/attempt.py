@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from ..filters import AttemptGradeFilter
-from .forms import AttemptForm
 from ..models import Attempt
+from .forms import AttemptForm
 
 
 @admin.register(Attempt)

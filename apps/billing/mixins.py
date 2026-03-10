@@ -24,4 +24,4 @@ class SubscriptionRequiredMixin(LoginRequiredMixin):
         except Exception:
             pass
 
-        return redirect('billing:pricing')
+        return redirect("billing:pricing")

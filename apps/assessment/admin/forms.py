@@ -101,27 +101,27 @@ class AttemptForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if not self.instance.pk:
-            self.fields["started_at"].initial = timezone.now().strftime("%Y-%m-%dT%H:%M")
+            self.fields["started_at"].initial = timezone.now().strftime(
+                "%Y-%m-%dT%H:%M"
+            )
             self.fields["started_at"].help_text = _(
                 "Automatically set to current time if left blank."
             )
 
     def clean(self):
         cleaned_data = super().clean()
-        started_at   = cleaned_data.get("started_at")
+        started_at = cleaned_data.get("started_at")
         submitted_at = cleaned_data.get("submitted_at")
 
-        if not started_at: 
+        if not started_at:
             cleaned_data["started_at"] = timezone.now()
             started_at = cleaned_data["started_at"]
 
         if started_at and submitted_at and submitted_at < started_at:
-            raise ValidationError(
-                _("Submission time cannot be before start time.")
-            )
+            raise ValidationError(_("Submission time cannot be before start time."))
 
         return cleaned_data
-    
+
     # class Meta:
     #     model = Attempt
     #     fields = "__all__"

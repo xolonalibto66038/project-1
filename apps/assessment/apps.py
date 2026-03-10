@@ -2,8 +2,8 @@ from django.apps import AppConfig
 
 
 class AssessmentConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.assessment'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.assessment"
 
     def ready(self):
         import apps.assessment.signals  # noqa

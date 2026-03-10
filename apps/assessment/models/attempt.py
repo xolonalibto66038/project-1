@@ -35,7 +35,7 @@ class Attempt(TimeStampModel):
     # Timing information
     started_at = models.DateTimeField(
         default=timezone.now,
-        verbose_name=_('Started At'),
+        verbose_name=_("Started At"),
     )
     submitted_at = models.DateTimeField(null=True, blank=True)
     time_taken = models.DurationField(

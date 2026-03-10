@@ -1,9 +1,7 @@
-from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
+from django.contrib import admin, messages
+from django.urls import reverse
 from django.utils.html import format_html
-from django.urls import reverse, path
-from django.http import HttpResponseRedirect
-from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
 from ..models import GradeSubject
 
@@ -11,37 +9,47 @@ from ..models import GradeSubject
 @admin.register(GradeSubject)
 class GradeSubjectAdmin(admin.ModelAdmin):
 
-    list_display        = ('grade', 'subject', 'specialty', 'level_display', 'edit_button', 'delete_button')
-    list_display_links  = ('grade', 'subject')
-    list_filter         = ('grade__level', 'grade', 'subject', 'specialty')
-    search_fields       = ('grade__name', 'subject__name', 'specialty__name')
-    ordering            = ('grade__level__order', 'grade__order', 'subject__name')
-    list_per_page       = 30
-    list_max_show_all   = 200
-    save_on_top         = True
-    preserve_filters    = True
+    list_display = (
+        "grade",
+        "subject",
+        "specialty",
+        "level_display",
+        "edit_button",
+        "delete_button",
+    )
+    list_display_links = ("grade", "subject")
+    list_filter = ("grade__level", "grade", "subject", "specialty")
+    search_fields = ("grade__name", "subject__name", "specialty__name")
+    ordering = ("grade__level__order", "grade__order", "subject__name")
+    list_per_page = 30
+    list_max_show_all = 200
+    save_on_top = True
+    preserve_filters = True
     show_full_result_count = True
-    autocomplete_fields = ('grade', 'subject', 'specialty')
+    autocomplete_fields = ("grade", "subject", "specialty")
 
     fieldsets = (
-        (_('Assignment'), {
-            'fields': ('grade', 'subject', 'specialty', 'is_active'),
-            'description': _(
-                'Assign a subject to a grade. '
-                'Leave specialty blank if the subject applies to all specialties of this grade.'
-            ),
-        }),
+        (
+            _("Assignment"),
+            {
+                "fields": ("grade", "subject", "specialty", "is_active"),
+                "description": _(
+                    "Assign a subject to a grade. "
+                    "Leave specialty blank if the subject applies to all specialties of this grade."
+                ),
+            },
+        ),
     )
 
     # ── Custom display methods ──
 
-    @admin.display(description=_('Level'))
+    @admin.display(description=_("Level"))
     def level_display(self, obj):
         return obj.grade.level.get_name_display()
 
     # ── Custom actions ──
 
-    @admin.action(description=_('Duplicate selected assignments'))
+    @admin.action(description=_("Duplicate selected assignments"))
     def duplicate_assignments(self, request, queryset):
         duplicated = 0
         for obj in queryset:
@@ -53,11 +61,11 @@ class GradeSubjectAdmin(admin.ModelAdmin):
                 pass
         self.message_user(
             request,
-            _(f'{duplicated} assignment(s) duplicated successfully.'),
+            _(f"{duplicated} assignment(s) duplicated successfully."),
             messages.SUCCESS,
         )
 
-    actions = ['duplicate_assignments']
+    actions = ["duplicate_assignments"]
 
     def edit_button(self, obj: GradeSubject) -> str:
         """Render an Edit button linking to the change page for the object."""
@@ -93,5 +101,5 @@ class GradeSubjectAdmin(admin.ModelAdmin):
 class GradeSubjectInline(admin.TabularInline):
     model = GradeSubject
     extra = 0
-    fields = ('subject', 'specialty')
-    autocomplete_fields = ('subject', 'specialty')
+    fields = ("subject", "specialty")
+    autocomplete_fields = ("subject", "specialty")

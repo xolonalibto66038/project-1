@@ -1,6 +1,6 @@
+from .chapter import ChapterAdmin
 from .course import CourseAdmin
 from .resource import ResourceAdmin
-from .chapter import ChapterAdmin
 from .video import VideoResourceAdmin
 
 __all__ = [

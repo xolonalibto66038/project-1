@@ -158,7 +158,7 @@ class Quiz(TimeStampModel):
             return False, "Quiz is not available"
 
         attempts_count = self.quiz_attempts.filter(student=user).count()
-        
+
         if attempts_count >= self.max_attempts:
             return False, f"Maximum attempts ({self.max_attempts}) reached"
 

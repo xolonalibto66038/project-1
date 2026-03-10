@@ -1,9 +1,9 @@
 # apps/curriculum/migrations/0005_seed_subjects.py
 
 import uuid
+
 from django.db import migrations
 from django.utils.text import slugify
-
 
 # ── Subject definitions per level ──────────────────────────────────────────
 # Each subject: (name, short_name, icon)

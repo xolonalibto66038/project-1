@@ -1,6 +1,7 @@
 # apps/curriculum/templatetags/dict_filters.py
 
 from django import template
+
 register = template.Library()
 
 

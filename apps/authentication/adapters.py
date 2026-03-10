@@ -1,13 +1,6 @@
-# apps/authentication/adapters.py
-
-from django.conf import settings
-from django.http import HttpRequest
-
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.core.exceptions import ImmediateHttpResponse
-
-from .exceptions import RoleRequiredException
+from django.conf import settings
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -23,8 +16,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if not user.is_authenticated:
             return settings.LOGIN_REDIRECT_URL
         if user.is_staff or user.is_superuser:
-            return '/admin/'
-        return '/dashboard/'
+            return "/admin/"
+        return "/dashboard/"
 
     def save_user(self, request, user, form, commit=True):
         """
@@ -34,7 +27,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         user = super().save_user(request, user, form, commit=False)
 
         # role comes from the custom signup form
-        user.role = form.cleaned_data.get('role', '')
+        user.role = form.cleaned_data.get("role", "")
 
         if commit:
             user.save()
@@ -63,7 +56,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             return
 
         try:
-            email = sociallogin.account.extra_data.get('email', '').lower()
+            email = sociallogin.account.extra_data.get("email", "").lower()
             if not email:
                 return
             existing = CustomUser.objects.get(email=email)
@@ -78,17 +71,18 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         extra = sociallogin.account.extra_data
 
         if not user.first_name:
-            user.first_name = extra.get('given_name', '')
+            user.first_name = extra.get("given_name", "")
         if not user.last_name:
-            user.last_name = extra.get('family_name', '')
+            user.last_name = extra.get("family_name", "")
 
         # role defaults to student for social signups
         if not user.role:
             from apps.accounts.choices import UserRole
-            role       = request.session.pop('pending_role', UserRole.STUDENT)
-            user.role  = role
 
-        user.is_verified = True   # Google already verified the email
+            role = request.session.pop("pending_role", UserRole.STUDENT)
+            user.role = role
+
+        user.is_verified = True  # Google already verified the email
         user.save()
 
         self._ensure_profile(user)
@@ -98,7 +92,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_auto_signup_allowed(self, request, sociallogin):
         """Allow auto-signup for Google — email is pre-verified."""
         return True
-    
+
     def _ensure_profile(self, user):
         """Guarantee profile exists regardless of signal timing."""
         from apps.accounts.choices import UserRole

@@ -1,9 +1,9 @@
 # apps/curriculum/migrations/0004_seed_specialties.py
 
 import uuid
+
 from django.db import migrations
 from django.utils.text import slugify
-
 
 # ── Specialties per secondaire grade ──────────────────────────────────────
 # Structure: { short_name: [(name, short_name), ...] }

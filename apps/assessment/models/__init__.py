@@ -7,4 +7,13 @@ from .quiz import Quiz
 from .quiz_question import QuizQuestion
 from .true_false_question import TrueFalseQuestion
 
-__all__ = ["Answer", "Attempt", "EssayQuestion", "Choice", "MultipleChoiceQuestion", "Quiz", "QuizQuestion", "TrueFalseQuestion"]
+__all__ = [
+    "Answer",
+    "Attempt",
+    "EssayQuestion",
+    "Choice",
+    "MultipleChoiceQuestion",
+    "Quiz",
+    "QuizQuestion",
+    "TrueFalseQuestion",
+]

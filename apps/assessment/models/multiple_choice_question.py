@@ -1,38 +1,37 @@
 # apps/assessment/models/mcq.py
 
-from django.utils.translation import gettext_lazy as _
 from django.db import models
-
+from django.utils.translation import gettext_lazy as _
 
 from common.models import TimeStampModel
-from .question import BaseQuestion
 
+from .question import BaseQuestion
 
 
 class MultipleChoiceQuestion(BaseQuestion):
     allow_multiple = models.BooleanField(
         default=False,
-        verbose_name=_('Allow Multiple'),
-        help_text=_('Whether students can select more than one correct answer.'),
+        verbose_name=_("Allow Multiple"),
+        help_text=_("Whether students can select more than one correct answer."),
     )
     explanation = models.TextField(
         blank=True,
-        verbose_name=_('Explanation'),
-        help_text=_('Shown to the student after answering.'),
+        verbose_name=_("Explanation"),
+        help_text=_("Shown to the student after answering."),
     )
 
     class Meta:
-        db_table      = 'mcq_questions'
-        verbose_name  = _('Multiple Choice Question')
-        verbose_name_plural = _('Multiple Choice Questions')
+        db_table = "mcq_questions"
+        verbose_name = _("Multiple Choice Question")
+        verbose_name_plural = _("Multiple Choice Questions")
         indexes = [
-            models.Index(fields=['question_type']),
-            models.Index(fields=['difficulty_level']),
-            models.Index(fields=['is_active']),
+            models.Index(fields=["question_type"]),
+            models.Index(fields=["difficulty_level"]),
+            models.Index(fields=["is_active"]),
         ]
 
     def save(self, *args, **kwargs):
-        self.question_type = 'mcq'
+        self.question_type = "mcq"
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -53,21 +52,19 @@ class MultipleChoiceQuestion(BaseQuestion):
         from django.core.exceptions import ValidationError
 
         correct_count = self.choices.filter(is_correct=True).count()
-        total_count   = self.choices.count()
+        total_count = self.choices.count()
 
         if total_count < 2:
             raise ValidationError(
-                _('A multiple choice question must have at least 2 choices.')
+                _("A multiple choice question must have at least 2 choices.")
             )
 
         if correct_count == 0:
-            raise ValidationError(
-                _('At least one correct choice is required.')
-            )
+            raise ValidationError(_("At least one correct choice is required."))
 
         if not self.allow_multiple and correct_count > 1:
             raise ValidationError(
-                _('Only one correct choice is allowed when allow_multiple is False.')
+                _("Only one correct choice is allowed when allow_multiple is False.")
             )
 
     @property
@@ -80,31 +77,32 @@ class MultipleChoiceQuestion(BaseQuestion):
     def grade(self, answer):
         if not isinstance(answer, list):
             return {
-                'awarded_points': 0,
-                'is_correct':     False,
-                'feedback':       _('Invalid answer format.'),
+                "awarded_points": 0,
+                "is_correct": False,
+                "feedback": _("Invalid answer format."),
             }
 
-        valid_choice_ids  = set(self.choices.values_list('id', flat=True))
-        submitted_ids     = set(answer)
+        valid_choice_ids = set(self.choices.values_list("id", flat=True))
+        submitted_ids = set(answer)
 
         if not submitted_ids.issubset(valid_choice_ids):
             return {
-                'awarded_points': 0,
-                'is_correct':     False,
-                'feedback':       _('Invalid choice selection.'),
+                "awarded_points": 0,
+                "is_correct": False,
+                "feedback": _("Invalid choice selection."),
             }
 
-        correct_ids = set(self.correct_choices.values_list('id', flat=True))
-        is_correct  = submitted_ids == correct_ids
-        awarded     = self.points if is_correct else 0
+        correct_ids = set(self.correct_choices.values_list("id", flat=True))
+        is_correct = submitted_ids == correct_ids
+        awarded = self.points if is_correct else 0
 
         return {
-            'awarded_points': awarded,
-            'is_correct':     is_correct,
-            'feedback':       self.explanation or '',
+            "awarded_points": awarded,
+            "is_correct": is_correct,
+            "feedback": self.explanation or "",
         }
-    
+
+
 # class MultipleChoiceQuestion(BaseQuestion):
 #     allow_multiple = models.BooleanField(default=False)
 #     explanation = models.TextField(blank=True)

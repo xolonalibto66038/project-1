@@ -12,7 +12,7 @@ class StudentRequiredMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if not request.user.is_student:
-            raise PermissionDenied(_('This page is for students only.'))
+            raise PermissionDenied(_("This page is for students only."))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -23,7 +23,7 @@ class TeacherRequiredMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if not request.user.is_teacher:
-            raise PermissionDenied(_('This page is for teachers only.'))
+            raise PermissionDenied(_("This page is for teachers only."))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -34,9 +34,7 @@ class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
         response = super().dispatch(request, *args, **kwargs)
         # super() already checked is_teacher
         if not request.user.teacher_profile.is_verified_teacher:
-            raise PermissionDenied(
-                _('Your teacher account is pending verification.')
-            )
+            raise PermissionDenied(_("Your teacher account is pending verification."))
         return response
 
 
@@ -47,7 +45,7 @@ class StaffRequiredMixin(LoginRequiredMixin):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
         if not request.user.is_staff:
-            raise PermissionDenied(_('Staff access only.'))
+            raise PermissionDenied(_("Staff access only."))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -58,7 +56,7 @@ class OwnerRequiredMixin(LoginRequiredMixin):
     Override get_owner() if the owner field is not 'author'.
     """
 
-    owner_field = 'author'
+    owner_field = "author"
 
     def get_owner(self, obj):
         return getattr(obj, self.owner_field, None)
@@ -69,8 +67,8 @@ class OwnerRequiredMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, *args, **kwargs):
-        obj   = super().get_object(*args, **kwargs)
+        obj = super().get_object(*args, **kwargs)
         owner = self.get_owner(obj)
         if owner != self.request.user and not self.request.user.is_staff:
-            raise PermissionDenied(_('You do not have permission to access this.'))
+            raise PermissionDenied(_("You do not have permission to access this."))
         return obj

@@ -1,5 +1,3 @@
-from django.utils import timezone
-
 from .selectors import get_or_create_course_progress
 
 
