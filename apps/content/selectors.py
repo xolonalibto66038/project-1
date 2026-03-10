@@ -7,6 +7,8 @@ from .models import Course, Resource
 from apps.progress.models import ContentProgress
 from apps.feedback.models import Rating
 
+QUARTER_TO_TERM = {'q1': 'first', 'q2': 'second', 'q3': 'third'}
+
 
 def get_course_by_pk(pk):
     return (
@@ -265,3 +267,47 @@ def get_resource_user_rating(user, resource):
         ).first()
     except Exception:
         return None
+
+
+def get_subject_resource_counts_by_quarter(subject):
+    """
+    Returns counts for each resource type per quarter for a subject.
+
+    Structure:
+    {
+        'q1': {'courses': 5, 'test': 2, 'exam': 1, ...},
+        'q2': {...},
+        'q3': {...},
+    }
+    """
+    result = {}
+
+    for quarter, term in QUARTER_TO_TERM.items():
+
+        # Count courses via GradeSubject → Chapter → Course
+        courses_count = Course.objects.filter(
+            Q(grade_subject__subject=subject, term=term)
+            | Q(chapter__grade_subject__subject=subject, chapter__term=term)
+        ).filter(is_active=True).distinct().count()
+
+        # Count subject-level resources per type for this term
+        subject_resources = (
+            Resource.objects
+            .filter(subject=subject, term=term, status='published')
+            .values('resource_type')
+            .annotate(count=Count('id'))
+        )
+        type_counts = {row['resource_type']: row['count'] for row in subject_resources}
+
+        result[quarter] = {
+            'courses':      courses_count,
+            'test':         type_counts.get(ResourceType.TEST,         0),
+            'exam':         type_counts.get(ResourceType.EXAM,         0),
+            'past_paper':   type_counts.get(ResourceType.PAST_PAPER,   0),
+            'mock_exam':    type_counts.get(ResourceType.MOCK_EXAM,    0),
+            'textbook':     type_counts.get(ResourceType.TEXTBOOK,     0),
+            'foreign_book': type_counts.get(ResourceType.FOREIGN_BOOK, 0),
+            'study_guide':  type_counts.get(ResourceType.STUDY_GUIDE,  0),
+        }
+
+    return result

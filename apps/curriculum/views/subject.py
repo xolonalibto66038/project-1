@@ -5,6 +5,7 @@ from ..models import Subject
 from ..services import get_subject_detail
 from ..mixins import GradeLoggingMixin, SubjectQuarterMixin
 from ..services.subject import build_courses_page
+from apps.content.selectors import get_subject_resource_counts_by_quarter
 
 # Term → quarter slug mapping (Term choices: first/second/third)
 _TERM_TO_QUARTER = {
@@ -54,6 +55,7 @@ class SubjectDetailView(GradeLoggingMixin, DetailView):
             ],
             'current_quarter': current_quarter,
             'level':           subject.level,
+            'counts_by_quarter':  get_subject_resource_counts_by_quarter(subject),
         })
 
         return context
