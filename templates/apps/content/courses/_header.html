@@ -67,54 +67,24 @@
           {% trans "Details" %}
         </a>
       </li>
-
+      
+      {% for slug, label, icon, count in resource_tabs %}
       <li class="nav-item">
-        {% comment %} {% url 'content:course-lessons' course.pk %} {% endcomment %}
-        <a class="nav-link {% if active_tab == 'lessons' %}active{% endif %}"
-           href="#">
-          <i class="fas fa-chalkboard-teacher mr-1"></i>
-          {% trans "Lessons" %}
-          <span class="badge badge-secondary ml-1">{{ course.lessons_count }}</span>
+        <a class="nav-link {% if active_tab == slug %}active{% endif %}"
+          href="{% url 'content:course:course-resources' pk=course.pk resource_slug=slug %}">
+          <i class="{{ icon }} mr-1"></i>
+          {% trans label %}
+          <span class="badge badge-secondary ml-1">{{ count }}</span>
         </a>
       </li>
+      {% endfor %}
 
       <li class="nav-item">
-        {% comment %} {% url 'content:course-summaries' course.pk %} {% endcomment %}
-        <a class="nav-link {% if active_tab == 'summaries' %}active{% endif %}"
-           href="#">
-          <i class="fas fa-align-left mr-1"></i>
-          {% trans "Summaries" %}
-          <span class="badge badge-secondary ml-1">{{ course.summaries_count }}</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        {% comment %} {% url 'content:course-homeworks' course.pk %} {% endcomment %}
-        <a class="nav-link {% if active_tab == 'homeworks' %}active{% endif %}"
-           href="#">
-          <i class="fas fa-pencil-ruler mr-1"></i>
-          {% trans "Homeworks" %}
-          <span class="badge badge-secondary ml-1">{{ course.homeworks_count }}</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        {% comment %} {% url 'content:course-exercises' course.pk %} {% endcomment %}
-        <a class="nav-link {% if active_tab == 'exercises' %}active{% endif %}"
-           href="{% url 'content:course:course-exercises' course.pk %}">
-          <i class="fas fa-pencil-alt mr-1"></i>
-          {% trans "Exercises" %}
-          <span class="badge badge-secondary ml-1">{{ course.exercises_count }}</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        {% comment %} {% url 'content:course-series' course.pk %} {% endcomment %}
-        <a class="nav-link {% if active_tab == 'series' %}active{% endif %}"
-           href="#">
-          <i class="fas fa-layer-group mr-1"></i>
-          {% trans "Series" %}
-          <span class="badge badge-secondary ml-1">{{ course.series_count }}</span>
+        <a class="nav-link {% if active_tab == 'videos' %}active{% endif %}"
+           href="{% url 'content:course:course-videos' course.pk %}">
+          <i class="fab fa-youtube mr-1"></i>
+          {% trans "Videos" %}
+          <span class="badge badge-secondary ml-1">{{ course.videos_count }}</span>
         </a>
       </li>
 

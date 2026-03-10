@@ -66,6 +66,11 @@ def get_course_by_pk(pk):
                 filter=Q(resources__status='published'),
                 distinct=True,
             ),
+            videos_count = Count(
+                'videos',
+                filter=Q(videos__is_active=True),
+                distinct=True,
+            ),
         )
         .get(pk=pk)
     )
@@ -311,3 +316,64 @@ def get_subject_resource_counts_by_quarter(subject):
         }
 
     return result
+
+
+def get_course_resources(course, resource_type, filters=None, user=None):
+    """
+    Generic resource selector for any course resource type.
+    Supports filters: q, difficulty, has_solution, completed.
+    """
+    qs = (
+        Resource.objects
+        .filter(
+            course=course,
+            resource_type=resource_type,
+            status=ResourceStatus.PUBLISHED,
+        )
+        .order_by('order')
+    )
+
+    if filters:
+        q            = filters.get('q', '').strip()
+        difficulty   = filters.get('difficulty', '')
+        has_solution = filters.get('has_solution', '')
+        completed    = filters.get('completed', '')
+
+        if q:
+            qs = qs.filter(
+                Q(title__icontains=q) | Q(metadata__icontains=q)
+            )
+        if difficulty:
+            qs = qs.filter(difficulty=difficulty)
+        if has_solution == '1':
+            qs = qs.filter(has_solution=True)
+        elif has_solution == '0':
+            qs = qs.filter(has_solution=False)
+
+        if completed and user and user.is_authenticated:
+            content_type = ContentType.objects.get_for_model(Resource)
+            completed_ids = ContentProgress.objects.filter(
+                student=user,
+                content_type=content_type,
+                is_completed=completed == '1',
+            ).values_list('object_id', flat=True)
+            qs = qs.filter(pk__in=completed_ids)
+
+    # Attach progress per resource (bulk — no N+1)
+    if user and user.is_authenticated and getattr(user, 'is_student', False):
+        content_type = ContentType.objects.get_for_model(Resource)
+        progress_map = {
+            str(cp.object_id): cp
+            for cp in ContentProgress.objects.filter(
+                student=user,
+                content_type=content_type,
+                object_id__in=qs.values_list('pk', flat=True),
+            )
+        }
+        for resource in qs:
+            resource.progress_obj = progress_map.get(str(resource.pk))
+    else:
+        for resource in qs:
+            resource.progress_obj = None
+
+    return qs

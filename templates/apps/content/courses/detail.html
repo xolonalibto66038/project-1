@@ -23,7 +23,7 @@
           {# Mark complete button — students only #}
           {% if user.is_authenticated and user.is_student %}
           <form method="post"
-                action="{% url 'content:course-mark-completed' course.pk %}"
+                action="{% url 'content:course:course-mark-completed' course.pk %}"
                 class="mb-0 d-inline">
             {% csrf_token %}
             {% if progress and progress.is_completed %}
@@ -152,6 +152,13 @@
             <div class="text-center p-2 border rounded">
               <div class="font-weight-bold text-danger">{{ course.series_count }}</div>
               <small class="text-muted">{% trans "Series" %}</small>
+            </div>
+          </div>
+          
+          <div class="col-6 col-md-2 mb-2">
+            <div class="text-center p-2 border rounded">
+              <div class="font-weight-bold text-danger">{{ course.videos_count }}</div>
+              <small class="text-muted">{% trans "Videos" %}</small>
             </div>
           </div>
 

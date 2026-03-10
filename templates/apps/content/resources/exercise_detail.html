@@ -162,7 +162,7 @@
               {% trans "Rate this exercise" %}
             </h6>
             <div class="rating-stars d-flex justify-content-center"
-                 data-url="{% url 'feedback:rate' 'content' 'resource' resource.pk %}"
+                 data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
                  data-user-rating="{{ user_rating.value|default:'0' }}">
               {% for i in "12345" %}
               <button type="button"

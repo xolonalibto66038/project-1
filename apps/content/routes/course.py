@@ -8,8 +8,9 @@ from ..views.course import (
     # CourseListView,
     # CourseResourcesView,
     # CourseUpdateView,
-    # CourseVideosView,
-    # MarkCourseCompletedView,
+    CourseVideosView,
+    CourseResourceListView,
+    MarkCourseCompletedView,
 )
 
 app_name = "course"
@@ -22,16 +23,21 @@ urlpatterns = [
     # path(
     #     "<uuid:pk>/resources/", CourseResourcesView.as_view(), name="course-resources"
     # ),
-    # path(
-    #     "<uuid:pk>/videos/",
-    #     CourseVideosView.as_view(),
-    #     name="course-videos",
-    # ),
-    # path(
-    #     "<uuid:pk>/mark-completed/",
-    #     MarkCourseCompletedView.as_view(),
-    #     name="course-mark-completed",
-    # ),
+    path(
+        'courses/<uuid:pk>/resources/<str:resource_slug>/',
+        CourseResourceListView.as_view(),
+        name='course-resources',
+    ),
+    path(
+        "<uuid:pk>/videos/",
+        CourseVideosView.as_view(),
+        name="course-videos",
+    ),
+    path(
+        "<uuid:pk>/mark-completed/",
+        MarkCourseCompletedView.as_view(),
+        name="course-mark-completed",
+    ),
     # path("<uuid:pk>/update/", CourseUpdateView.as_view(), name="course-update"),
     # path("<uuid:pk>/delete/", CourseDeleteView.as_view(), name="course-delete"),
 ]

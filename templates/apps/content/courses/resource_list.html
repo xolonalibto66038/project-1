@@ -1,0 +1,155 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ course.title }} — {{ resource_type_title }}{% endblock %}
+
+{% block content %}
+{% include "apps/content/courses/_header.html" with active_tab=active_tab %}
+
+<section class="content">
+<div class="container-fluid">
+
+  {# ── Filters ── #}
+  <div class="card card-outline card-secondary mb-3">
+    <div class="card-body py-2">
+      <form method="get" class="form-inline flex-wrap" style="gap:8px;">
+
+        <input type="text"
+               name="q"
+               value="{{ filter_q }}"
+               placeholder="{% trans 'Search...' %}"
+               class="form-control form-control-sm">
+
+        <select name="difficulty" class="form-control form-control-sm">
+          <option value="">{% trans "All difficulties" %}</option>
+          {% for val, label in difficulty_choices %}
+          <option value="{{ val }}" {% if filter_difficulty == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+
+        {# has_solution only relevant for exercises/series #}
+        {% if resource_type == 'exercise' or resource_type == 'series' %}
+        <select name="has_solution" class="form-control form-control-sm">
+          {% for val, label in has_solution_choices %}
+          <option value="{{ val }}" {% if filter_has_solution == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+        {% endif %}
+
+        {% if user.is_authenticated and user.is_student %}
+        <select name="completed" class="form-control form-control-sm">
+          <option value="">{% trans "All" %}</option>
+          <option value="1" {% if filter_completed == '1' %}selected{% endif %}>
+            {% trans "Completed" %}
+          </option>
+          <option value="0" {% if filter_completed == '0' %}selected{% endif %}>
+            {% trans "Not completed" %}
+          </option>
+        </select>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fas fa-search mr-1"></i>{% trans "Filter" %}
+        </button>
+
+        {% if filter_q or filter_difficulty or filter_has_solution or filter_completed %}
+        <a href="?" class="btn btn-outline-secondary btn-sm">
+          <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+        </a>
+        {% endif %}
+
+      </form>
+    </div>
+  </div>
+
+  {# ── Resource grid ── #}
+  {% if resources %}
+  <div class="row">
+    {% for resource in resources %}
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card card-outline card-primary h-100">
+
+        <div class="card-header">
+          <h3 class="card-title font-weight-bold text-truncate">
+            <i class="{{ resource_type_icon }} text-primary mr-2"></i>
+            {{ resource.title }}
+          </h3>
+          <div class="card-tools">
+            {% if resource.progress_obj and resource.progress_obj.is_completed %}
+            <span class="badge badge-success">
+              <i class="fas fa-check-circle mr-1"></i>{% trans "Done" %}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-body">
+
+          <div class="d-flex flex-wrap mb-2" style="gap:5px;">
+
+            <span class="badge badge-warning">
+              {{ resource.get_difficulty_display }}
+            </span>
+
+            {% if resource.has_solution %}
+            <span class="badge badge-success">
+              <i class="fas fa-check mr-1"></i>{% trans "Solution" %}
+            </span>
+            {% endif %}
+
+            {% if resource.total_marks %}
+            <span class="badge badge-info">
+              {{ resource.total_marks }} {% trans "marks" %}
+            </span>
+            {% endif %}
+
+            {% if resource.duration_minutes %}
+            <span class="badge badge-secondary">
+              <i class="far fa-clock mr-1"></i>{{ resource.duration_minutes }} min
+            </span>
+            {% endif %}
+
+          </div>
+
+        </div>
+
+        <div class="card-footer text-right">
+          <a href="{% url 'content:resource:resource-detail' resource.pk %}"
+             class="btn btn-primary btn-sm">
+            <i class="fas fa-eye mr-1"></i>{% trans "View" %}
+          </a>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Pagination #}
+  {% if is_paginated %}
+  <div class="d-flex justify-content-center mt-3">
+    {% include "includes/pagination.html" with querystring=querystring %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="card">
+    <div class="card-body text-center py-5 text-muted">
+      <i class="{{ resource_type_icon }} fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+      <h5 class="font-weight-bold">
+        {% blocktrans with title=resource_type_title %}No {{ title }} yet{% endblocktrans %}
+      </h5>
+      <p class="small mb-0">
+        {% trans "Resources will appear here once added." %}
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+</section>
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends "layouts/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ course.title }} — {% trans "Videos" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Playlist ── */
+  .playlist {
+    max-height: 560px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 transparent;
+  }
+  .playlist::-webkit-scrollbar       { width: 4px; }
+  .playlist::-webkit-scrollbar-track { background: transparent; }
+  .playlist::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 4px; }
+
+  .playlist-item {
+    cursor: pointer;
+    transition: background .15s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    color: inherit;
+  }
+  .playlist-item:hover {
+    background: #f4f6f9;
+    text-decoration: none;
+    color: inherit;
+  }
+  .playlist-item.active {
+    background: #e8f0fe;
+    border-left-color: #007bff;
+  }
+  .playlist-item.active .video-index {
+    background: #007bff;
+    color: #fff;
+  }
+
+  .video-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #e9ecef;
+    font-size: .72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #495057;
+    transition: background .15s ease, color .15s ease;
+  }
+
+  .video-title {
+    font-weight: 600;
+    font-size: .875rem;
+    line-height: 1.3;
+    color: #212529;
+  }
+  .video-duration {
+    font-size: .75rem;
+    color: #6c757d;
+    margin-top: 2px;
+  }
+
+  /* ── Player ── */
+  .player-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #000;
+  }
+  .player-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── Empty state ── */
+  .empty-player {
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #adb5bd;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "apps/content/courses/_header.html" with active_tab="videos" %}
+
+<section class="content">
+<div class="container-fluid">
+
+  {% if not videos %}
+  {# ── Empty state — full width ── #}
+  <div class="card">
+    <div class="card-body text-center py-5 text-muted">
+      <i class="fas fa-play-circle fa-4x mb-3 d-block" style="color:#dee2e6;"></i>
+      <h5 class="font-weight-bold">{% trans "No videos yet" %}</h5>
+      <p class="mb-0 small">{% trans "Videos for this course will appear here once added." %}</p>
+    </div>
+  </div>
+
+  {% else %}
+
+  <div class="row">
+
+    {# ── LEFT: playlist ── #}
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="card card-outline card-primary h-100">
+
+        <div class="card-header">
+          <h3 class="card-title font-weight-bold">
+            <i class="fas fa-play-circle text-primary mr-2"></i>
+            {% trans "Videos" %}
+          </h3>
+          <div class="card-tools">
+            <span class="badge badge-primary">{{ videos_count }}</span>
+          </div>
+        </div>
+
+        <div class="card-body p-0 playlist">
+          {% for video in videos %}
+          <a href="?video={{ video.pk }}"
+             class="d-flex align-items-start p-3 playlist-item border-bottom
+                    {% if video.pk == current_video.pk %}active{% endif %}">
+
+            {# Index bubble #}
+            <span class="video-index mr-2 mt-1">{{ forloop.counter }}</span>
+
+            {# Info #}
+            <div class="flex-grow-1 min-width-0">
+              <div class="video-title">{{ video.title }}</div>
+              {% if video.duration %}
+              <div class="video-duration">
+                <i class="far fa-clock mr-1"></i>{{ video.duration }}
+              </div>
+              {% endif %}
+            </div>
+
+            {# Completed check #}
+            {% if video.is_completed %}
+            <i class="fas fa-check-circle text-success ml-2 mt-1" style="flex-shrink:0;"></i>
+            {% elif video.pk == current_video.pk %}
+            <i class="fas fa-circle text-primary ml-2 mt-1" style="flex-shrink:0; font-size:.5rem;"></i>
+            {% endif %}
+
+          </a>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+
+    {# ── RIGHT: player ── #}
+    <div class="col-lg-9 col-md-8 mb-4">
+      <div class="card card-outline card-primary">
+
+        <div class="card-header">
+          <h3 class="card-title font-weight-bold">
+            <i class="fas fa-play-circle text-primary mr-2"></i>
+            {{ current_video.title }}
+          </h3>
+          {% if current_video.duration %}
+          <div class="card-tools">
+            <span class="text-muted small">
+              <i class="far fa-clock mr-1"></i>{{ current_video.duration }}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="card-body">
+
+          {% if current_video %}
+
+          {# 16:9 responsive iframe #}
+          <div class="player-wrapper mb-3">
+            <iframe
+              src="https://www.youtube.com/embed/{{ current_video.youtube_id }}?rel=0&modestbranding=1&enablejsapi=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen>
+            </iframe>
+          </div>
+
+          {# Prev / Next navigation #}
+          {% comment %} {% with vlist=videos|list %}
+          <div class="d-flex justify-content-between align-items-center mt-3">
+
+            {# Previous #}
+            {% for v in videos %}
+              {% if v.pk == current_video.pk and not forloop.first %}
+                {# Can't do prev easily in Django template — handled via JS below #}
+              {% endif %}
+            {% endfor %}
+
+            <div id="nav-prev"></div>
+            <div id="nav-next"></div>
+
+          </div>
+          {% endwith %} {% endcomment %}
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="nav-prev"></div>
+            <div id="nav-next"></div>
+          </div>
+
+          {% else %}
+          <div class="empty-player">
+            <i class="fas fa-play-circle fa-3x mb-3"></i>
+            <p class="mb-0">{% trans "Select a video to start watching" %}</p>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+  {% endif %}
+
+</div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+
+  // ── Build ordered video list from playlist items ──────────────
+  const items = Array.from(
+    document.querySelectorAll('.playlist-item')
+  ).map(a => ({
+    url:   a.getAttribute('href'),
+    title: a.querySelector('.video-title')?.textContent?.trim() || '',
+  }));
+
+  const activeIndex = items.findIndex(
+    item => item.url === window.location.search
+            || document.querySelector('.playlist-item.active')
+               ?.getAttribute('href') === item.url
+  );
+
+  // ── Prev / Next buttons ───────────────────────────────────────
+  const prevWrap = document.getElementById('nav-prev');
+  const nextWrap = document.getElementById('nav-next');
+
+  if (prevWrap && nextWrap && items.length > 1) {
+    const prev = items[activeIndex - 1];
+    const next = items[activeIndex + 1];
+
+    if (prev) {
+      prevWrap.innerHTML = `
+        <a href="${prev.url}" class="btn btn-outline-secondary btn-sm">
+          <i class="fas fa-chevron-left mr-1"></i>{% trans "Previous" %}
+        </a>`;
+    }
+
+    if (next) {
+      nextWrap.innerHTML = `
+        <a href="${next.url}" class="btn btn-primary btn-sm">
+          {% trans "Next" %} <i class="fas fa-chevron-right ml-1"></i>
+        </a>`;
+    }
+  }
+
+  // ── Auto-scroll active playlist item into view ────────────────
+  const activeItem = document.querySelector('.playlist-item.active');
+  if (activeItem) {
+    activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+})();
+</script>
+{% endblock %}
