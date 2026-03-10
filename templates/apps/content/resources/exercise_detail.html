@@ -54,6 +54,125 @@
 
 <section class="content">
   <div class="container-fluid">
+
+    <!-- ===================== RESOURCE INFO CARD ===================== -->
+    <div class="card card-outline card-primary mb-4">
+      <div class="card-body">
+
+        <!-- METADATA BADGES -->
+        <div class="d-flex flex-wrap mb-2">
+          <span class="badge badge-info mr-2 mb-1">
+            Type: {{ resource.get_type_display }}
+          </span>
+          <span class="badge badge-warning mr-2 mb-1">
+            Difficulty: {{ resource.get_difficulty_level_display }}
+          </span>
+          {% if resource.rating_avg %}
+          <span class="badge badge-success mr-2 mb-1">
+            ⭐ {{ resource.get_rating_display }} ({{ resource.rating_count }} ratings)
+          </span>
+          {% else %}
+          <span class="badge badge-secondary mr-2 mb-1">No ratings yet</span>
+          {% endif %}
+          <span class="badge badge-light border mr-2 mb-1">
+            👁 Views: {{ resource.view_count }}
+          </span>
+          <span class="badge badge-light border mr-2 mb-1">
+            ⬇ Downloads: {{ resource.download_count }}
+          </span>
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+
+          {% if user.is_authenticated and user.is_student %}
+
+            <!-- RATING STARS -->
+            <!-- <div class="d-flex align-items-center mr-3">
+              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
+              <div class="rating-stars d-inline-block">
+                {% for i in "12345" %}
+                  <i class="far fa-star star-icon"
+                    data-value="{{ i }}"
+                    style="cursor:pointer; font-size:1.2rem; color:#ffc107;">
+                  </i>
+                {% endfor %}
+              </div>
+            </div> -->
+            <!-- ===================== RATING ===================== -->
+            <div class="d-flex align-items-center mr-3">
+              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
+              <div class="rating-stars d-inline-flex" 
+                  data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
+                  data-user-rating="{{ user_rating.value|default:'0' }}">
+                {% for i in "12345" %}
+                  <button type="button"
+                          class="btn btn-link p-0 border-0 star-btn mx-1"
+                          data-value="{{ forloop.counter }}"
+                          title="{% trans 'Rate' %} {{ forloop.counter }}/5"
+                          style="font-size: 1.3rem; line-height:1;">
+                    <i class="{% if user_rating and forloop.counter <= user_rating.value %}fas{% else %}far{% endif %} fa-star text-warning"></i>
+                  </button>
+                {% endfor %}
+              </div>
+              <span class="ml-2 small text-muted rating-feedback"></span>
+            </div>
+
+            <!-- BOOKMARK BUTTON -->
+            <button
+              id="bookmark-btn"
+              data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
+              data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}"
+              class="btn {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2"
+            >
+              <i class="fas fa-bookmark mr-1"></i>
+              <span>{% if is_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
+            </button>
+
+          {% else %}
+
+            <!-- GUEST: STATIC RATING DISPLAY -->
+            <div class="d-flex align-items-center mr-3">
+              <span>⭐ {{ resource.get_rating_display }}</span>
+              <span class="text-muted ml-1">({{ resource.rating_count }})</span>
+            </div>
+
+          {% endif %}
+
+          <!-- DOWNLOAD BUTTON -->
+          {% if resource.file %}
+            <a href="{% url 'content:resource:resource-download' resource.pk %}"
+              class="btn btn-danger"
+              target="_blank"
+              rel="noopener noreferrer">
+              <i class="fas fa-file-download mr-1"></i>
+              {% trans "Download File" %}
+            </a>
+          {% endif %}
+
+          {% if user.is_authenticated and user.is_student %}
+            <form method="post"
+                      action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
+                      class="mb-0 d-inline">
+                  {% csrf_token %}
+              {% if not progress.is_completed %}
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    {% trans "Mark as completed" %}
+                  </button>
+              {% else %}
+                <button type="submit" class="btn btn-outline-success">
+                  <i class="fas fa-check-circle mr-1"></i>
+                  {% trans "Completed" %}
+                </button>
+              {% endif %}
+            </form>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+
     <div class="row">
 
       {# ── Left: exercise content ── #}
@@ -194,21 +313,6 @@
               <i class="fas fa-lightbulb mr-2"></i>
               {% trans "View Solution" %}
             </a>
-            {% comment %} <button class="btn btn-outline-primary btn-block"
-                    data-toggle="collapse"
-                    data-target="#solutionCollapse">
-              <i class="fas fa-lightbulb mr-2"></i>
-              {% trans "View Solution" %}
-            </button>
-            <div id="solutionCollapse" class="collapse mt-3">
-              <div class="card card-outline card-info">
-                <div class="card-body text-center">
-                  <img src="{{ resource.solution_file.url }}"
-                       class="img-fluid rounded shadow-sm"
-                       alt="{% trans 'Solution' %}">
-                </div>
-              </div>
-            </div> {% endcomment %}
             {% else %}
             <div class="alert alert-secondary text-sm text-center mb-0">
               <i class="fas fa-clock mr-1"></i>

@@ -1,3 +1,7 @@
+import os
+import hashlib
+import mimetypes
+
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -110,6 +114,44 @@ class Resource(TimeStampModel):
         help_text=_("Indicates whether this resource has an associated solution file"),
     )
 
+    # Automatically populated file metadata fields
+    file_size = models.PositiveIntegerField(
+        editable=False,
+        null=True,
+        blank=True,
+        verbose_name=_("File Size (bytes)"),
+        help_text=_("File size in bytes, automatically calculated"),
+    )
+    original_filename = models.CharField(
+        max_length=255,
+        editable=False,
+        blank=True,
+        verbose_name=_("Original Filename"),
+        help_text=_("Original name of the uploaded file"),
+    )
+    file_extension = models.CharField(
+        max_length=10,
+        editable=False,
+        blank=True,
+        verbose_name=_("File Extension"),
+        help_text=_("File extension (without dot)"),
+    )
+    file_mimetype = models.CharField(
+        max_length=100,
+        editable=False,
+        blank=True,
+        verbose_name=_("MIME Type"),
+        help_text=_("File MIME type for proper handling"),
+    )
+    file_hash = models.CharField(
+        max_length=64,
+        editable=False,
+        blank=True,
+        verbose_name=_("File Hash (SHA-256)"),
+        help_text=_("SHA-256 hash for file integrity verification"),
+        db_index=True,  # Index for duplicate detection
+    )
+
     metadata = models.JSONField(
         default=dict,
         blank=True,
@@ -189,7 +231,87 @@ class Resource(TimeStampModel):
         if not self.slug:
             parent_slug = self.course.slug if self.course else self.subject.slug
             self.slug = slugify(f"{parent_slug}-{self.resource_type}-{self.title}")
+        
+        # Extract custom parameters
+        skip_validation = kwargs.pop("skip_validation", False)
+
+        if not skip_validation:
+            self.full_clean()
+
+        file_changed = False
+
+        if self.pk:
+            old = self.__class__.objects.filter(pk=self.pk).only("file").first()
+            if old and old.file != self.file:
+                file_changed = True
+        else:
+            file_changed = bool(self.file)
+
         super().save(*args, **kwargs)
+
+        if file_changed and self.file:
+            self._process_file_metadata()
+            super().save(
+                update_fields=[
+                    "file_size",
+                    "original_filename",
+                    "file_extension",
+                    "file_mimetype",
+                    "file_hash",
+                ]
+            )
+
+    def delete(self, *args, **kwargs):
+        """Delete file when model instance is deleted"""
+        if self.file and os.path.isfile(self.file.path):
+            # os.remove(self.file.path)
+            self.file.delete(save=False)
+        if self.solution_file and os.path.isfile(self.solution_file.path):
+            # os.remove(self.solution_file.path)
+            self.solution_file.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def _process_file_metadata(self):
+        """Extract and store file metadata."""
+        try:
+            # Basic file information
+            self.file_size = self.file.size
+            self.original_filename = os.path.basename(self.file.name)
+
+            # Extract extension
+            _, ext = os.path.splitext(self.original_filename)
+            self.file_extension = ext.lstrip(".").lower()
+
+            # Determine MIME type
+            # mime = magic.from_buffer(self.file.read(2048), mime=True)
+            # self.file.seek(0)
+            self.file_mimetype = (
+                mimetypes.guess_type(self.original_filename)[0]
+                or "application/octet-stream"
+            )
+
+            # Calculate file hash for integrity checking
+            self._calculate_file_hash()
+
+        except Exception as ex:
+            # logger.error(f"Error processing file metadata for {self.id}: {e}")
+            raise ValidationError(_(f"Error processing uploaded file. Error : {str(ex)}"))
+
+    def _calculate_file_hash(self):
+        """Calculate SHA-256 hash of the file content."""
+        sha256_hash = hashlib.sha256()
+
+        # Reset file pointer to beginning
+        self.file.seek(0)
+
+        # Read file in chunks to handle large files efficiently
+        for chunk in self.file.chunks():
+            sha256_hash.update(chunk)
+
+        self.file_hash = sha256_hash.hexdigest()
+
+        # Reset file pointer for any subsequent operations
+        self.file.seek(0)
 
     def __str__(self):
         return f"[{self.get_resource_type_display()}] {self.title}"
@@ -209,7 +331,7 @@ class Resource(TimeStampModel):
                         ) % {"term": self.course.get_term_display()}
                     }
                 )
-        
+
     # ── Metadata helpers ──
 
     @property

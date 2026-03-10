@@ -46,7 +46,7 @@ class VideoResourceAdmin(admin.ModelAdmin):
             'fields': ('is_active',),
         }),
         (_('Tags'), {
-            'fields': ('tags',),
+            'fields': ('tags', 'created_by'),
             'classes': ('collapse',),
         }),
         (_('Timestamps'), {

@@ -141,13 +141,33 @@
 
             {# Info #}
             <div class="flex-grow-1 min-width-0">
+
+              <div class="video-title">
+                {% if video.created_by %}{{ video.title }}{% else %}{% trans "Untitled" %}{% endif %}
+              </div>
+
+              <div class="small text-muted">
+                <i class="fas fa-user mr-1"></i>
+                {% if video.created_by %}{{ video.created_by.get_full_name }}{% else %}{% trans "-" %}{% endif %}
+              </div>
+
+              
+              <div class="video-duration">
+                <i class="far fa-clock mr-1"></i>{% if video.duration %}{{ video.duration }}{% else %}{% trans "-" %}{% endif %}
+              </div>
+              
+
+            </div>
+
+            {# Info #}
+            {% comment %} <div class="flex-grow-1 min-width-0">
               <div class="video-title">{{ video.title }}</div>
               {% if video.duration %}
               <div class="video-duration">
                 <i class="far fa-clock mr-1"></i>{{ video.duration }}
               </div>
               {% endif %}
-            </div>
+            </div> {% endcomment %}
 
             {# Completed check #}
             {% if video.is_completed %}
