@@ -1,11 +1,62 @@
+from django.http import Http404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
-from apps.content.choices import Term
+from apps.content.choices import DifficultyLevel, ResourceType, Term
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
-from ..selectors import get_grade_subject_by_pk
+from ..selectors import (
+    get_grade_subject_by_pk,
+    get_grade_subject_counts_by_quarter,
+    get_grade_subject_resources,
+)
 from ..services import build_grade_subject_courses_page
+
+SUBJECT_RESOURCE_TYPE_CONFIG = {
+    "tests": {
+        "resource_type": ResourceType.TEST,
+        "tab": "tests",
+        "title": _("Tests"),
+        "icon": "fas fa-clipboard-check",
+    },
+    "exams": {
+        "resource_type": ResourceType.EXAM,
+        "tab": "exams",
+        "title": _("Exams"),
+        "icon": "fas fa-file-alt",
+    },
+    "past-papers": {
+        "resource_type": ResourceType.PAST_PAPER,
+        "tab": "past-papers",
+        "title": _("Past Papers"),
+        "icon": "fas fa-file-signature",
+    },
+    "mock-exams": {
+        "resource_type": ResourceType.MOCK_EXAM,
+        "tab": "mock-exams",
+        "title": _("Mock Exams"),
+        "icon": "fas fa-stopwatch",
+    },
+    "textbooks": {
+        "resource_type": ResourceType.TEXTBOOK,
+        "tab": "textbooks",
+        "title": _("Textbooks"),
+        "icon": "fas fa-book-open",
+    },
+    "foreign-books": {
+        "resource_type": ResourceType.FOREIGN_BOOK,
+        "tab": "foreign-books",
+        "title": _("Foreign Books"),
+        "icon": "fas fa-book",
+    },
+    "study-guides": {
+        "resource_type": ResourceType.STUDY_GUIDE,
+        "tab": "study-guides",
+        "title": _("Study Guides"),
+        "icon": "fas fa-book-reader",
+    },
+}
 
 
 class GradeSubjectDetailView(DetailView):
@@ -13,28 +64,22 @@ class GradeSubjectDetailView(DetailView):
     template_name = "apps/curriculum/grade_subjects/detail.html"
     context_object_name = "grade_subject"
 
-    def get_term(self):
-        term = self.kwargs.get("term")
-        if term and term in Term.values:
-            return term
-        return None
-
     def get_object(self, queryset=None):
         if not hasattr(self, "_grade_subject"):
-            self._grade_subject = get_grade_subject_by_pk(
-                pk=self.kwargs["pk"],
-                term=self.get_term(),
-            )
+            # No term filter here — we want the unfiltered object for breadcrumbs
+            self._grade_subject = get_grade_subject_by_pk(pk=self.kwargs["pk"])
         return self._grade_subject
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         gs = self.get_object()
-        term = self.get_term()
 
         grade = gs.grade
         level = grade.level
         subject = gs.subject
+
+        # One DB hit per term (3 total) — returns counts for all quarters
+        counts_by_quarter = get_grade_subject_counts_by_quarter(pk=self.kwargs["pk"])
 
         context.update(
             {
@@ -42,65 +87,22 @@ class GradeSubjectDetailView(DetailView):
                 "level": level,
                 "subject": subject,
                 "specialty": gs.specialty,
-                "term": term,
-                "term_display": dict(Term.choices).get(term, "") if term else "",
                 "quarters": Term.choices,
-                "current_quarter": term or Term.FIRST,
+                "current_quarter": Term.FIRST,
+                "counts_by_quarter": counts_by_quarter,
                 "is_student": (
                     self.request.user.is_authenticated
                     and getattr(self.request.user, "is_student", False)
                 ),
-                # ── Counts passed to template ──
-                "courses_count": gs.courses_count,
-                "quizzes_count": 0,  # assessment app — wire up when ready
-                # Course resource tabs
-                "course_resource_tabs": [
-                    (
-                        "lessons",
-                        "Lessons",
-                        "fas fa-chalkboard-teacher",
-                        gs.lessons_count,
-                    ),
-                    ("summaries", "Summaries", "fas fa-align-left", gs.summaries_count),
-                    (
-                        "homeworks",
-                        "Homeworks",
-                        "fas fa-pencil-ruler",
-                        gs.homeworks_count,
-                    ),
-                    ("exercises", "Exercises", "fas fa-pencil-alt", gs.exercises_count),
-                    ("notes", "Notes", "fas fa-sticky-note", gs.notes_count),
-                    ("series", "Series", "fas fa-layer-group", gs.series_count),
-                ],
-                # Subject resource tabs
+                # Subject resource tab config — slugs + icons only, counts come from counts_by_quarter
                 "subject_resource_tabs": [
-                    ("tests", "Tests", "fas fa-clipboard-check", gs.tests_count),
-                    ("exams", "Exams", "fas fa-file-alt", gs.exams_count),
-                    (
-                        "past-papers",
-                        "Past Papers",
-                        "fas fa-file-signature",
-                        gs.past_papers_count,
-                    ),
-                    (
-                        "mock-exams",
-                        "Mock Exams",
-                        "fas fa-stopwatch",
-                        gs.mock_exams_count,
-                    ),
-                    ("textbooks", "Textbooks", "fas fa-book-open", gs.textbooks_count),
-                    (
-                        "foreign-books",
-                        "Foreign Books",
-                        "fas fa-book",
-                        gs.foreign_books_count,
-                    ),
-                    (
-                        "study-guides",
-                        "Study Guides",
-                        "fas fa-book-reader",
-                        gs.study_guides_count,
-                    ),
+                    ("tests", "Tests", "fas fa-clipboard-check"),
+                    ("exams", "Exams", "fas fa-file-alt"),
+                    ("past-papers", "Past Papers", "fas fa-file-signature"),
+                    ("mock-exams", "Mock Exams", "fas fa-stopwatch"),
+                    ("textbooks", "Textbooks", "fas fa-book-open"),
+                    ("foreign-books", "Foreign Books", "fas fa-book"),
+                    ("study-guides", "Study Guides", "fas fa-book-reader"),
                 ],
             }
         )
@@ -133,5 +135,61 @@ class GradeSubjectCoursesByQuarterView(GradeSubjectQuarterMixin, ListView):
         qp = self.request.GET.copy()
         qp.pop("page", None)
         context["querystring"] = qp.urlencode()
+
+        return context
+
+
+class GradeSubjectResourceListView(GradeSubjectQuarterMixin, ListView):
+    """
+    Generic view for all subject resource types (tests, exams, past papers, etc.)
+    Driven by `resource_slug` URL kwarg — matches keys in SUBJECT_RESOURCE_TYPE_CONFIG.
+
+    URL example:
+        path('subjects/<uuid:pk>/resources/<str:resource_slug>/',
+             SubjectResourceListView.as_view(),
+             name='subject-resources'),
+    """
+
+    template_name = "apps/curriculum/subjects/resource_list.html"
+    context_object_name = "resources"
+    paginate_by = 9
+
+    def _get_config(self):
+        slug = self.kwargs.get("resource_slug")
+        config = SUBJECT_RESOURCE_TYPE_CONFIG.get(slug)
+        if not config:
+            raise Http404(f"Unknown subject resource type: {slug}")
+        return config
+
+    def get_queryset(self):
+        config = self._get_config()
+        return get_grade_subject_resources(
+            grade_subject=self.grade_subject,
+            resource_type=config["resource_type"],
+            filters=self.request.GET,
+            user=self.request.user,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        config = self._get_config()
+
+        qp = self.request.GET.copy()
+        qp.pop("page", None)
+
+        context.update(
+            {
+                "active_tab": config["tab"],
+                "resource_type_title": config["title"],
+                "resource_type_icon": config["icon"],
+                "resource_type": config["resource_type"],
+                "difficulty_choices": DifficultyLevel.choices,
+                "term_choices": Term.choices,
+                "querystring": qp.urlencode(),
+                "filter_q": self.request.GET.get("q", ""),
+                "filter_difficulty": self.request.GET.get("difficulty", ""),
+                "filter_term": self.request.GET.get("term", ""),
+            }
+        )
 
         return context

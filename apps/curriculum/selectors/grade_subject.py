@@ -1,12 +1,11 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Q
 
-from apps.content.choices import ResourceType
-from apps.content.models import Course
+from apps.content.choices import ResourceStatus, ResourceType, Term
+from apps.content.models import Course, Resource
 from apps.progress.models import ContentProgress
 
 from ..models import GradeSubject
-from .subject import resolve_term
 
 
 def get_grade_subject_by_pk(pk, term=None):
@@ -28,6 +27,21 @@ def get_grade_subject_by_pk(pk, term=None):
                 filter=Q(courses__is_active=True) & term_filter,
                 distinct=True,
             ),
+            quizzes_count=Count(
+                "quizzes",
+                filter=(Q(courses__grade_subject_id=pk) & term_filter)
+                | (Q(courses__chapter__grade_subject_id=pk) & term_filter),
+                distinct=True,
+            ),
+            # quizzes_count=Quiz.objects.filter(
+            #     is_published=True,
+            # )
+            # .filter(
+            #     Q(course__grade_subject_id=pk, course__term=term)
+            #     | Q(course__chapter__grade_subject_id=pk, course__chapter__term=term)
+            # )
+            # .distinct()
+            # .count(),
             # ── Course resources (via course) ──
             lessons_count=Count(
                 "courses__resources",
@@ -235,3 +249,58 @@ def get_grade_subject_courses_by_quarter(grade_subject, quarter: str, user=None)
     for course in courses:
         course.progress_obj = None
     return courses
+
+
+def get_grade_subject_counts_by_quarter(pk):
+    """
+    Returns counts for all resource types grouped by term.
+    Shape: {
+        'first':  {courses, tests, exams, past_papers, mock_exams, textbooks, foreign_books, study_guides},
+        'second': {...},
+        'third':  {...},
+    }
+    """
+    result = {}
+
+    for term in Term.values:
+        gs = get_grade_subject_by_pk(pk=pk, term=term)
+        result[term] = {
+            "courses": gs.courses_count,
+            "quizzes": gs.quizzes_count,
+            "tests": gs.tests_count,
+            "exams": gs.exams_count,
+            "past_papers": gs.past_papers_count,
+            "mock_exams": gs.mock_exams_count,
+            "textbooks": gs.textbooks_count,
+            "foreign_books": gs.foreign_books_count,
+            "study_guides": gs.study_guides_count,
+        }
+
+    return result
+
+
+def get_grade_subject_resources(grade_subject, resource_type, filters=None, user=None):
+    """
+    Generic resource selector for any subject resource type.
+    Supports filters: q, difficulty, term.
+    Subject resources are NOT linked to a course — they belong to Subject directly.
+    """
+    qs = Resource.objects.filter(
+        grade_subject=grade_subject,
+        resource_type=resource_type,
+        status=ResourceStatus.PUBLISHED,
+    ).order_by("term", "order")
+
+    if filters:
+        q = filters.get("q", "").strip()
+        difficulty = filters.get("difficulty", "")
+        term = filters.get("term", "")
+
+        if q:
+            qs = qs.filter(title__icontains=q)
+        if difficulty:
+            qs = qs.filter(difficulty=difficulty)
+        if term:
+            qs = qs.filter(term=term)
+
+    return qs

@@ -47,7 +47,15 @@ class QuizAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Basic Information",
-            {"fields": ("title", "description", "instructions", "subject", "course")},
+            {
+                "fields": (
+                    "title",
+                    "description",
+                    "instructions",
+                    "grade_subject",
+                    "course",
+                )
+            },
         ),
         (
             "Quiz Settings",

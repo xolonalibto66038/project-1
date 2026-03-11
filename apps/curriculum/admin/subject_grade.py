@@ -13,6 +13,7 @@ class GradeSubjectAdmin(admin.ModelAdmin):
         "grade",
         "subject",
         "specialty",
+        "is_active",
         "level_display",
         "edit_button",
         "delete_button",
@@ -21,6 +22,7 @@ class GradeSubjectAdmin(admin.ModelAdmin):
     list_filter = ("grade__level", "grade", "subject", "specialty")
     search_fields = ("grade__name", "subject__name", "specialty__name")
     ordering = ("grade__level__order", "grade__order", "subject__name")
+    list_editable = ("is_active",)
     list_per_page = 30
     list_max_show_all = 200
     save_on_top = True

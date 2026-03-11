@@ -64,8 +64,8 @@
               {{ level.name }}
             </a>
           </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}">
+          <li class="breadcrumb-item"> 
+            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}{% if grade_subject.specialty %}?specialty={{ grade_subject.specialty.pk }}{% endif %}">
               {{ grade.name }} {% if grade_subject.specialty %}| {{ grade_subject.specialty.short_name }}{% endif %}
             </a>
           </li>
@@ -239,51 +239,52 @@
 
               {% for q, label in quarters %}
               <div class="tab-pane fade {% if current_quarter == q %}show active{% endif %}" id="{{ q }}">
-
+                {% with counts=counts_by_quarter|get_item:q %}
                 <div class="row">
-                {# Courses #}
-                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                  <a href="{% url 'curriculum:grade-subject:grade-subject-courses-by-quarter' pk=grade_subject.pk  quarter=q %}"
-                      class="text-decoration-none d-block h-100"> 
-                    <div class="card h-100 border-0 text-center resource-card">
-                      <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="fas fa-layer-group fa-2x resource-icon mb-3"></i>
-                        <h6 class="font-weight-bold text-dark mb-0">{% trans "Courses" %}</h6>
-                        <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">{{ courses_count }}</span>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-
-                {# QUIZZES #}
-                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                  <a href="#"
-                      class="text-decoration-none d-block h-100">
-                    <div class="card h-100 border-0 text-center resource-card">
-                      <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="fas fa-brain fa-2x resource-icon mb-3"></i>
-                        <h6 class="font-weight-bold text-dark mb-0">{% trans "Quizzes" %}</h6>
-                        <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">0</span>
-                      </div>
-                    </div> 
-                  </a>
-                </div>
-
-                {% for slug, label, icon, count in subject_resource_tabs %}
-                <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
-                    <a href="{% url 'curriculum:subject:subject-resources' pk=subject.pk resource_slug=slug %}"
-                       class="text-decoration-none d-block h-100">
+                  {# Courses #}
+                  <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
+                    <a href="{% url 'curriculum:grade-subject:grade-subject-courses-by-quarter' pk=grade_subject.pk  quarter=q %}"
+                        class="text-decoration-none d-block h-100"> 
                       <div class="card h-100 border-0 text-center resource-card">
                         <div class="card-body d-flex flex-column justify-content-center">
-                          <i class="{{ icon }} fa-2x resource-icon mb-3"></i>
-                          <h6 class="font-weight-bold text-dark mb-0">{{ label }}</h6>
-                          <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">{{ count }}</span>
+                          <i class="fas fa-layer-group fa-2x resource-icon mb-3"></i>
+                          <h6 class="font-weight-bold text-dark mb-0">{% trans "Courses" %}</h6>
+                          <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">{{ counts.courses }}</span>
                         </div>
                       </div>
                     </a>
                   </div>
-                {% endfor %}
+
+                  {# QUIZZES #}
+                  <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
+                    <a href="#"
+                        class="text-decoration-none d-block h-100">
+                      <div class="card h-100 border-0 text-center resource-card">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                          <i class="fas fa-brain fa-2x resource-icon mb-3"></i>
+                          <h6 class="font-weight-bold text-dark mb-0">{% trans "Quizzes" %}</h6>
+                          <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">{{ counts.quizzes }}</span>
+                        </div>
+                      </div> 
+                    </a>
+                  </div>
+
+                  {% for slug, label, icon in subject_resource_tabs %}
+                  <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
+                    <a href="{% url 'curriculum:grade-subject:grade-subject-resources' pk=grade_subject.pk resource_slug=slug %}"
+                      class="text-decoration-none d-block h-100">
+                      <div class="card h-100 border-0 text-center resource-card">
+                        <div class="card-body d-flex flex-column justify-content-center">
+                          <i class="{{ icon }} fa-2x resource-icon mb-3"></i>
+                          <h6 class="font-weight-bold text-dark mb-0">{{ label }}</h6>
+                          <span style="font-size:1.1rem; font-weight:700; color:#6c757d;">{{ counts|get_item:slug|default:0 }}</span>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                  {% endfor %}
                 </div>
+                {% endwith %}
               </div>
               {% endfor %}
 

@@ -78,8 +78,8 @@ class Quiz(TimeStampModel):
         limit_choices_to={"role": "teacher"},
     )
 
-    subject = models.ForeignKey(
-        "curriculum.Subject",
+    grade_subject = models.ForeignKey(
+        "curriculum.GradeSubject",
         on_delete=models.CASCADE,
         related_name="quizzes",
         null=True,
@@ -103,8 +103,8 @@ class Quiz(TimeStampModel):
             models.CheckConstraint(
                 check=(
                     # Exactly one must be set
-                    (Q(subject__isnull=False) & Q(course__isnull=True))
-                    | (Q(subject__isnull=True) & Q(course__isnull=False))
+                    (Q(grade_subject__isnull=False) & Q(course__isnull=True))
+                    | (Q(grade_subject__isnull=True) & Q(course__isnull=False))
                 ),
                 name="quiz_belongs_to_exactly_one_parent",
             )
@@ -114,10 +114,10 @@ class Quiz(TimeStampModel):
         return self.title
 
     def clean(self):
-        if not self.subject and not self.course:
+        if not self.grade_subject and not self.course:
             raise ValidationError("Quiz must belong to either a subject or a course.")
 
-        if self.subject and self.course:
+        if self.grade_subject and self.course:
             raise ValidationError("Quiz cannot belong to both subject and course.")
 
     @property
