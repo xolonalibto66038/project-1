@@ -81,13 +81,17 @@ class ResourceDetailView(DetailView):
 
         # ── Breadcrumb context ────────────────────────────────────────────
         gs = resource.course.effective_grade_subject if resource.course else None
-        subject = gs.subject if gs else resource.subject
+        grade_subject = gs.grade_subject if gs else resource.grade_subject
         grade = gs.grade if gs else None
-        level = grade.level if grade else (subject.level if subject else None)
+        level = (
+            grade.level
+            if grade
+            else (grade_subject.subject.level if grade_subject.subject else None)
+        )
 
         context.update(
             {
-                "subject": subject,
+                "grade_subject": grade_subject,
                 "grade": grade,
                 "level": level,
                 "course": resource.course,

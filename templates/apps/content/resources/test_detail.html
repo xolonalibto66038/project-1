@@ -1,0 +1,453 @@
+{% extends "layouts/base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Test" %}: {{ resource.title }}{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="fas fa-pencil-ruler mr-2 text-warning"></i>
+          {% trans "Test" %}: {{ resource.title }}
+        </h1>
+      </div>
+
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          {% if level %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">{{ level.name }}</a>
+          </li>
+          {% endif %}
+          {% if subject %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">{{ subject.short_name }}</a>
+          </li>
+          {% endif %}
+          {% if course %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'content:course:course-detail' pk=course.pk %}">{{ course.title }}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'content:course:course-exercises' pk=course.pk %}">{% trans "Exercises" %}</a>
+          </li>
+          {% endif %}
+          <li class="breadcrumb-item active font-weight-bold">
+            {{ resource.title }}
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <!-- ===================== RESOURCE INFO CARD ===================== -->
+    <div class="card card-outline card-primary mb-4">
+      <div class="card-body">
+
+        <!-- METADATA BADGES -->
+        <div class="d-flex flex-wrap mb-2">
+          <span class="badge badge-info mr-2 mb-1">
+            Type: {{ resource.get_type_display }}
+          </span>
+          <span class="badge badge-warning mr-2 mb-1">
+            Difficulty: {{ resource.get_difficulty_level_display }}
+          </span>
+          {% if resource.rating_avg %}
+          <span class="badge badge-success mr-2 mb-1">
+            ⭐ {{ resource.get_rating_display }} ({{ resource.rating_count }} ratings)
+          </span>
+          {% else %}
+          <span class="badge badge-secondary mr-2 mb-1">No ratings yet</span>
+          {% endif %}
+          <span class="badge badge-light border mr-2 mb-1">
+            👁 Views: {{ resource.view_count }}
+          </span>
+          <span class="badge badge-light border mr-2 mb-1">
+            ⬇ Downloads: {{ resource.download_count }}
+          </span>
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+
+          {% if user.is_authenticated and user.is_student %}
+
+            <!-- RATING STARS -->
+            <!-- <div class="d-flex align-items-center mr-3">
+              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
+              <div class="rating-stars d-inline-block">
+                {% for i in "12345" %}
+                  <i class="far fa-star star-icon"
+                    data-value="{{ i }}"
+                    style="cursor:pointer; font-size:1.2rem; color:#ffc107;">
+                  </i>
+                {% endfor %}
+              </div>
+            </div> -->
+            <!-- ===================== RATING ===================== -->
+            <div class="d-flex align-items-center mr-3">
+              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
+              <div class="rating-stars d-inline-flex" 
+                  data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
+                  data-user-rating="{{ user_rating.value|default:'0' }}">
+                {% for i in "12345" %}
+                  <button type="button"
+                          class="btn btn-link p-0 border-0 star-btn mx-1"
+                          data-value="{{ forloop.counter }}"
+                          title="{% trans 'Rate' %} {{ forloop.counter }}/5"
+                          style="font-size: 1.3rem; line-height:1;">
+                    <i class="{% if user_rating and forloop.counter <= user_rating.value %}fas{% else %}far{% endif %} fa-star text-warning"></i>
+                  </button>
+                {% endfor %}
+              </div>
+              <span class="ml-2 small text-muted rating-feedback"></span>
+            </div>
+
+            <!-- BOOKMARK BUTTON -->
+            <button
+              id="bookmark-btn"
+              data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
+              data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}"
+              class="btn {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2"
+            >
+              <i class="fas fa-bookmark mr-1"></i>
+              <span>{% if is_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
+            </button>
+
+          {% else %}
+
+            <!-- GUEST: STATIC RATING DISPLAY -->
+            <div class="d-flex align-items-center mr-3">
+              <span>⭐ {{ resource.get_rating_display }}</span>
+              <span class="text-muted ml-1">({{ resource.rating_count }})</span>
+            </div>
+
+          {% endif %}
+
+          <!-- DOWNLOAD BUTTON -->
+          {% if resource.file %}
+            <a href="{% url 'content:resource:resource-download' resource.pk %}"
+              class="btn btn-danger"
+              target="_blank"
+              rel="noopener noreferrer">
+              <i class="fas fa-file-download mr-1"></i>
+              {% trans "Download File" %}
+            </a>
+          {% endif %}
+
+          {% if user.is_authenticated and user.is_student %}
+            <form method="post"
+                      action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
+                      class="mb-0 d-inline">
+                  {% csrf_token %}
+              {% if not progress.is_completed %}
+                  <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    {% trans "Mark as completed" %}
+                  </button>
+              {% else %}
+                <button type="submit" class="btn btn-outline-success">
+                  <i class="fas fa-check-circle mr-1"></i>
+                  {% trans "Completed" %}
+                </button>
+              {% endif %}
+            </form>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="row">
+
+      {# ── Left: exercise content ── #}
+      <div class="col-lg-8">
+        <div class="card card-primary card-outline shadow-sm">
+
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-pencil-ruler mr-2"></i>
+              {% trans "Exercise Statement" %}
+            </h3>
+
+            {% if is_student and progress %}
+            <div class="card-tools">
+              {% if progress.is_completed %}
+              <span class="badge badge-success px-3 py-2">
+                <i class="fas fa-check-circle mr-1"></i>{% trans "Solved" %}
+              </span>
+              {% else %}
+              <span class="badge badge-warning px-3 py-2">
+                <i class="fas fa-hourglass-half mr-1"></i>{% trans "Not solved" %}
+              </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="card-body">
+
+            {# File attachment #}
+            {% if resource.file %}
+            <div class="text-center mb-4">
+              {% if resource.file.name|lower|slice:"-4:" == ".pdf" %}
+              <embed src="{{ resource.file.url }}"
+                     type="application/pdf"
+                     width="100%"
+                     height="600px"
+                     class="rounded shadow">
+              {% else %}
+              <img src="{{ resource.file.url }}"
+                   class="img-fluid rounded shadow"
+                   alt="{{ resource.title }}">
+              {% endif %}
+            </div>
+            {% endif %}
+
+            {# Metadata #}
+            {% if resource.total_marks or resource.due_days %}
+            <div class="callout callout-info">
+              {% if resource.total_marks %}
+              <p class="mb-1">
+                <i class="fas fa-star text-warning mr-2"></i>
+                <strong>{% trans "Total marks" %}:</strong> {{ resource.total_marks }}
+              </p>
+              {% endif %}
+              {% if resource.due_days %}
+              <p class="mb-0">
+                <i class="fas fa-clock text-info mr-2"></i>
+                <strong>{% trans "Due in" %}:</strong> {{ resource.due_days }} {% trans "days" %}
+              </p>
+              {% endif %}
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+
+      {# ── Right: actions + meta ── #}
+      <div class="col-lg-4">
+
+        {# Actions card #}
+        <div class="card card-outline card-secondary shadow-sm">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-tasks mr-2"></i>
+              {% trans "Your Actions" %}
+            </h3>
+          </div>
+          <div class="card-body">
+
+            {% if is_student %}
+
+            {# Mark as solved toggle #}
+            <form method="post"
+                  action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}">
+              {% csrf_token %}
+              {% if progress.is_completed %}
+              <button type="submit" class="btn btn-outline-success btn-block btn-lg">
+                <i class="fas fa-check mr-2"></i>
+                {% trans "Already Solved" %}
+              </button>
+              {% else %}
+              <button type="submit" class="btn btn-success btn-block btn-lg">
+                <i class="fas fa-check mr-2"></i>
+                {% trans "Mark as Solved" %}
+              </button>
+              {% endif %}
+            </form>
+
+            <hr>
+
+            {# Star rating #}
+            <h6 class="text-muted mb-2">
+              <i class="fas fa-star mr-1 text-warning"></i>
+              {% trans "Rate this exercise" %}
+            </h6>
+            <div class="rating-stars d-flex justify-content-center"
+                 data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
+                 data-user-rating="{{ user_rating.value|default:'0' }}">
+              {% for i in "12345" %}
+              <button type="button"
+                      class="btn btn-link p-0 mx-1 star-btn"
+                      data-value="{{ forloop.counter }}"
+                      title="{{ forloop.counter }} / 5"
+                      style="font-size:1.4rem; line-height:1;">
+                <i class="{% if user_rating and forloop.counter <= user_rating.value %}fas{% else %}far{% endif %} fa-star text-warning"></i>
+              </button>
+              {% endfor %}
+            </div>
+            <small class="text-muted d-block text-center mt-1 rating-feedback">
+              {% if user_rating %}
+                {% blocktrans with val=user_rating.value %}You rated this {{ val }}/5{% endblocktrans %}
+              {% else %}
+                {% trans "Click a star to rate" %}
+              {% endif %}
+            </small>
+
+            <hr>
+            {% endif %}
+
+            {# Solution #}
+            {% if resource.has_solution and resource.solution_file %}
+            <a href="{{ resource.solution_file.url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-outline-primary btn-block">
+              <i class="fas fa-lightbulb mr-2"></i>
+              {% trans "View Solution" %}
+            </a>
+            {% else %}
+            <div class="alert alert-secondary text-sm text-center mb-0">
+              <i class="fas fa-clock mr-1"></i>
+              <strong>{% trans "Solution not available yet." %}</strong>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+        {# Meta card #}
+        <div class="card card-outline card-info shadow-sm">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-info-circle mr-2"></i>
+              {% trans "Exercise Info" %}
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+
+              <li class="list-group-item d-flex justify-content-between">
+                <strong>{% trans "Difficulty" %}</strong>
+                <span>{{ resource.get_difficulty_display }}</span>
+              </li>
+
+              <li class="list-group-item d-flex justify-content-between">
+                <strong>{% trans "Term" %}</strong>
+                <span>{{ resource.get_term_display }}</span>
+              </li>
+
+              {% if resource.total_marks %}
+              <li class="list-group-item d-flex justify-content-between">
+                <strong>{% trans "Marks" %}</strong>
+                <span>{{ resource.total_marks }}</span>
+              </li>
+              {% endif %}
+
+              <li class="list-group-item">
+                <strong>{% trans "Tags" %}</strong>
+                <div class="mt-2">
+                  {% for tag in resource.tags.all %}
+                  <span class="badge badge-light mr-1">{{ tag.name }}</span>
+                  {% empty %}
+                  <span class="text-muted small">{% trans "No tags" %}</span>
+                  {% endfor %}
+                </div>
+              </li>
+
+              {% if resource.created_by %}
+              <li class="list-group-item d-flex justify-content-between">
+                <strong>{% trans "Author" %}</strong>
+                <span>{{ resource.created_by.get_full_name }}</span>
+              </li>
+              {% endif %}
+
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const container = document.querySelector('.rating-stars');
+  if (!container) return;
+
+  const stars    = container.querySelectorAll('.star-btn');
+  const feedback = document.querySelector('.rating-feedback');
+  const rateUrl  = container.dataset.url;
+  let userRating = parseInt(container.dataset.userRating) || 0;
+  let isLoading  = false;
+
+  function renderStars(n) {
+    stars.forEach(btn => {
+      const val  = parseInt(btn.dataset.value);
+      const icon = btn.querySelector('i');
+      icon.classList.toggle('fas', val <= n);
+      icon.classList.toggle('far', val >  n);
+    });
+  }
+
+  function setFeedback(msg) {
+    if (feedback) feedback.textContent = msg;
+  }
+
+  renderStars(userRating);
+
+  stars.forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      if (!isLoading) renderStars(parseInt(btn.dataset.value));
+    });
+    btn.addEventListener('mouseleave', () => {
+      if (!isLoading) renderStars(userRating);
+    });
+    btn.addEventListener('click', async () => {
+      if (isLoading) return;
+
+      const value = parseInt(btn.dataset.value);
+      userRating  = value;
+      renderStars(userRating);
+      isLoading   = true;
+      setFeedback('{% trans "Saving…" %}');
+      stars.forEach(b => b.disabled = true);
+
+      try {
+        const res = await fetch(rateUrl, {
+          method:   'POST',
+          headers:  {
+            'X-CSRFToken':  '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body:     new URLSearchParams({ value }),
+          redirect: 'follow',
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        container.dataset.userRating = value;
+        setFeedback(`{% trans "You rated this" %} ${value}/5 ✓`);
+      } catch (err) {
+        console.error('Rating error:', err);
+        userRating = parseInt(container.dataset.userRating) || 0;
+        renderStars(userRating);
+        setFeedback('{% trans "Failed to save. Try again." %}');
+      } finally {
+        isLoading = false;
+        stars.forEach(b => b.disabled = false);
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}
