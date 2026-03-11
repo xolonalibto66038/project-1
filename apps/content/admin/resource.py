@@ -55,7 +55,7 @@ class ResourceAdmin(admin.ModelAdmin):
         (
             _("Parent"),
             {
-                "fields": ("course", "grade_subject"),
+                "fields": ("course", "grade_subject", "tags"),
                 "description": _(
                     "Assign to a course (lesson/exercise/homework) OR "
                     "directly to a grade subject (test/exam/past paper). Never both."

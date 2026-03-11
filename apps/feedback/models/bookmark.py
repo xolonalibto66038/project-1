@@ -41,6 +41,7 @@ class Bookmark(TimeStampModel):
         related_name="bookmarks",
         verbose_name=_("Student"),
         db_index=True,
+        limit_choices_to={"role": "student"},
     )
 
     content_type = models.ForeignKey(

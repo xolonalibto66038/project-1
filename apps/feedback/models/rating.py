@@ -13,6 +13,19 @@ from ..choices import RatingChoice
 User = get_user_model()
 
 
+class RatingQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(active=True)
+
+
+class RatingManager(models.Manager):
+    def get_queryset(self):
+        return RatingQuerySet(self.model, using=self._db)
+
+    def active(self):
+        return self.get_queryset().active()
+
+
 class Rating(TimeStampModel):
     """
     Generic rating model that allows users to rate any object in the system.
@@ -34,6 +47,7 @@ class Rating(TimeStampModel):
         related_name="ratings",
         verbose_name=_("Student"),
         db_index=True,
+        limit_choices_to={"role": "student"},
     )
 
     # Rating value - using choices for validation
@@ -71,6 +85,8 @@ class Rating(TimeStampModel):
         verbose_name=_("Active Status Updated At"),
         help_text=_("Timestamp when active status was last changed"),
     )
+
+    objects = RatingManager()
 
     class Meta:
         verbose_name = _("Rating")
@@ -219,3 +235,9 @@ class Rating(TimeStampModel):
             "average": round(result["average"], 2) if result["average"] else 0,
             "count": result["count"],
         }
+
+    @staticmethod
+    def _get_content_type(obj):
+        from django.contrib.contenttypes.models import ContentType
+
+        return ContentType.objects.get_for_model(obj)

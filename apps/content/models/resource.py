@@ -356,3 +356,50 @@ class Resource(TimeStampModel):
     @property
     def due_days(self):
         return self.metadata.get("due_days")
+
+    def get_rating_display(self, user=None):
+        """
+        Returns rating info for this object.
+
+        Args:
+            user: optional — if provided, includes the user's own rating
+
+        Returns:
+            dict: {
+                'average': float,
+                'count': int,
+                'stars': range,        # for template star rendering
+                'user_rating': int|None,
+                'user_has_rated': bool,
+            }
+        """
+        from apps.feedback.models import Rating
+
+        content_type = Rating._get_content_type(self)
+
+        data = Rating.get_average_rating(
+            content_type=content_type,
+            object_id=self.pk,
+        )
+
+        user_rating = None
+        if user and user.is_authenticated:
+            rating_obj = (
+                Rating.objects.filter(
+                    content_type=content_type,
+                    object_id=self.pk,
+                    student=user,
+                    active=True,
+                )
+                .only("value")
+                .first()
+            )
+            user_rating = rating_obj.value if rating_obj else None
+
+        return {
+            "average": data["average"],
+            "count": data["count"],
+            "stars": range(1, 6),  # for {% for star in rating.stars %}
+            "user_rating": user_rating,
+            "user_has_rated": user_rating is not None,
+        }

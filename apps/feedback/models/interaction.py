@@ -20,6 +20,7 @@ class Interaction(TimeStampModel):
         related_name="interactions",
         verbose_name=_("Student"),
         db_index=True,
+        limit_choices_to={"role": "student"},
     )
 
     # Generic Foreign Key fields for polymorphic relationships
