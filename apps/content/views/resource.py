@@ -7,14 +7,16 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView
 
-from apps.content.choices import ResourceType
-from apps.content.models.resource import Resource
-from apps.content.selectors import (
+from apps.progress.models import ContentProgress
+
+from ..choices import ResourceType
+from ..models import Resource
+from ..selectors import (
     get_or_create_resource_progress,
     get_resource_for_detail,
     get_resource_user_rating,
 )
-from apps.progress.models import ContentProgress
+from ..services import _track_student_first_view
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +53,25 @@ class ResourceDetailView(DetailView):
         return [
             type_template_map.get(resource_type, "apps/content/resources/detail.html")
         ]
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        resource = self.object
+        user = request.user
+
+        # ── Increment view count for everyone, deduped per session ──
+        session_key = f"viewed_resource_{resource.pk}"
+        if not request.session.get(session_key, False):
+            resource.increment_view_count()
+            request.session[session_key] = True
+
+        resource.refresh_from_db(fields=["view_count", "download_count"])
+
+        # ── Track progress for authenticated students ──
+        if user.is_authenticated and getattr(user, "is_student", False):
+            self._progress, _ = get_or_create_resource_progress(user, resource)
+
+        return response
 
     def get_object(self, queryset=None):
         try:
@@ -121,36 +142,23 @@ def resource_download_view(request, pk):
 
     user = request.user
 
-    # Only students increment download count
+    # ── Increment download count for everyone, deduped per session ──
+    session_key = f"downloaded_resource_{resource.pk}"
+    if not request.session.get(session_key, False):
+        resource.increment_download_count()
+        request.session[session_key] = True
+
+    # ── Track progress for authenticated students only ──
     if user.is_authenticated and getattr(user, "is_student", False):
-        session_key = f"downloaded_resource_{resource.pk}"
-
-        if not request.session.get(session_key, False):
-            with transaction.atomic():
-                resource.increment_download_count()
-
-            request.session[session_key] = True
-
         content_type = ContentType.objects.get_for_model(
             Resource, for_concrete_model=False
         )
-
-        progress, created = ContentProgress.objects.get_or_create(
+        ContentProgress.objects.get_or_create(
             student=user,
             content_type=content_type,
             object_id=resource.pk,
         )
 
-        # Only increment first time student downloads
-        if created or not getattr(progress, "downloaded_at", None):
-            with transaction.atomic():
-                resource.increment_download_count()
-
-                ContentProgress.objects.filter(pk=progress.pk).update(
-                    downloaded_at=timezone.now()
-                )
-
-    # Serve file
     return FileResponse(
         resource.file.open("rb"),
         content_type=resource.file_mimetype or "application/octet-stream",
@@ -158,3 +166,50 @@ def resource_download_view(request, pk):
             "Content-Disposition": f'inline; filename="{resource.original_filename}"'
         },
     )
+
+
+# def resource_download_view(request, pk):
+#     resource = get_object_or_404(Resource, pk=pk, is_active=True)
+
+#     if not resource.file:
+#         raise Http404("File not found.")
+
+#     user = request.user
+
+#     # Only students increment download count
+#     if user.is_authenticated and getattr(user, "is_student", False):
+#         session_key = f"downloaded_resource_{resource.pk}"
+
+#         if not request.session.get(session_key, False):
+#             with transaction.atomic():
+#                 resource.increment_download_count()
+
+#             request.session[session_key] = True
+
+#         content_type = ContentType.objects.get_for_model(
+#             Resource, for_concrete_model=False
+#         )
+
+#         progress, created = ContentProgress.objects.get_or_create(
+#             student=user,
+#             content_type=content_type,
+#             object_id=resource.pk,
+#         )
+
+#         # Only increment first time student downloads
+#         if created or not getattr(progress, "downloaded_at", None):
+#             with transaction.atomic():
+#                 resource.increment_download_count()
+
+#                 ContentProgress.objects.filter(pk=progress.pk).update(
+#                     downloaded_at=timezone.now()
+#                 )
+
+#     # Serve file
+#     return FileResponse(
+#         resource.file.open("rb"),
+#         content_type=resource.file_mimetype or "application/octet-stream",
+#         headers={
+#             "Content-Disposition": f'inline; filename="{resource.original_filename}"'
+#         },
+#     )

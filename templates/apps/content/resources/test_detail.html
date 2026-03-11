@@ -67,13 +67,16 @@
           <span class="badge badge-warning mr-2 mb-1">
             Difficulty: {{ resource.get_difficulty_level_display }}
           </span>
-          {% if resource.rating_avg %}
+          {% comment %} {% if resource.rating_avg %} {% endcomment %}
           <span class="badge badge-success mr-2 mb-1">
-            ⭐ {{ resource.get_rating_display }} ({{ resource.rating_count }} ratings)
+            {% for star in resource.get_rating_display.stars %}
+              <i class="fas fa-star {% if star <= resource.get_rating_display.average %}text-warning{% else %}text-muted{% endif %}"></i>
+            {% endfor %}
+          <small>({{ resource.get_rating_display.count }} ratings)</small>
           </span>
-          {% else %}
+          {% comment %} {% else %}
           <span class="badge badge-secondary mr-2 mb-1">No ratings yet</span>
-          {% endif %}
+          {% endif %} {% endcomment %}
           <span class="badge badge-light border mr-2 mb-1">
             👁 Views: {{ resource.view_count }}
           </span>
@@ -84,7 +87,7 @@
 
         <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
 
-          {% if user.is_authenticated and user.is_student %}
+          {% comment %} {% if user.is_authenticated and user.is_student %}
 
             <!-- RATING STARS -->
             <!-- <div class="d-flex align-items-center mr-3">
@@ -136,7 +139,7 @@
               <span class="text-muted ml-1">({{ resource.rating_count }})</span>
             </div>
 
-          {% endif %}
+          {% endif %} {% endcomment %}
 
           <!-- DOWNLOAD BUTTON -->
           {% if resource.file %}

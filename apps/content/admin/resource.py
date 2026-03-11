@@ -93,7 +93,7 @@ class ResourceAdmin(admin.ModelAdmin):
         (
             _("Metadata"),
             {
-                "fields": ("metadata",),
+                "fields": ("metadata", "view_count", "download_count"),
                 "classes": ("collapse",),
                 "description": _(
                     "Type-specific JSON attributes. "

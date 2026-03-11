@@ -91,6 +91,7 @@ class Resource(TimeStampModel):
     term = models.CharField(
         max_length=10,
         choices=Term.choices,
+        blank=True,
         verbose_name=_("Term"),
         help_text=_("The school term (trimester) this chapter is taught in."),
     )
@@ -178,6 +179,25 @@ class Resource(TimeStampModel):
         verbose_name=_("Tags"),
     )
 
+    download_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Download Count"),
+        help_text=_("Number of times this resource has been downloaded"),
+    )
+
+    view_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("View Count"),
+        help_text=_("Number of times this resource has been viewed"),
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Active"),
+        help_text=_("Whether this resource is visible and accessible"),
+        db_index=True,
+    )
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -224,6 +244,15 @@ class Resource(TimeStampModel):
                     "Resource type must match parent entity requirements"
                 ),
             ),
+        ]
+
+        indexes = [
+            models.Index(fields=["resource_type"]),
+            models.Index(fields=["is_active"]),
+            models.Index(fields=["course", "resource_type"]),
+            models.Index(fields=["grade_subject", "resource_type"]),
+            models.Index(fields=["-download_count"]),
+            models.Index(fields=["-view_count"]),
         ]
 
     def save(self, *args, **kwargs):
@@ -403,3 +432,72 @@ class Resource(TimeStampModel):
             "user_rating": user_rating,
             "user_has_rated": user_rating is not None,
         }
+
+    def get_similar_resources(self, limit=5):
+        """
+        Find similar resources based on shared tags and context.
+
+        Args:
+            limit (int): Maximum number of similar resources to return
+
+        Returns:
+            QuerySet: Similar Resource objects ordered by relevance
+        """
+        if not self.pk:
+            return Resource.objects.none()
+
+        # Get current resource's tags
+        resource_tag_ids = list(self.tags.values_list("id", flat=True))
+
+        if not resource_tag_ids:
+            # If no tags, fall back to same type and difficulty
+            return (
+                Resource.objects.filter(
+                    resource_type=self.resource_type,
+                    difficulty=self.difficulty,
+                    is_active=True,
+                )
+                .exclude(pk=self.pk)
+                .order_by("-download_count")[:limit]
+            )
+
+        # Find resources with overlapping tags
+        similar = (
+            Resource.objects.filter(tags__in=resource_tag_ids, is_active=True)
+            .exclude(pk=self.pk)
+            .annotate(
+                shared_tag_count=models.Count("tags"),
+                # Boost score for same type and difficulty
+                relevance_score=models.Case(
+                    models.When(
+                        resource_type=self.resource_type,
+                        then=models.F("shared_tag_count") + 2,
+                    ),
+                    models.When(
+                        difficulty=self.difficulty,
+                        then=models.F("shared_tag_count") + 1,
+                    ),
+                    default=models.F("shared_tag_count"),
+                ),
+            )
+            .order_by("-relevance_score", "-created_at")
+            .distinct()[:limit]
+        )
+
+        return similar
+
+    def increment_download_count(self):
+        """Increment download counter atomically."""
+        Resource.objects.filter(pk=self.pk).update(
+            download_count=models.F("download_count") + 1
+        )
+        # Refresh from database to get updated value
+        # self.refresh_from_db(fields=["download_count"])
+
+    def increment_view_count(self):
+        """Increment view counter atomically."""
+        Resource.objects.filter(pk=self.pk).update(
+            view_count=models.F("view_count") + 1
+        )
+        # Refresh from database to get updated value
+        # self.refresh_from_db(fields=["view_count"])
