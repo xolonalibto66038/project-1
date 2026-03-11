@@ -1,16 +1,13 @@
-from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
-from apps.content.choices import DifficultyLevel, ResourceType, Term
+from apps.content.choices import ResourceType, Term
+from apps.content.models import Resource
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
-from ..selectors import (
-    get_grade_subject_by_pk,
-    get_grade_subject_counts_by_quarter,
-    get_grade_subject_resources,
-)
+from ..selectors import get_grade_subject_by_pk, get_grade_subject_counts_by_quarter
 from ..services import build_grade_subject_courses_page
 
 SUBJECT_RESOURCE_TYPE_CONFIG = {
@@ -96,13 +93,13 @@ class GradeSubjectDetailView(DetailView):
                 ),
                 # Subject resource tab config — slugs + icons only, counts come from counts_by_quarter
                 "subject_resource_tabs": [
-                    ("tests", "Tests", "fas fa-clipboard-check"),
-                    ("exams", "Exams", "fas fa-file-alt"),
-                    ("past-papers", "Past Papers", "fas fa-file-signature"),
-                    ("mock-exams", "Mock Exams", "fas fa-stopwatch"),
-                    ("textbooks", "Textbooks", "fas fa-book-open"),
-                    ("foreign-books", "Foreign Books", "fas fa-book"),
-                    ("study-guides", "Study Guides", "fas fa-book-reader"),
+                    ("test", "Tests", "fas fa-clipboard-check"),
+                    ("exam", "Exams", "fas fa-file-alt"),
+                    ("past_paper", "Past Papers", "fas fa-file-signature"),
+                    ("mock_exam", "Mock Exams", "fas fa-stopwatch"),
+                    ("textbook", "Textbooks", "fas fa-book-open"),
+                    ("foreign_book", "Foreign Books", "fas fa-book"),
+                    ("study_guide", "Study Guides", "fas fa-book-reader"),
                 ],
             }
         )
@@ -139,57 +136,128 @@ class GradeSubjectCoursesByQuarterView(GradeSubjectQuarterMixin, ListView):
         return context
 
 
-class GradeSubjectResourceListView(GradeSubjectQuarterMixin, ListView):
-    """
-    Generic view for all subject resource types (tests, exams, past papers, etc.)
-    Driven by `resource_slug` URL kwarg — matches keys in SUBJECT_RESOURCE_TYPE_CONFIG.
+# class GradeSubjectResourceListView(ListView):
+#     """
+#     Generic view for all subject resource types (tests, exams, past papers, etc.)
+#     Driven by `resource_slug` URL kwarg — matches keys in SUBJECT_RESOURCE_TYPE_CONFIG.
 
-    URL example:
-        path('subjects/<uuid:pk>/resources/<str:resource_slug>/',
-             SubjectResourceListView.as_view(),
-             name='subject-resources'),
-    """
+#     URL example:
+#         path('subjects/<uuid:pk>/resources/<str:resource_slug>/',
+#              SubjectResourceListView.as_view(),
+#              name='subject-resources'),
+#     """
 
-    template_name = "apps/curriculum/subjects/resource_list.html"
+#     template_name = "apps/curriculum/subjects/resource_list.html"
+#     context_object_name = "resources"
+#     paginate_by = 9
+
+#     def _get_config(self):
+#         slug = self.kwargs.get("resource_slug")
+#         config = SUBJECT_RESOURCE_TYPE_CONFIG.get(slug)
+#         if not config:
+#             raise Http404(f"Unknown subject resource type: {slug}")
+#         return config
+
+#     def get_queryset(self):
+#         config = self._get_config()
+#         return get_grade_subject_resources(
+#             grade_subject=self.grade_subject,
+#             resource_type=config["resource_type"],
+#             filters=self.request.GET,
+#             user=self.request.user,
+#         )
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         config = self._get_config()
+
+#         qp = self.request.GET.copy()
+#         qp.pop("page", None)
+
+#         context.update(
+#             {
+#                 "active_tab": config["tab"],
+#                 "resource_type_title": config["title"],
+#                 "resource_type_icon": config["icon"],
+#                 "resource_type": config["resource_type"],
+#                 "difficulty_choices": DifficultyLevel.choices,
+#                 "term_choices": Term.choices,
+#                 "querystring": qp.urlencode(),
+#                 "filter_q": self.request.GET.get("q", ""),
+#                 "filter_difficulty": self.request.GET.get("difficulty", ""),
+#                 "filter_term": self.request.GET.get("term", ""),
+#             }
+#         )
+
+#         return context
+
+
+class GradeSubjectResourceListByTermView(ListView):
+    model = Resource
+    template_name = "apps/curriculum/grade_subjects/resources_by_term.html"
     context_object_name = "resources"
-    paginate_by = 9
 
-    def _get_config(self):
-        slug = self.kwargs.get("resource_slug")
-        config = SUBJECT_RESOURCE_TYPE_CONFIG.get(slug)
-        if not config:
-            raise Http404(f"Unknown subject resource type: {slug}")
-        return config
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.grade_subject = get_object_or_404(
+            GradeSubject.objects.select_related("grade", "subject", "specialty"),
+            pk=self.kwargs["pk"],
+            is_active=True,
+        )
+        self.current_term = self.kwargs.get("term")
+        self.resource_slug = self.kwargs.get("resource_slug")  # e.g. "tests", "exams"
 
     def get_queryset(self):
-        config = self._get_config()
-        return get_grade_subject_resources(
-            grade_subject=self.grade_subject,
-            resource_type=config["resource_type"],
-            filters=self.request.GET,
-            user=self.request.user,
+        qs = (
+            Resource.objects.filter(
+                grade_subject=self.grade_subject,
+                resource_type__in=ResourceType.get_subject_values(),
+                status="published",
+            )
+            .select_related("created_by")
+            .prefetch_related("tags")
+            .order_by("term", "resource_type", "order")
         )
+
+        if self.current_term:
+            qs = qs.filter(term=self.current_term)
+
+        if self.resource_slug:
+            qs = qs.filter(resource_type=self.resource_slug)
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        config = self._get_config()
+        context["grade_subject"] = self.grade_subject
+        context["resource_slug"] = self.resource_slug
+        context["level"] = self.grade_subject.grade.level
+        context["grade"] = self.grade_subject.grade
+        context["subject"] = self.grade_subject.subject
+        context["specialty"] = self.grade_subject.specialty
+        context["current_term"] = self.current_term
+        context["terms"] = Term.choices
+        context["resource_types"] = ResourceType.get_subject_choices()
 
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        context.update(
-            {
-                "active_tab": config["tab"],
-                "resource_type_title": config["title"],
-                "resource_type_icon": config["icon"],
-                "resource_type": config["resource_type"],
-                "difficulty_choices": DifficultyLevel.choices,
-                "term_choices": Term.choices,
-                "querystring": qp.urlencode(),
-                "filter_q": self.request.GET.get("q", ""),
-                "filter_difficulty": self.request.GET.get("difficulty", ""),
-                "filter_term": self.request.GET.get("term", ""),
-            }
-        )
+        # Group resources by term when no specific term is selected
+        if not self.current_term:
+            context["resources_by_term"] = self._group_by_term(context["resources"])
 
         return context
+
+    def _group_by_term(self, resources):
+        """Group resources by term, preserving Term order."""
+        term_order = [t[0] for t in Term.choices]
+        grouped = {term: [] for term in term_order}
+
+        for resource in resources:
+            if resource.term in grouped:
+                grouped[resource.term].append(resource)
+
+        # Return as list of (term_value, term_label, resources) tuples,
+        # skipping empty terms
+        return [
+            (term, Term(term).label, grouped[term])
+            for term in term_order
+            if grouped[term]
+        ]

@@ -1,9 +1,9 @@
 from django.urls import path
 
-from ..views import (
+from ..views import (  # GradeSubjectResourceListView,
     GradeSubjectCoursesByQuarterView,
     GradeSubjectDetailView,
-    GradeSubjectResourceListView,
+    GradeSubjectResourceListByTermView,
 )
 
 app_name = "grade-subject"
@@ -26,9 +26,19 @@ urlpatterns = [
         GradeSubjectCoursesByQuarterView.as_view(),
         name="grade-subject-courses-by-quarter",
     ),
+    # path(
+    #     "subjects/<uuid:pk>/resources/<str:resource_slug>/",
+    #     GradeSubjectResourceListView.as_view(),
+    #     name="grade-subject-resources",
+    # ),
     path(
-        "subjects/<uuid:pk>/resources/<str:resource_slug>/",
-        GradeSubjectResourceListView.as_view(),
-        name="grade-subject-resources",
+        "grade-subjects/<uuid:pk>/resources/",
+        GradeSubjectResourceListByTermView.as_view(),
+        name="grade-subject-resource-list",
+    ),
+    path(
+        "grade-subjects/<uuid:pk>/resources/<str:resource_slug>/<str:term>/",
+        GradeSubjectResourceListByTermView.as_view(),
+        name="grade-subject-resource-list-by-term",
     ),
 ]

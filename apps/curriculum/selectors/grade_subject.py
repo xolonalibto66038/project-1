@@ -267,13 +267,13 @@ def get_grade_subject_counts_by_quarter(pk):
         result[term] = {
             "courses": gs.courses_count,
             "quizzes": gs.quizzes_count,
-            "tests": gs.tests_count,
-            "exams": gs.exams_count,
-            "past_papers": gs.past_papers_count,
-            "mock_exams": gs.mock_exams_count,
-            "textbooks": gs.textbooks_count,
-            "foreign_books": gs.foreign_books_count,
-            "study_guides": gs.study_guides_count,
+            "test": gs.tests_count,
+            "exam": gs.exams_count,
+            "past_paper": gs.past_papers_count,
+            "mock_exam": gs.mock_exams_count,
+            "textbook": gs.textbooks_count,
+            "foreign_book": gs.foreign_books_count,
+            "study_guide": gs.study_guides_count,
         }
 
     return result
@@ -304,3 +304,61 @@ def get_grade_subject_resources(grade_subject, resource_type, filters=None, user
             qs = qs.filter(term=term)
 
     return qs
+
+
+def get_course_counts_for_grade_subjects(grade_subject_ids):
+    return dict(
+        Course.objects.filter(
+            grade_subject_id__in=grade_subject_ids,
+            is_active=True,
+        )
+        .values("grade_subject_id")
+        .annotate(count=Count("id"))
+        .values_list("grade_subject_id", "count")
+    )
+
+
+def get_resource_counts_for_grade_subjects(grade_subject_ids):
+    """Direct subject-level resources (tests, exams, etc.)"""
+    return dict(
+        Resource.objects.filter(
+            grade_subject_id__in=grade_subject_ids,
+            status="published",
+        )
+        .values("grade_subject_id")
+        .annotate(count=Count("id"))
+        .values_list("grade_subject_id", "count")
+    )
+
+
+def get_grade_subjects_for_grade(grade, specialty=None):
+    """
+    Returns GradeSubject rows for this grade with subject pre-fetched.
+    Used to build the subject list on the grade detail page.
+    """
+    qs = (
+        GradeSubject.objects.filter(grade=grade, is_active=True)
+        .select_related("subject", "specialty")
+        .order_by("subject__name")
+    )
+
+    if specialty is not None:
+        qs = qs.filter(specialty=specialty)
+    else:
+        qs = qs.filter(specialty__isnull=True)
+
+    return qs
+
+
+def get_course_resource_counts_for_grade_subjects(grade_subject_ids):
+    """Resources attached to courses under these subjects."""
+    return dict(
+        Resource.objects.filter(
+            course__grade_subject_id__in=grade_subject_ids,
+            course__is_active=True,
+            status="published",
+        )
+        .values("course__grade_subject_id")
+        .annotate(count=Count("id"))
+        .values_list("course__grade_subject_id", "count")
+    )

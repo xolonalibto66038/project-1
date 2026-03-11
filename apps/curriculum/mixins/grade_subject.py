@@ -56,19 +56,19 @@ class GradeSubjectQuarterMixin:
             ("series", "Series", "fas fa-layer-group", gs.series_count),
         ]
         context["subject_resource_tabs"] = [
-            ("tests", "Tests", "fas fa-clipboard-check", gs.tests_count),
-            ("exams", "Exams", "fas fa-file-alt", gs.exams_count),
+            ("test", "Tests", "fas fa-clipboard-check", gs.tests_count),
+            ("exam", "Exams", "fas fa-file-alt", gs.exams_count),
             (
-                "past-papers",
+                "past_paper",
                 "Past Papers",
                 "fas fa-file-signature",
                 gs.past_papers_count,
             ),
-            ("mock-exams", "Mock Exams", "fas fa-stopwatch", gs.mock_exams_count),
-            ("textbooks", "Textbooks", "fas fa-book-open", gs.textbooks_count),
-            ("foreign-books", "Foreign Books", "fas fa-book", gs.foreign_books_count),
+            ("mock_exam", "Mock Exams", "fas fa-stopwatch", gs.mock_exams_count),
+            ("textbook", "Textbooks", "fas fa-book-open", gs.textbooks_count),
+            ("foreign_book", "Foreign Books", "fas fa-book", gs.foreign_books_count),
             (
-                "study-guides",
+                "study_guide",
                 "Study Guides",
                 "fas fa-book-reader",
                 gs.study_guides_count,

@@ -4,7 +4,7 @@ from django.views.generic import DetailView
 
 from ..mixins import GradeLoggingMixin
 from ..models import Grade, Specialty
-from ..services import build_enriched_subjects
+from ..services import build_enriched_grade_subjects
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class GradeDetailView(GradeLoggingMixin, DetailView):
         grade = self.object
         user = self.request.user
         specialty = self._resolve_specialty(user, grade)
-        context["enriched_subjects"] = build_enriched_subjects(
+        context["enriched_subjects"] = build_enriched_grade_subjects(
             grade=grade,
             user=user,
             specialty=specialty,

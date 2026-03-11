@@ -1,0 +1,251 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {{ subject.name }} — {{ resource_type_title }} ({{ filter_term|default:_("All Terms") }})
+{% endblock %}
+
+{% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="{{ resource_type_icon }} mr-2 text-primary"></i>
+          {{ subject.name }}
+          <span class="badge badge-primary ml-2">{{ resource_type_title }}</span>
+        </h1>
+        <small class="text-muted">
+          {% blocktrans with title=resource_type_title %}
+            Browse {{ title }} for this subject
+          {% endblocktrans %}
+        </small>
+      </div>
+
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
+              {{ level.name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">
+              {{ subject.short_name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">
+            {{ resource_type_title }}
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── Filters ── #}
+    <div class="card card-outline card-secondary mb-3">
+      <div class="card-body py-2">
+        <form method="get" class="form-inline flex-wrap" style="gap:8px;">
+
+          <input type="text"
+                 name="q"
+                 value="{{ filter_q }}"
+                 placeholder="{% trans 'Search...' %}"
+                 class="form-control form-control-sm">
+
+          <select name="difficulty" class="form-control form-control-sm">
+            <option value="">{% trans "All difficulties" %}</option>
+            {% for val, label in difficulty_choices %}
+            <option value="{{ val }}"
+                    {% if filter_difficulty == val %}selected{% endif %}>
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+
+          <select name="term" class="form-control form-control-sm">
+            <option value="">{% trans "All terms" %}</option>
+            {% for val, label in term_choices %}
+            <option value="{{ val }}"
+                    {% if filter_term == val %}selected{% endif %}>
+              {{ label }}
+            </option>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fas fa-search mr-1"></i>{% trans "Filter" %}
+          </button>
+
+          {% if filter_q or filter_difficulty or filter_term %}
+          <a href="?" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+          </a>
+          {% endif %}
+
+        </form>
+      </div>
+    </div>
+
+    {# ── Resource list ── #}
+    <div class="card card-primary card-outline">
+
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="{{ resource_type_icon }} mr-2"></i>
+          {{ subject.name }} — {{ resource_type_title }}
+        </h3>
+        <div class="card-tools">
+          <span class="badge badge-primary">
+            {{ page_obj.paginator.count }} {% trans "total" %}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+
+        {% if resources %}
+        <div class="list-group list-group-flush">
+
+          {% for resource in resources %}
+          <a href="{% url 'content:resource:resource-detail' pk=resource.pk %}"
+             class="list-group-item list-group-item-action px-4 py-3">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+              {# ── Left: icon + title ── #}
+              <div class="d-flex align-items-center flex-grow-1 mr-3">
+                <i class="{{ resource_type_icon }} text-primary mr-3"></i>
+                <div>
+                  <div class="font-weight-bold">{{ resource.title }}</div>
+                  <small class="text-muted d-flex flex-wrap mt-1" style="gap:8px;">
+
+                    {# Term #}
+                    <span>
+                      <i class="fas fa-calendar-alt mr-1"></i>
+                      {{ resource.get_term_display }}
+                    </span>
+
+                    {# File size #}
+                    {% if resource.file_size %}
+                    <span>
+                      <i class="fas fa-file mr-1"></i>
+                      {% if resource.file_size < 1048576 %}
+                        {{ resource.file_size|filesizeformat }}
+                      {% else %}
+                        {{ resource.file_size|filesizeformat }}
+                      {% endif %}
+                    </span>
+                    {% endif %}
+
+                    {# Extension #}
+                    {% if resource.file_extension %}
+                    <span class="text-uppercase">
+                      <i class="fas fa-paperclip mr-1"></i>
+                      {{ resource.file_extension }}
+                    </span>
+                    {% endif %}
+
+                    {# Duration #}
+                    {% if resource.duration_minutes %}
+                    <span>
+                      <i class="far fa-clock mr-1"></i>
+                      {{ resource.duration_minutes }} {% trans "min" %}
+                    </span>
+                    {% endif %}
+
+                    {# Total marks #}
+                    {% if resource.total_marks %}
+                    <span>
+                      <i class="fas fa-star mr-1"></i>
+                      {{ resource.total_marks }} {% trans "pts" %}
+                    </span>
+                    {% endif %}
+
+                  </small>
+                </div>
+              </div>
+
+              {# ── Right: badges ── #}
+              <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
+
+                {# Difficulty #}
+                <span class="badge badge-warning">
+                  <i class="fas fa-signal mr-1 small"></i>
+                  {{ resource.get_difficulty_display }}
+                </span>
+
+                {# Free/Premium #}
+                {% if resource.is_free %}
+                <span class="badge badge-success">
+                  <i class="fas fa-unlock mr-1"></i>{% trans "Free" %}
+                </span>
+                {% else %}
+                <span class="badge badge-secondary">
+                  <i class="fas fa-lock mr-1"></i>{% trans "Premium" %}
+                </span>
+                {% endif %}
+
+                {# Solution #}
+                {% if resource.has_solution %}
+                <span class="badge badge-info">
+                  <i class="fas fa-check mr-1"></i>{% trans "Solution" %}
+                </span>
+                {% endif %}
+
+                {# Arrow #}
+                <i class="fas fa-chevron-right text-muted ml-2"></i>
+
+              </div>
+
+            </div>
+
+          </a>
+          {% endfor %}
+
+        </div>
+
+        {% else %}
+        <div class="p-5 text-center text-muted">
+          <i class="{{ resource_type_icon }} fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+          <h5 class="font-weight-bold">
+            {% blocktrans with title=resource_type_title %}
+              No {{ title }} available yet
+            {% endblocktrans %}
+          </h5>
+          <p class="small mb-0">
+            {% trans "Resources will appear here once added." %}
+          </p>
+        </div>
+        {% endif %}
+
+      </div>
+
+      {% if is_paginated %}
+      <div class="card-footer">
+        {% include "includes/pagination.html" with querystring=querystring %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
