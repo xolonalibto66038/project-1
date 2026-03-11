@@ -70,7 +70,7 @@
       <div class="col-sm-6">
         <h1 class="font-weight-bold">
           <i class="fas fa-graduation-cap text-primary mr-2"></i>
-          {{ grade.name }} | {{ specialty.short_name }}
+          {% if specialty %}{{ grade.name }} | {{ specialty.short_name }}{% else %}{{ grade.name }} | {{ grade.level.name|title }}{% endif %}
         </h1>
         <small class="text-muted">
           {{ grade.level.get_name_display }} —
@@ -95,7 +95,7 @@
             </a>
           </li>
           <li class="breadcrumb-item active font-weight-bold">
-            {{ grade.short_name }}
+            {{ grade.short_name }} {% if specialty %}- {{ specialty.short_name }}{% endif %}
           </li>
         </ol>
       </div>
@@ -119,9 +119,9 @@
     <div class="row">
 
       {% for item in enriched_subjects %}
-      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4 d-flex">
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 d-flex">
 
-        <a href="{% url 'curriculum:subject:subject-detail' item.subject.pk %}"
+        <a href="{% url 'curriculum:grade-subject:grade-subject-detail' item.grade_subject.pk %}"
            class="subject-link w-100">
 
           <div class="card border-0 shadow-sm subject-card w-100">

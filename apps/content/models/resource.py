@@ -231,7 +231,9 @@ class Resource(TimeStampModel):
         if self.course:
             self.term = self.course.term
         if not self.slug:
-            parent_slug = self.course.slug if self.course else self.grade_subject.slug
+            parent_slug = (
+                self.course.slug if self.course else self.grade_subject.subject.slug
+            )
             self.slug = slugify(f"{parent_slug}-{self.resource_type}-{self.title}")
 
         # Extract custom parameters

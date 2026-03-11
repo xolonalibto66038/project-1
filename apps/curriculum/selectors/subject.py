@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Q
+from django.http import Http404
 
 from apps.accounts.choices import UserRole
 from apps.accounts.models import CustomUser
@@ -22,6 +23,10 @@ def get_grade_by_pk(pk):
 
 def get_subject_by_pk(pk):
     return Subject.objects.select_related("level").get(pk=pk)
+
+
+# def get_grade_subject_by_pk(pk):
+#     return GradeSubject.objects.select_related("level").get(pk=pk)
 
 
 def get_grades_for_level(level):
@@ -391,65 +396,68 @@ def get_subject_resources(subject, resource_type, filters=None, user=None):
 
 
 def get_grade_subject_by_pk(pk):
-    return (
-        GradeSubject.objects.select_related("level")
-        .annotate(
-            tests_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.TEST,
-                    resources__status="published",
+    try:
+        return (
+            GradeSubject.objects.filter(is_active=True)
+            .annotate(
+                tests_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.TEST,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            exams_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.EXAM,
-                    resources__status="published",
+                exams_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.EXAM,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            past_papers_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.PAST_PAPER,
-                    resources__status="published",
+                past_papers_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.PAST_PAPER,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            mock_exams_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.MOCK_EXAM,
-                    resources__status="published",
+                mock_exams_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.MOCK_EXAM,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            textbooks_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.TEXTBOOK,
-                    resources__status="published",
+                textbooks_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.TEXTBOOK,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            foreign_books_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.FOREIGN_BOOK,
-                    resources__status="published",
+                foreign_books_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.FOREIGN_BOOK,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
-            study_guides_count=Count(
-                "resources",
-                filter=Q(
-                    resources__resource_type=ResourceType.STUDY_GUIDE,
-                    resources__status="published",
+                study_guides_count=Count(
+                    "resources",
+                    filter=Q(
+                        resources__resource_type=ResourceType.STUDY_GUIDE,
+                        resources__status="published",
+                    ),
+                    distinct=True,
                 ),
-                distinct=True,
-            ),
+            )
+            .get(pk=pk)
         )
-        .get(pk=pk)
-    )
+    except GradeSubject.DoesNotExist:
+        raise Http404("GradeSubject not found")

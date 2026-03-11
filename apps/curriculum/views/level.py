@@ -81,7 +81,6 @@ class LevelDetailView(DetailView):
 
         # context['grade_groups'] = get_grade_groups(level)
         context["grade_groups"] = get_grade_groups_with_specialties(level)
-        print(context["grade_groups"])
         context["stats"] = get_level_stats(level)
 
         return context

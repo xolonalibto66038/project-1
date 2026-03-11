@@ -6,4 +6,5 @@ urlpatterns = [
     path("level/", include("apps.curriculum.routes.level")),
     path("grade/", include("apps.curriculum.routes.grade")),
     path("subject/", include("apps.curriculum.routes.subject")),
+    path("grade_subject/", include("apps.curriculum.routes.grade_subject")),
 ]

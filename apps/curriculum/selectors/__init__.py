@@ -5,6 +5,7 @@ from .grade import (
     get_level_by_pk,
     get_level_stats,
 )
+from .grade_subject import get_grade_subject_by_pk, get_grade_subject_courses_by_quarter
 from .level import get_active_levels
 from .subject import (
     get_course_counts_for_subjects,

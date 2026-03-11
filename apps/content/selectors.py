@@ -227,7 +227,7 @@ def get_resource_for_detail(pk):
             "course__chapter__grade_subject__subject",
             "course__grade_subject__grade__level",
             "course__grade_subject__subject",
-            "subject__level",
+            "grade_subject__subject__level",
             "created_by",
         )
         .prefetch_related("tags")
@@ -273,9 +273,9 @@ def get_resource_user_rating(user, resource):
         return None
 
 
-def get_subject_resource_counts_by_quarter(subject):
+def get_subject_resource_counts_by_quarter(grade_subject):
     """
-    Returns counts for each resource type per quarter for a subject.
+    Returns counts for each resource type per quarter for a grade_subject.
 
     Structure:
     {
@@ -291,8 +291,8 @@ def get_subject_resource_counts_by_quarter(subject):
         # Count courses via GradeSubject → Chapter → Course
         courses_count = (
             Course.objects.filter(
-                Q(grade_subject__subject=subject, term=term)
-                | Q(chapter__grade_subject__subject=subject, chapter__term=term)
+                Q(grade_subject__subject=grade_subject, term=term)
+                | Q(chapter__grade_subject=grade_subject, chapter__term=term)
             )
             .filter(is_active=True)
             .distinct()
@@ -301,7 +301,9 @@ def get_subject_resource_counts_by_quarter(subject):
 
         # Count subject-level resources per type for this term
         subject_resources = (
-            Resource.objects.filter(subject=subject, term=term, status="published")
+            Resource.objects.filter(
+                grade_subject=grade_subject, term=term, status="published"
+            )
             .values("resource_type")
             .annotate(count=Count("id"))
         )

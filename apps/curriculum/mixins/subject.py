@@ -1,6 +1,6 @@
 from apps.content.choices import Term
 
-from ..selectors import get_subject_by_pk
+from ..selectors import get_grade_subject_by_pk, get_subject_by_pk
 
 VALID_QUARTERS = ("q1", "q2", "q3")
 
@@ -12,7 +12,7 @@ class SubjectMixin:
 
     def get_subject(self):
         if not hasattr(self, "_subject"):
-            self._subject = get_subject_by_pk(self.kwargs["pk"])
+            self._subject = get_grade_subject_by_pk(self.kwargs["pk"])
         return self._subject
 
     @property

@@ -65,7 +65,14 @@ class ResourceAdmin(admin.ModelAdmin):
         (
             _("Identity"),
             {
-                "fields": ("title", "slug", "resource_type", "order", "term"),
+                "fields": (
+                    "title",
+                    "slug",
+                    "resource_type",
+                    "order",
+                    "term",
+                    "created_by",
+                ),
             },
         ),
         (
@@ -105,7 +112,7 @@ class ResourceAdmin(admin.ModelAdmin):
             return format_html('<a href="{}">📘 {}</a>', url, obj.course.title)
         if obj.grade_subject:
             url = reverse(
-                "admin:curriculum_grade_subject_change", args=[obj.grade_subject.pk]
+                "admin:curriculum_gradesubject_change", args=[obj.grade_subject.pk]
             )
             return format_html(
                 '<a href="{}">📚 {}</a>', url, obj.grade_subject.subject.name
