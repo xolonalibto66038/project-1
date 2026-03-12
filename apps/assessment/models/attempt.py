@@ -280,6 +280,7 @@ class Attempt(TimeStampModel):
     #     total_answers_needed = self.quiz.question_count
     #     graded_answers = answers.filter(is_correct__isnull=False).count()
     #     self.is_graded = graded_answers >= total_answers_needed
+
     def calculate_score(self):
         from django.db.models import Sum
 
@@ -331,3 +332,16 @@ class Attempt(TimeStampModel):
             return "D"
         else:
             return "F"
+
+    @property
+    def time_taken_display(self):
+        if not self.time_taken:
+            return None
+        total_seconds = int(self.time_taken.total_seconds())
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        if hours:
+            return f"{hours}h {minutes}m {seconds}s"
+        if minutes:
+            return f"{minutes}m {seconds}s"
+        return f"{seconds}s"

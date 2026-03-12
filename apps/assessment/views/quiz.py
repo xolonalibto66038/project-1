@@ -18,7 +18,8 @@ from django.views.generic import (
     UpdateView,
 )
 
-from apps.authentication.mixins import TeacherRequiredMixin
+from apps.authentication.mixins import TeacherRequiredMixin, StudentRequiredMixin
+from apps.curriculum.models import GradeSubject
 
 from ..forms import (
     AddQuestionToQuizForm,
@@ -128,24 +129,40 @@ class QuizDeleteView(TeacherRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class StudentTakeQuizView(LoginRequiredMixin, View):
+class StudentTakeQuizView(StudentRequiredMixin, View):
     template_name = "apps/assessement/quizzes/take_quiz.html"
 
-    def get(self, request, pk):
-        quiz = get_object_or_404(Quiz, pk=pk)
+    def _get_grade_subject(self):
+        return get_object_or_404(
+            GradeSubject,
+            pk=self.kwargs["grade_subject_pk"],
+        )
 
-        # Check if quiz is available
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR")
+
+    def _get_back_url(self):
+        return reverse(
+            "curriculum:grade-subject:grade-subject-quizzes-list",
+            kwargs={"pk": self.kwargs["grade_subject_pk"]},
+        )
+
+    def get(self, request, grade_subject_pk, pk):
+        quiz          = get_object_or_404(Quiz, pk=pk)
+        grade_subject = self._get_grade_subject()
+
         if not quiz.is_available:
             messages.error(request, "This quiz is not available.")
-            return redirect("assessment:quiz:quiz-list")
+            return redirect(self._get_back_url())
 
-        # Check if user can attempt
-        can_attempt, reason = quiz.can_user_attempt(request.user)
-        if not can_attempt:
-            messages.error(request, reason)
-            return redirect("assessment:quiz:quiz-list")
+        # can_attempt, reason = quiz.can_user_attempt(request.user)
+        # if not can_attempt:
+        #     messages.error(request, reason)
+        #     return redirect(self._get_back_url())
 
-        # Check if there's already an in-progress attempt
         existing_attempt = Attempt.objects.filter(
             student=request.user,
             quiz=quiz,
@@ -153,13 +170,13 @@ class StudentTakeQuizView(LoginRequiredMixin, View):
         ).first()
 
         if existing_attempt:
-            # Resume existing attempt instead of creating a new one
             attempt = existing_attempt
         else:
             attempt_number = (
-                Attempt.objects.filter(student=request.user, quiz=quiz).count() + 1
+                Attempt.objects.filter(
+                    student=request.user, quiz=quiz
+                ).count() + 1
             )
-
             attempt = Attempt.objects.create(
                 student=request.user,
                 quiz=quiz,
@@ -168,51 +185,54 @@ class StudentTakeQuizView(LoginRequiredMixin, View):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
             )
 
-        questions = quiz.quiz_questions.select_related(
-            "question_content_type"
-        ).order_by("order")
-
-        return render(
-            request,
-            self.template_name,
-            {
-                "quiz": quiz,
-                "attempt": attempt,
-                "questions": questions,
-                "time_remaining": attempt.time_remaining,
-            },
+        questions = (
+            quiz.quiz_questions
+            .select_related("question_content_type")
+            .order_by("order")
         )
 
-    def post(self, request, pk):
+        return render(request, self.template_name, {
+            "quiz":            quiz,
+            "attempt":         attempt,
+            "questions":       questions,
+            "grade_subject":   grade_subject,
+            "back_url":        self._get_back_url(),
+            "time_remaining":  attempt.time_remaining,
+        })
+
+    def post(self, request, grade_subject_pk, pk):
         quiz = get_object_or_404(Quiz, pk=pk)
         attempt = get_object_or_404(
             Attempt,
             pk=request.POST.get("attempt_id"),
             student=request.user,
-            quiz=quiz,  # ensure attempt belongs to this quiz
+            quiz=quiz,
             is_completed=False,
         )
 
         if attempt.is_expired:
             attempt.submit(auto_submit=True)
             messages.warning(request, "Time is up. Quiz auto-submitted.")
-            return redirect("assessment:quiz:quiz-result", attempt_id=attempt.pk)
+            return redirect(
+                reverse("assessment:quiz:quiz-result",
+                        kwargs={"attempt_id": attempt.pk})
+            )
 
-        questions = quiz.quiz_questions.select_related(
-            "question_content_type"
-        ).order_by("order")
+        questions = (
+            quiz.quiz_questions
+            .select_related("question_content_type")
+            .order_by("order")
+        )
 
         with transaction.atomic():
             for qq in questions:
                 question = qq.question
 
                 if question is None:
-                    # GenericFK resolution failed — skip silently
                     continue
 
                 content_type = ContentType.objects.get_for_model(question)
 
-                # get_or_create prevents duplicate answers on re-submission
                 answer, _ = Answer.objects.get_or_create(
                     student=request.user,
                     attempt=attempt,
@@ -231,11 +251,10 @@ class StudentTakeQuizView(LoginRequiredMixin, View):
                 elif question.question_type == "mcq":
                     selected_ids = request.POST.getlist(field_name)
                     if selected_ids:
-                        # Validate choices belong to this question
                         valid_ids = list(
-                            question.choices.filter(pk__in=selected_ids).values_list(
-                                "pk", flat=True
-                            )
+                            question.choices.filter(
+                                pk__in=selected_ids
+                            ).values_list("pk", flat=True)
                         )
                         answer.selected_choices.set(valid_ids)
                         answer.save(update_fields=["updated_at"])
@@ -250,14 +269,10 @@ class StudentTakeQuizView(LoginRequiredMixin, View):
             attempt.submit(auto_submit=False)
 
         messages.success(request, "Quiz submitted successfully.")
-        return redirect("assessment:quiz:quiz-result", attempt_id=attempt.pk)
-
-    def _get_client_ip(self, request):
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for:
-            return x_forwarded_for.split(",")[0].strip()
-        return request.META.get("REMOTE_ADDR")
-
+        return redirect(
+            reverse("assessment:quiz:quiz-result",
+                    kwargs={"attempt_id": attempt.pk})
+        )
 
 class QuizAddQuestionView(TeacherRequiredMixin, FormView):
     template_name = "apps/assessement/quizzes/add_question.html"
@@ -334,6 +349,122 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
             self.quiz.quiz_questions
             .select_related("question_content_type")
             .order_by("order")
+        )
+        return context
+
+
+class QuizResultView(StudentRequiredMixin, View):
+    template_name = "apps/assessement/quizzes/quiz_result.html"
+
+    def get(self, request, attempt_id):
+        attempt = get_object_or_404(
+            Attempt.objects.select_related(
+                'quiz',
+                'quiz__grade_subject',
+                'quiz__grade_subject__grade',
+                'quiz__grade_subject__grade__level',
+                'quiz__grade_subject__subject',
+                'student',
+            ),
+            pk=attempt_id,
+            student=request.user,
+            is_completed=True,
+        )
+
+        quiz = attempt.quiz
+
+        # ── Build question + answer pairs ──────────────────────────────
+        quiz_questions = (
+            quiz.quiz_questions
+            .select_related('question_content_type')
+            .order_by('order')
+        )
+
+        # Bulk-fetch all answers for this attempt — no N+1
+        answers_map = {
+            (str(a.question_content_type_id), str(a.question_object_id)): a
+            for a in attempt.answers.prefetch_related('selected_choices').all()
+        }
+
+        question_results = []
+        for qq in quiz_questions:
+            question = qq.question
+            if question is None:
+                continue
+
+            ct_id  = str(qq.question_content_type_id)
+            obj_id = str(qq.question_object_id)
+            answer = answers_map.get((ct_id, obj_id))
+
+            question_results.append({
+                'order':            qq.order,
+                'question':         question,
+                'question_type':    qq.question_type,
+                'effective_points': qq.effective_points,
+                'answer':           answer,
+                'is_correct':       answer.is_correct if answer else None,
+                'points_earned':    answer.points_earned if answer else 0,
+                # Type-specific helpers
+                'selected_choices': (
+                    answer.selected_choices.all()
+                    if answer and qq.question_type == 'mcq'
+                    else []
+                ),
+                'answer_boolean': (
+                    answer.answer_boolean
+                    if answer and qq.question_type == 'tf'
+                    else None
+                ),
+                'answer_text': (
+                    answer.answer_text
+                    if answer and qq.question_type == 'essay'
+                    else ''
+                ),
+            })
+
+        # ── Back URL ──────────────────────────────────────────────────
+        back_url = None
+        if quiz.grade_subject:
+            back_url = reverse(
+                'curriculum:grade-subject:grade-subject-quizzes-list',
+                kwargs={'pk': quiz.grade_subject.pk},
+            )
+
+        return render(request, self.template_name, {
+            'attempt':          attempt,
+            'quiz':             quiz,
+            'question_results': question_results,
+            'is_passed':        attempt.is_passed,
+            'grade_letter':     attempt.get_grade_letter(),
+            'back_url':         back_url,
+            'grade_subject':    quiz.grade_subject,
+        })
+    
+class QuizAttemptsView(StudentRequiredMixin, ListView):
+    template_name       = "apps/assessement/quizzes/attempts.html"
+    context_object_name = "attempts"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.quiz = get_object_or_404(Quiz, pk=kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return (
+            Attempt.objects
+            .filter(student=self.request.user, quiz=self.quiz)
+            .order_by("-started_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["quiz"]      = self.quiz
+        context["back_url"]  = (
+            reverse(
+                "curriculum:grade-subject:grade-subject-quizzes-list",
+                kwargs={"pk": self.quiz.grade_subject.pk},
+            )
+            if self.quiz.grade_subject
+            else None
         )
         return context
     

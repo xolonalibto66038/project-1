@@ -8,6 +8,8 @@ from ..views.quiz import (
     QuizListView,
     QuizUpdateView,
     StudentTakeQuizView,
+    QuizResultView,
+    QuizAttemptsView
 )
 
 app_name = "quiz"
@@ -43,5 +45,15 @@ urlpatterns = [
         QuizDeleteView.as_view(),
         name="quiz-delete",
     ),
-    path("quiz/<uuid:pk>/take/", StudentTakeQuizView.as_view(), name="quiz-take"),
+    path("grade-subject/<uuid:grade_subject_pk>/quiz/<uuid:pk>/take/", StudentTakeQuizView.as_view(), name="quiz-take"),
+    path(
+        "quizzes/result/<uuid:attempt_id>/",
+        QuizResultView.as_view(),
+        name="quiz-result",
+    ),
+    path(
+    "quizzes/<uuid:pk>/attempts/",
+        QuizAttemptsView.as_view(),
+        name="quiz-attempts",
+    ),
 ]
