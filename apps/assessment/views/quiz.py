@@ -1,0 +1,353 @@
+from itertools import chain
+from operator import attrgetter
+
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    UpdateView,
+)
+
+from apps.authentication.mixins import TeacherRequiredMixin
+
+from ..forms import (
+    AddQuestionToQuizForm,
+    ChoiceCreateFormSet,
+    ChoiceFormSet,
+    EssayQuestionForm,
+    MultipleChoiceQuestionForm,
+    QuizForm,
+    TrueFalseQuestionForm,
+)
+from ..models import (
+    Answer,
+    Attempt,
+    BaseQuestion,
+    Choice,
+    EssayQuestion,
+    MultipleChoiceQuestion,
+    Quiz,
+    QuizQuestion,
+    TrueFalseQuestion,
+)
+
+
+class QuizListView(TeacherRequiredMixin, ListView):
+    model = Quiz
+    template_name = "apps/assessement/quizzes/list.html"
+    context_object_name = "quizzes"
+    paginate_by = 10
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return Quiz.objects.filter(created_by=self.request.user).prefetch_related(
+            "quiz_questions"
+        )
+
+
+class QuizCreateView(TeacherRequiredMixin, CreateView):
+    model = Quiz
+    form_class = QuizForm
+    template_name = "apps/assessement/quizzes/create.html"
+    success_url = reverse_lazy("assessment:quiz:quiz-list")
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+
+            # Attach teacher profile
+            self.object.created_by = self.request.user
+
+            self.object.save()
+            form.save_m2m()
+
+        messages.success(self.request, "Quiz created successfully.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below.")
+        return super().form_invalid(form)
+
+
+class QuizUpdateView(TeacherRequiredMixin, UpdateView):
+    model = Quiz
+    form_class = QuizForm
+    template_name = "apps/assessement/quizzes/create.html"  # reuse template
+    success_url = reverse_lazy("assessment:quiz:quiz-list")
+
+    def get_queryset(self):
+        """
+        Ensure teacher can only edit their own quizzes
+        """
+        return Quiz.objects.filter(created_by=self.request.user)
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save()
+
+        messages.success(self.request, "Quiz updated successfully.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below.")
+        return super().form_invalid(form)
+
+
+class QuizDeleteView(TeacherRequiredMixin, DeleteView):
+    model = Quiz
+    template_name = "apps/assessement/quizzes/confirm_delete.html"
+    success_url = reverse_lazy("assessment:quiz:quiz-list")
+
+    def get_queryset(self):
+        return Quiz.objects.filter(created_by=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if self.object.quiz_attempts.exists():  # ← fixed from .attempts
+            messages.error(request, "Cannot delete quiz with existing attempts.")
+            return redirect("assessment:quiz:quiz-detail", pk=self.object.pk)
+
+        messages.success(request, "Quiz deleted successfully.")
+        return super().delete(request, *args, **kwargs)
+
+
+class StudentTakeQuizView(LoginRequiredMixin, View):
+    template_name = "apps/assessement/quizzes/take_quiz.html"
+
+    def get(self, request, pk):
+        quiz = get_object_or_404(Quiz, pk=pk)
+
+        # Check if quiz is available
+        if not quiz.is_available:
+            messages.error(request, "This quiz is not available.")
+            return redirect("assessment:quiz:quiz-list")
+
+        # Check if user can attempt
+        can_attempt, reason = quiz.can_user_attempt(request.user)
+        if not can_attempt:
+            messages.error(request, reason)
+            return redirect("assessment:quiz:quiz-list")
+
+        # Check if there's already an in-progress attempt
+        existing_attempt = Attempt.objects.filter(
+            student=request.user,
+            quiz=quiz,
+            is_completed=False,
+        ).first()
+
+        if existing_attempt:
+            # Resume existing attempt instead of creating a new one
+            attempt = existing_attempt
+        else:
+            attempt_number = (
+                Attempt.objects.filter(student=request.user, quiz=quiz).count() + 1
+            )
+
+            attempt = Attempt.objects.create(
+                student=request.user,
+                quiz=quiz,
+                attempt_number=attempt_number,
+                ip_address=self._get_client_ip(request),
+                user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            )
+
+        questions = quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "quiz": quiz,
+                "attempt": attempt,
+                "questions": questions,
+                "time_remaining": attempt.time_remaining,
+            },
+        )
+
+    def post(self, request, pk):
+        quiz = get_object_or_404(Quiz, pk=pk)
+        attempt = get_object_or_404(
+            Attempt,
+            pk=request.POST.get("attempt_id"),
+            student=request.user,
+            quiz=quiz,  # ensure attempt belongs to this quiz
+            is_completed=False,
+        )
+
+        if attempt.is_expired:
+            attempt.submit(auto_submit=True)
+            messages.warning(request, "Time is up. Quiz auto-submitted.")
+            return redirect("assessment:quiz:quiz-result", attempt_id=attempt.pk)
+
+        questions = quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
+
+        with transaction.atomic():
+            for qq in questions:
+                question = qq.question
+
+                if question is None:
+                    # GenericFK resolution failed — skip silently
+                    continue
+
+                content_type = ContentType.objects.get_for_model(question)
+
+                # get_or_create prevents duplicate answers on re-submission
+                answer, _ = Answer.objects.get_or_create(
+                    student=request.user,
+                    attempt=attempt,
+                    question_content_type=content_type,
+                    question_object_id=question.pk,
+                )
+
+                field_name = f"question_{qq.pk}"
+
+                if question.question_type == "tf":
+                    value = request.POST.get(field_name)
+                    if value in ("true", "false"):
+                        answer.answer_boolean = value == "true"
+                        answer.save(update_fields=["answer_boolean", "updated_at"])
+
+                elif question.question_type == "mcq":
+                    selected_ids = request.POST.getlist(field_name)
+                    if selected_ids:
+                        # Validate choices belong to this question
+                        valid_ids = list(
+                            question.choices.filter(pk__in=selected_ids).values_list(
+                                "pk", flat=True
+                            )
+                        )
+                        answer.selected_choices.set(valid_ids)
+                        answer.save(update_fields=["updated_at"])
+
+                else:
+                    text = request.POST.get(field_name, "").strip()
+                    answer.answer_text = text
+                    answer.save(update_fields=["answer_text", "updated_at"])
+
+                answer.auto_grade()
+
+            attempt.submit(auto_submit=False)
+
+        messages.success(request, "Quiz submitted successfully.")
+        return redirect("assessment:quiz:quiz-result", attempt_id=attempt.pk)
+
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR")
+
+
+class QuizAddQuestionView(TeacherRequiredMixin, FormView):
+    template_name = "apps/assessement/quizzes/add_question.html"
+    form_class = AddQuestionToQuizForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.quiz = get_object_or_404(
+            Quiz,
+            pk=self.kwargs["pk"],
+            created_by=request.user,
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["teacher"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        QUESTION_MODELS = {
+            "mcq": MultipleChoiceQuestion,
+            "essay": EssayQuestion,
+            "tf": TrueFalseQuestion,
+        }
+        # question = form.cleaned_data["question"]
+        q_type = form.cleaned_data["question_type"]
+        question_id = form.cleaned_data["question"]
+
+        model = QUESTION_MODELS.get(q_type)
+        question = model.objects.get(id=question_id)
+
+        points_override = form.cleaned_data.get("points_override")
+
+        content_type = ContentType.objects.get_for_model(question)
+
+        # Prevent duplicates
+        exists = QuizQuestion.objects.filter(
+            quiz=self.quiz,
+            question_content_type=content_type,
+            question_object_id=question.id,
+        ).exists()
+
+        if exists:
+            form.add_error("question", "This question is already in the quiz.")
+            return self.form_invalid(form)
+
+        # Determine next order
+        last_order = (
+            QuizQuestion.objects.filter(quiz=self.quiz)
+            .order_by("-order")
+            .values_list("order", flat=True)
+            .first()
+        )
+
+        next_order = (last_order or 0) + 1
+
+        with transaction.atomic():
+            QuizQuestion.objects.create(
+                quiz=self.quiz,
+                question_type=q_type,  # adapt if multi-type later
+                question_content_type=content_type,
+                question_object_id=question.id,
+                order=next_order,
+                points_override=points_override,
+            )
+
+        messages.success(self.request, "Question added to quiz successfully.")
+
+        return redirect(
+            reverse("assessment:quiz:quiz-detail", kwargs={"pk": self.quiz.pk})
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["quiz"] = self.quiz
+        context["quiz_questions"] = self.quiz.quiz_questions.select_related(
+            "question_content_type"
+        )
+        return context
+
+
+class QuizDetailView(TeacherRequiredMixin, DetailView):
+    model = Quiz
+    template_name = "apps/assessement/quizzes/detail.html"
+    context_object_name = "quiz"
+
+    def get_queryset(self):
+        return Quiz.objects.filter(created_by=self.request.user).prefetch_related(
+            "quiz_questions__question_content_type"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["quiz_questions"] = self.object.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
+
+        return context

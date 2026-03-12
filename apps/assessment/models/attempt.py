@@ -139,7 +139,7 @@ class Attempt(TimeStampModel):
             with transaction.atomic():
                 last_attempt = (
                     Attempt.objects.select_for_update()
-                    .filter(student=self.user, quiz=self.quiz)
+                    .filter(student=self.student, quiz=self.quiz)
                     .order_by("-attempt_number")
                     .first()
                 )

@@ -1,0 +1,162 @@
+{% extends "layouts/base-full.html" %}
+{% load i18n %}
+
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+  <!-- ================= Quiz Header ================= -->
+  <div class="col-12">
+    <div class="card card-primary card-outline shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+
+        <div>
+          <h4 class="mb-1 font-weight-bold">
+            {{ quiz.title }}
+          </h4>
+          <small class="text-muted">
+            {% trans "Total Questions:" %} {{ questions|length }} |
+            {% trans "Total Points:" %} {{ quiz.total_points }}
+          </small>
+        </div>
+
+        {% if quiz.time_limit %}
+        <div class="text-right">
+          <h5 class="mb-1 text-danger">
+            <i class="fas fa-clock"></i>
+            <span id="timer"></span>
+          </h5>
+          <small class="text-muted">
+            {% trans "Time Remaining" %}
+          </small>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Quiz Form ================= -->
+  <div class="col-12">
+    <form method="post" id="quizForm">
+      {% csrf_token %}
+      <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+
+      {% for qq in questions %}
+      <div class="card card-outline card-secondary shadow-sm mb-4">
+
+        <!-- Question Header -->
+        <div class="card-header bg-light">
+          <h6 class="mb-0 font-weight-bold">
+            {% trans "Question" %} {{ forloop.counter }}
+            <span class="badge badge-primary float-right">
+              {{ qq.question.points }} {% trans "pts" %}
+            </span>
+          </h6>
+        </div>
+
+        <div class="card-body">
+
+          <!-- 🔥 QUESTION STATEMENT -->
+          <div class="mb-4">
+            <h6 class="text-dark font-weight-bold">
+              {{ qq.question.title }}
+            </h6>
+
+            <div class="mt-2">
+              {{ qq.question.question_text|safe }}
+            </div>
+
+            {% if qq.question.difficulty_level %}
+            <small class="text-muted">
+              {% trans "Difficulty:" %} {{ qq.question.get_difficulty_level_display }}
+            </small>
+            {% endif %}
+          </div>
+
+          <!-- ================= TRUE/FALSE ================= -->
+          {% if qq.question.question_type == "tf" %}
+          <div class="form-group">
+            <div class="custom-control custom-radio mb-2">
+              <input type="radio"
+                     id="q{{ qq.id }}_true"
+                     name="question_{{ qq.id }}"
+                     value="true"
+                     class="custom-control-input">
+              <label class="custom-control-label" for="q{{ qq.id }}_true">
+                {% trans "True" %}
+              </label>
+            </div>
+
+            <div class="custom-control custom-radio">
+              <input type="radio"
+                     id="q{{ qq.id }}_false"
+                     name="question_{{ qq.id }}"
+                     value="false"
+                     class="custom-control-input">
+              <label class="custom-control-label" for="q{{ qq.id }}_false">
+                {% trans "False" %}
+              </label>
+            </div>
+          </div>
+
+          <!-- ================= MULTIPLE CHOICE ================= -->
+          {% elif qq.question.question_type == "mcq" %}
+          <div class="form-group">
+
+            {% for choice in qq.question.choices.all %}
+            <div class="custom-control {% if qq.question.allow_multiple %}custom-checkbox{% else %}custom-radio{% endif %} mb-2">
+
+              <input type="{% if qq.question.allow_multiple %}checkbox{% else %}radio{% endif %}"
+                     id="choice_{{ choice.id }}"
+                     name="question_{{ qq.id }}"
+                     value="{{ choice.id }}"
+                     class="custom-control-input">
+
+              <label class="custom-control-label" for="choice_{{ choice.id }}">
+                {{ choice.text }}
+              </label>
+            </div>
+            {% endfor %}
+
+          </div>
+
+          <!-- ================= ESSAY ================= -->
+          {% elif qq.question.question_type == "essay" %}
+          <div class="form-group">
+            <textarea name="question_{{ qq.id }}"
+                      rows="5"
+                      maxlength="{{ qq.question.max_length }}"
+                      class="form-control"
+                      placeholder="{% trans 'Type your answer here...' %}"></textarea>
+
+            <small class="text-muted">
+              {% trans "Minimum" %} {{ qq.question.min_length }}
+              | {% trans "Maximum" %} {{ qq.question.max_length }}
+              {% trans "characters" %}
+            </small>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Submit -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-right">
+          <button type="submit" class="btn btn-success btn-lg">
+            <i class="fas fa-paper-plane"></i>
+            {% trans "Submit Quiz" %}
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -127,7 +127,14 @@ class Quiz(TimeStampModel):
         #     qq.effective_points
         #     for qq in self.quiz_questions.select_related("question_content_type")
         # )
-        return sum(qq.effective_points for qq in self.quiz_questions.all())
+        # In Quiz.total_points — this is an N+1 query
+        # return sum(qq.effective_points for qq in self.quiz_questions.all())
+
+        # Fix with prefetch
+        return sum(
+            qq.effective_points
+            for qq in self.quiz_questions.prefetch_related("question_content_type")
+        )
 
     @property
     def question_count(self):
@@ -166,7 +173,7 @@ class Quiz(TimeStampModel):
 
     def get_user_best_score(self, user):
         """Get user's best score percentage for this quiz"""
-        attempts = self.attempts.filter(student=user, is_completed=True)
+        attempts = self.quiz_attempts.filter(student=user, is_completed=True)
         if not attempts.exists():
             return None
 
@@ -175,4 +182,4 @@ class Quiz(TimeStampModel):
 
     def get_user_attempts_count(self, user):
         """Get number of attempts user has made"""
-        return self.attempts.filter(student=user).count()
+        return self.quiz_attempts.filter(student=user).count()

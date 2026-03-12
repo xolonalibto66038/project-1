@@ -150,7 +150,9 @@ class Answer(TimeStampModel):
             raise ValidationError(_("Points earned cannot be negative."))
 
         # ── Validate grading consistency ──
-        if self.graded_at and not self.graded_by and self.is_correct is None:
+        # if self.graded_at and not self.graded_by and self.is_correct is None:
+        #     raise ValidationError(_("A graded answer must have is_correct set."))
+        if self.graded_at and self.is_correct is None:
             raise ValidationError(_("A graded answer must have is_correct set."))
 
     @property
@@ -205,7 +207,7 @@ class Answer(TimeStampModel):
         """
         Automatically grade the answer if supported by the question type.
         """
-        if self.attempt.is_completed:
+        if not self.attempt.is_completed:
             return
 
         q = self.question

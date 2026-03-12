@@ -1,0 +1,146 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "True/False" %}{% endblock title %}
+
+{% block content %}
+<section class="content">
+<div class="container-fluid">
+
+  <div class="card card-primary">
+    <div class="card-header">
+      <h3 class="card-title">Create Essay Question</h3>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <!-- Basic Info -->
+        <h5 class="mb-3">Basic Information</h5>
+
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          {{ form.title }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Question Text</label>
+          {{ form.question_text }}
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Points</label>
+            {{ form.points }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Difficulty</label>
+            {{ form.difficulty_level }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Tags</label>
+            {{ form.tags }}
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- Length Settings -->
+        <h5 class="mb-3">Answer Length Settings</h5>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Minimum Length</label>
+            {{ form.min_length }}
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Maximum Length</label>
+            {{ form.max_length }}
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- Optional Content -->
+        <h5 class="mb-3">Optional Content</h5>
+
+        <div class="mb-3">
+          <label class="form-label">Sample Answer (Instructor Only)</label>
+          {{ form.sample_answer }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Explanation (Shown After Submission)</label>
+          {{ form.explanation }}
+        </div>
+
+        <hr>
+
+        <!-- Auto Grading -->
+        <h5 class="mb-3">Auto Grading</h5>
+
+        <div class="form-check mb-3">
+          {{ form.is_auto_gradable }}
+          <label class="form-check-label" for="id_is_auto_gradable">
+            Enable Auto-Grading with Keywords
+          </label>
+        </div>
+
+        <div class="mb-3" id="keywords-wrapper" style="display:none;">
+          <label class="form-label">Keywords (comma separated)</label>
+          {{ form.keywords }}
+        </div>
+
+        <hr>
+
+        <div class="form-check">
+          {{ form.is_active }}
+          <label class="form-check-label">
+            Active (visible for quizzes)
+          </label>
+        </div>
+
+      </div>
+
+      <div class="card-footer text-end">
+        <a href="#" class="btn btn-secondary">
+          Cancel
+        </a>
+        <button type="submit" class="btn btn-primary">
+          Save Question
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  const autoGradeCheckbox = document.getElementById("id_is_auto_gradable");
+  const keywordsWrapper = document.getElementById("keywords-wrapper");
+
+  function toggleKeywords() {
+      if (autoGradeCheckbox.checked) {
+          keywordsWrapper.style.display = "block";
+      } else {
+          keywordsWrapper.style.display = "none";
+      }
+  }
+
+  autoGradeCheckbox.addEventListener("change", toggleKeywords);
+  toggleKeywords();
+</script>
+{% endblock extra_js %}

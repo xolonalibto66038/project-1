@@ -118,6 +118,6 @@ class EssayQuestion(BaseQuestion):
 
         return {
             "awarded_points": awarded,
-            "is_correct": score_ratio == 1,
+            "is_correct": score_ratio >= 0.8,  # "is_correct": score_ratio == 1,
             "feedback": self.explanation or "",
         }
