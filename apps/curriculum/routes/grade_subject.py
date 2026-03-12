@@ -4,6 +4,7 @@ from ..views import (  # GradeSubjectResourceListView,
     GradeSubjectCoursesByQuarterView,
     GradeSubjectDetailView,
     GradeSubjectResourceListByTermView,
+    GradeSubjectQuizzesView
 )
 
 app_name = "grade-subject"
@@ -16,11 +17,11 @@ urlpatterns = [
         name="grade-subject-detail",
     ),
     # with term filter
-    path(
-        "grade-subjects/<uuid:pk>/<str:term>/",
-        GradeSubjectDetailView.as_view(),
-        name="grade-subject-detail-by-term",
-    ),
+    # path(
+    #     "grade-subjects/<uuid:pk>/<str:term>/",
+    #     GradeSubjectDetailView.as_view(),
+    #     name="grade-subject-detail-by-term",
+    # ),
     path(
         "<uuid:pk>/<str:quarter>/courses/",
         GradeSubjectCoursesByQuarterView.as_view(),
@@ -41,4 +42,10 @@ urlpatterns = [
         GradeSubjectResourceListByTermView.as_view(),
         name="grade-subject-resource-list-by-term",
     ),
+    path(
+        "grade-subjects/<uuid:pk>/quizzes/",
+        GradeSubjectQuizzesView.as_view(),
+        name="grade-subject-quizzes-list",
+    ),
+
 ]

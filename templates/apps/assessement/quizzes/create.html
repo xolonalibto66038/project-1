@@ -151,10 +151,10 @@
 
             <div class="col-md-6 mb-3">
               <label class="form-label">Subject</label>
-              {{ form.subject }}
-              {% if form.subject.errors %}
+              {{ form.grade_subject }}
+              {% if form.grade_subject.errors %}
                 <div class="invalid-feedback d-block">
-                  {{ form.subject.errors|striptags }}
+                  {{ form.grade_subject.errors|striptags }}
                 </div>
               {% endif %}
               <small class="form-text text-muted">

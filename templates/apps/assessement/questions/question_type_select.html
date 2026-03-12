@@ -1,0 +1,136 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Select Question Type" %}{% endblock %}
+
+{% block content_header %}
+<div class="row mb-2">
+  <div class="col-sm-6">
+    <h1 class="m-0">{% trans "Create a Question" %}</h1>
+  </div>
+  <div class="col-sm-6">
+    <ol class="breadcrumb float-sm-right">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Home" %}</a></li>
+      <li class="breadcrumb-item active">{% trans "Select Question Type" %}</li>
+    </ol>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+
+      <div class="card card-outline card-primary shadow-sm">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-question-circle mr-2"></i>
+            {% trans "What type of question do you want to create?" %}
+          </h3>
+        </div>
+
+        <div class="card-body">
+          <p class="text-muted mb-4">
+            {% trans "Choose one of the question types below to get started." %}
+          </p>
+
+          <div class="row">
+
+            {# ── Essay ── #}
+            <div class="col-md-4 mb-4">
+              <a href="{% url 'assessment:question:essay-create' %}" class="text-decoration-none">
+                <div class="question-type-card card h-100 text-center border-0 shadow-sm">
+                  <div class="card-body py-5">
+                    <div class="icon-wrap bg-primary-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
+                      <i class="fas fa-pen-alt fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="card-title font-weight-bold text-dark">{% trans "Essay" %}</h4>
+                    <p class="card-text text-muted small">
+                      {% trans "Open-ended question requiring a written response from the student." %}
+                    </p>
+                  </div>
+                  <div class="card-footer bg-primary text-white py-2 rounded-bottom">
+                    <small><i class="fas fa-arrow-right mr-1"></i> {% trans "Create Essay Question" %}</small>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {# ── True / False ── #}
+            <div class="col-md-4 mb-4">
+              <a href="{% url 'assessment:question:tf-create' %}" class="text-decoration-none">
+                <div class="question-type-card card h-100 text-center border-0 shadow-sm">
+                  <div class="card-body py-5">
+                    <div class="icon-wrap bg-success-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
+                      <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                    <h4 class="card-title font-weight-bold text-dark">{% trans "True / False" %}</h4>
+                    <p class="card-text text-muted small">
+                      {% trans "A statement the student must judge as either true or false." %}
+                    </p>
+                  </div>
+                  <div class="card-footer bg-success text-white py-2 rounded-bottom">
+                    <small><i class="fas fa-arrow-right mr-1"></i> {% trans "Create True/False Question" %}</small>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {# ── MCQ ── #}
+            <div class="col-md-4 mb-4">
+              <a href="{% url 'assessment:question:mcq-create' %}" class="text-decoration-none">
+                <div class="question-type-card card h-100 text-center border-0 shadow-sm">
+                  <div class="card-body py-5">
+                    <div class="icon-wrap bg-warning-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
+                      <i class="fas fa-list-ul fa-2x text-warning"></i>
+                    </div>
+                    <h4 class="card-title font-weight-bold text-dark">{% trans "Multiple Choice" %}</h4>
+                    <p class="card-text text-muted small">
+                      {% trans "A question with several answer choices where one or more are correct." %}
+                    </p>
+                  </div>
+                  <div class="card-footer bg-warning text-white py-2 rounded-bottom">
+                    <small><i class="fas fa-arrow-right mr-1"></i> {% trans "Create MCQ Question" %}</small>
+                  </div>
+                </div>
+              </a>
+            </div>
+
+          </div>{# /.row #}
+        </div>{# /.card-body #}
+      </div>{# /.card #}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Icon circles */
+  .icon-wrap {
+    width: 72px;
+    height: 72px;
+  }
+
+  .bg-primary-light { background-color: rgba(0, 123, 255, 0.12); }
+  .bg-success-light { background-color: rgba(40, 167, 69, 0.12); }
+  .bg-warning-light { background-color: rgba(255, 193, 7, 0.12); }
+
+  /* Card hover lift */
+  .question-type-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .question-type-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+</style>
+{% endblock %}

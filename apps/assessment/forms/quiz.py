@@ -1,10 +1,3 @@
-# # forms.py
-
-# from django import forms
-
-# from ..models import Quiz
-# forms.py
-
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -52,7 +45,7 @@ class QuizForm(forms.ModelForm):
             "end_date": forms.DateTimeInput(
                 attrs={"class": "form-control", "type": "datetime-local"}
             ),
-            "subject": forms.Select(attrs={"class": "form-control"}),
+            "grade_subject": forms.Select(attrs={"class": "form-control"}),
             "course": forms.Select(attrs={"class": "form-control"}),
         }
 
@@ -60,7 +53,7 @@ class QuizForm(forms.ModelForm):
         cleaned_data = super().clean()
         start = cleaned_data.get("start_date")
         end = cleaned_data.get("end_date")
-        subject = cleaned_data.get("subject")
+        grade_subject = cleaned_data.get("grade_subject")
         course = cleaned_data.get("course")
 
         # Validate dates
@@ -68,10 +61,15 @@ class QuizForm(forms.ModelForm):
             raise ValidationError("End date must be after start date.")
 
         # Validate only one parent is set
-        if (subject and course) or (not subject and not course):
-            raise ValidationError(
-                "Quiz must be linked to either a Subject or a Course, not both."
-            )
+        # if (grade_subject and course) or (not grade_subject and not course):
+        #     raise ValidationError(
+        #         "Quiz must be linked to either a Subject or a Course, not both."
+        #     )
+        
+        # Only reject if BOTH are set — having neither is now fine
+        if grade_subject and course:
+            raise ValidationError("Quiz cannot be linked to both a Subject and a Course.")
+
 
         return cleaned_data
 

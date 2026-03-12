@@ -41,6 +41,12 @@ from ..models import (
     TrueFalseQuestion,
 )
 
+QUESTION_MODELS = {
+    "mcq": MultipleChoiceQuestion,
+    "essay": EssayQuestion,
+    "tf": TrueFalseQuestion,
+}
+
 
 class QuizListView(TeacherRequiredMixin, ListView):
     model = Quiz
@@ -255,12 +261,12 @@ class StudentTakeQuizView(LoginRequiredMixin, View):
 
 class QuizAddQuestionView(TeacherRequiredMixin, FormView):
     template_name = "apps/assessement/quizzes/add_question.html"
-    form_class = AddQuestionToQuizForm
+    form_class    = AddQuestionToQuizForm
 
     def dispatch(self, request, *args, **kwargs):
         self.quiz = get_object_or_404(
             Quiz,
-            pk=self.kwargs["pk"],
+            pk=kwargs["pk"],
             created_by=request.user,
         )
         return super().dispatch(request, *args, **kwargs)
@@ -270,69 +276,67 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
         kwargs["teacher"] = self.request.user
         return kwargs
 
+    def post(self, request, *args, **kwargs):
+        # Type-change submit — re-render without validating
+        if "submit_question" not in request.POST:
+            form = self.get_form_class()(teacher=request.user)
+            return self.render_to_response(self.get_context_data(form=form))
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
-        QUESTION_MODELS = {
-            "mcq": MultipleChoiceQuestion,
-            "essay": EssayQuestion,
-            "tf": TrueFalseQuestion,
-        }
-        # question = form.cleaned_data["question"]
-        q_type = form.cleaned_data["question_type"]
-        question_id = form.cleaned_data["question"]
-
-        model = QUESTION_MODELS.get(q_type)
-        question = model.objects.get(id=question_id)
-
+        question_data   = form.cleaned_data["question"]
+        q_type          = question_data["q_type"]
+        question        = question_data["question"]
         points_override = form.cleaned_data.get("points_override")
 
         content_type = ContentType.objects.get_for_model(question)
 
-        # Prevent duplicates
-        exists = QuizQuestion.objects.filter(
+        already_added = QuizQuestion.objects.filter(
             quiz=self.quiz,
             question_content_type=content_type,
             question_object_id=question.id,
         ).exists()
 
-        if exists:
+        if already_added:
             form.add_error("question", "This question is already in the quiz.")
             return self.form_invalid(form)
 
-        # Determine next order
-        last_order = (
-            QuizQuestion.objects.filter(quiz=self.quiz)
+        next_order = (
+            QuizQuestion.objects
+            .filter(quiz=self.quiz)
             .order_by("-order")
             .values_list("order", flat=True)
-            .first()
-        )
-
-        next_order = (last_order or 0) + 1
+            .first() or 0
+        ) + 1
 
         with transaction.atomic():
             QuizQuestion.objects.create(
                 quiz=self.quiz,
-                question_type=q_type,  # adapt if multi-type later
+                question_type=q_type,
                 question_content_type=content_type,
                 question_object_id=question.id,
                 order=next_order,
                 points_override=points_override,
             )
 
-        messages.success(self.request, "Question added to quiz successfully.")
-
+        messages.success(self.request, "Question added successfully.")
         return redirect(
-            reverse("assessment:quiz:quiz-detail", kwargs={"pk": self.quiz.pk})
+            reverse("assessment:quiz:quiz-add-question", kwargs={"pk": self.quiz.pk})
         )
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["quiz"] = self.quiz
-        context["quiz_questions"] = self.quiz.quiz_questions.select_related(
-            "question_content_type"
+        context["quiz_questions"] = (
+            self.quiz.quiz_questions
+            .select_related("question_content_type")
+            .order_by("order")
         )
         return context
-
-
+    
 class QuizDetailView(TeacherRequiredMixin, DetailView):
     model = Quiz
     template_name = "apps/assessement/quizzes/detail.html"

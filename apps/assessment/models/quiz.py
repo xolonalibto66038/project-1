@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.contrib import messages
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
@@ -99,26 +100,28 @@ class Quiz(TimeStampModel):
         ordering = ["-created_at"]
         verbose_name = _("Quiz")
         verbose_name_plural = _("Quizzes")
-        constraints = [
-            models.CheckConstraint(
-                check=(
-                    # Exactly one must be set
-                    (Q(grade_subject__isnull=False) & Q(course__isnull=True))
-                    | (Q(grade_subject__isnull=True) & Q(course__isnull=False))
-                ),
-                name="quiz_belongs_to_exactly_one_parent",
-            )
-        ]
+        # constraints = [
+        #     models.CheckConstraint(
+        #         check=(
+        #             # Exactly one must be set
+        #             (Q(grade_subject__isnull=False) & Q(course__isnull=True))
+        #             | (Q(grade_subject__isnull=True) & Q(course__isnull=False))
+        #         ),
+        #         name="quiz_belongs_to_exactly_one_parent",
+        #     )
+        # ]
 
     def __str__(self):
         return self.title
 
     def clean(self):
-        if not self.grade_subject and not self.course:
-            raise ValidationError("Quiz must belong to either a subject or a course.")
+        # messages.success(self.request, "Operation completed successfully!")
+        pass
+        # if not self.grade_subject and not self.course:
+        #     raise ValidationError("Quiz must belong to either a subject or a course.")
 
-        if self.grade_subject and self.course:
-            raise ValidationError("Quiz cannot belong to both subject and course.")
+        # if self.grade_subject and self.course:
+        #     raise ValidationError("Quiz cannot belong to both subject and course.")
 
     @property
     def total_points(self):

@@ -1,6 +1,7 @@
 from itertools import chain
 from operator import attrgetter
 
+from django.views.generic import TemplateView
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -90,7 +91,7 @@ class EssayQuestionCreateView(TeacherRequiredMixin, CreateView):
     model = EssayQuestion
     form_class = EssayQuestionForm
     template_name = "apps/assessement/questions/essay.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def form_valid(self, form):
         question = form.save(commit=False)
@@ -106,7 +107,7 @@ class EssayQuestionUpdateView(TeacherRequiredMixin, UpdateView):
     model = EssayQuestion
     form_class = EssayQuestionForm
     template_name = "apps/assessement/questions/essay.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def get_queryset(self):
         # Prevent editing other teachers' questions
@@ -121,7 +122,7 @@ class TrueFalseQuestionCreateView(TeacherRequiredMixin, CreateView):
     model = TrueFalseQuestion
     form_class = TrueFalseQuestionForm
     template_name = "apps/assessement/questions/tf.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def form_valid(self, form):
         question = form.save(commit=False)
@@ -137,7 +138,7 @@ class TrueFalseQuestionUpdateView(TeacherRequiredMixin, UpdateView):
     model = TrueFalseQuestion
     form_class = TrueFalseQuestionForm
     template_name = "apps/assessement/questions/tf.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def get_queryset(self):
         return TrueFalseQuestion.objects.filter(created_by=self.request.user)
@@ -151,7 +152,7 @@ class MultipleChoiceQuestionCreateView(TeacherRequiredMixin, CreateView):
     model = MultipleChoiceQuestion
     form_class = MultipleChoiceQuestionForm
     template_name = "apps/assessement/questions/mcq.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -209,7 +210,7 @@ class MultipleChoiceQuestionUpdateView(TeacherRequiredMixin, UpdateView):
     model = MultipleChoiceQuestion
     form_class = MultipleChoiceQuestionForm
     template_name = "apps/assessement/questions/mcq.html"
-    success_url = reverse_lazy("assessement:question-list")
+    success_url = reverse_lazy("assessment:question:question-list")
 
     def get_queryset(self):
         return MultipleChoiceQuestion.objects.filter(created_by=self.request.user)
@@ -272,3 +273,7 @@ class MultipleChoiceQuestionUpdateView(TeacherRequiredMixin, UpdateView):
         return self.render_to_response(
             self.get_context_data(form=form, formset=formset)
         )
+
+
+class QuestionTypeSelectView(TemplateView):
+    template_name = "apps/assessement/questions/question_type_select.html"
