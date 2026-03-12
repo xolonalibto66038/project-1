@@ -198,6 +198,16 @@ class Resource(TimeStampModel):
         db_index=True,
     )
 
+    content = models.TextField(
+        blank=True,
+        verbose_name=_("Content"),
+        help_text=_(
+            "Rich text content of the resource. "
+            "Supports LaTeX (e.g. $x^2 + y^2 = z^2$) and Markdown. "
+            "Used primarily for exercises, lessons, and summaries."
+        ),
+    )
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -356,6 +366,14 @@ class Resource(TimeStampModel):
             raise ValidationError(
                 _("has_solution must be True when a solution file is attached.")
             )
+
+        # Exercise must have either a file or content
+        if self.resource_type == ResourceType.EXERCISE:
+            if not self.file and not self.content:
+                raise ValidationError(
+                    _("An exercise must have either a file or written content.")
+                )
+
         # Resource inside course must match course term
         if self.course:
             if self.term and self.term != self.course.term:

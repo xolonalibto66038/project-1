@@ -84,7 +84,7 @@ class ResourceAdmin(admin.ModelAdmin):
         (
             _("Files"),
             {
-                "fields": ("file", "solution_file", "has_solution"),
+                "fields": ("file", "solution_file", "has_solution", "content"),
                 "description": _(
                     "Upload the main resource file and optionally a separate solution file."
                 ),

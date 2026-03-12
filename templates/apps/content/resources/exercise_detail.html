@@ -219,6 +219,12 @@
             </div>
             {% endif %}
 
+            {% if resource.content %}
+              <div class="resource-content">
+                {{ resource.content }}
+              </div>
+            {% endif %}
+
             {# Metadata #}
             {% if resource.total_marks or resource.due_days %}
             <div class="callout callout-info">
@@ -381,6 +387,12 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <script>
 (function () {
   const container = document.querySelector('.rating-stars');

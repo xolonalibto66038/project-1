@@ -102,7 +102,7 @@ class ResourceDetailView(DetailView):
 
         # ── Breadcrumb context ────────────────────────────────────────────
         gs = resource.course.effective_grade_subject if resource.course else None
-        grade_subject = gs.grade_subject if gs else resource.grade_subject
+        grade_subject = gs.subject if gs else resource.grade_subject
         grade = gs.grade if gs else None
         level = (
             grade.level
