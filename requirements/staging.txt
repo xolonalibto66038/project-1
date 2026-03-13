@@ -2,3 +2,5 @@
 
 # Same as production — no dev/lint tools on staging server
 # Add staging-only packages here if needed (e.g. django-debug-toolbar)
+cloudinary==1.44.1
+django-cloudinary-storage==0.3.0
