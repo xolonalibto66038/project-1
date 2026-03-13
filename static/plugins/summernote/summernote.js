@@ -10225,4 +10225,3 @@ external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default.a.summe
 
 /******/ });
 });
-//# sourceMappingURL=summernote.js.map
