@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+.env.staging
 .vscode
 .idea
-media
+media/
+staticfiles/

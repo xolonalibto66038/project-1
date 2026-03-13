@@ -1,0 +1,4 @@
+-r base.txt
+
+# Add production-only packages here if needed (e.g. sentry-sdk)
+# sentry-sdk==2.x.x

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         ("common", "0001_initial"),
         ("content", "0003_resource_created_by_videoresource_created_by"),
         ("contenttypes", "0002_remove_content_type_name"),
-        ("curriculum", "0002_specialty_created_at_specialty_updated_at_and_more"),
+        ("curriculum", "0001_initial"),
         (
             "taggit",
             "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx",

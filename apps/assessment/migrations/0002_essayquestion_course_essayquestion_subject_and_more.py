@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("assessment", "0001_initial"),
         ("content", "0003_resource_created_by_videoresource_created_by"),
-        ("curriculum", "0002_specialty_created_at_specialty_updated_at_and_more"),
+        ("curriculum", "0001_initial"),
     ]
 
     operations = [

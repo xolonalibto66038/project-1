@@ -4,6 +4,8 @@ import os
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+
+# from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -97,6 +99,7 @@ class Resource(TimeStampModel):
     )
     file = models.FileField(
         upload_to="resources/%Y/%m/",
+        # storage=FileSystemStorage(),
         blank=True,
         null=True,
         verbose_name=_("File"),
@@ -104,6 +107,7 @@ class Resource(TimeStampModel):
     )
     solution_file = models.FileField(
         upload_to="solutions/%Y/%m/",
+        # storage=FileSystemStorage(),
         null=True,
         blank=True,
         verbose_name=_("Solution"),
@@ -290,8 +294,6 @@ class Resource(TimeStampModel):
         else:
             file_changed = bool(self.file)
 
-        super().save(*args, **kwargs)
-
         if file_changed and self.file:
             self._process_file_metadata()
             super().save(
@@ -303,21 +305,20 @@ class Resource(TimeStampModel):
                     "file_hash",
                 ]
             )
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """Delete file when model instance is deleted"""
-        if self.file and os.path.isfile(self.file.path):
+        if self.file:  # and os.path.isfile(self.file.path):
             # os.remove(self.file.path)
             self.file.delete(save=False)
-        if self.solution_file and os.path.isfile(self.solution_file.path):
+        if self.solution_file:  # and os.path.isfile(self.solution_file.path):
             # os.remove(self.solution_file.path)
             self.solution_file.delete(save=False)
         super().delete(*args, **kwargs)
 
     def _process_file_metadata(self):
-        """Extract and store file metadata."""
         try:
-            # Basic file information
             self.file_size = self.file.size
             self.original_filename = os.path.basename(self.file.name)
 
@@ -326,21 +327,53 @@ class Resource(TimeStampModel):
             self.file_extension = ext.lstrip(".").lower()
 
             # Determine MIME type
-            # mime = magic.from_buffer(self.file.read(2048), mime=True)
-            # self.file.seek(0)
             self.file_mimetype = (
                 mimetypes.guess_type(self.original_filename)[0]
                 or "application/octet-stream"
             )
 
-            # Calculate file hash for integrity checking
+            # Optionally, set Cloudinary resource_type dynamically
+            # Images: 'image', PDFs/docs: 'raw'
+            if self.file_mimetype and self.file_mimetype.startswith("image/"):
+                self._cloudinary_resource_type = "image"
+            else:
+                self._cloudinary_resource_type = "raw"
+
+            # Calculate hash
             self._calculate_file_hash()
 
         except Exception as ex:
-            # logger.error(f"Error processing file metadata for {self.id}: {e}")
             raise ValidationError(
-                _(f"Error processing uploaded file. Error : {str(ex)}")
+                _("Error processing uploaded file. Error: %s") % str(ex)
             )
+
+    # def _process_file_metadata(self):
+    #     """Extract and store file metadata."""
+    #     try:
+    #         # Basic file information
+    #         self.file_size = self.file.size
+    #         self.original_filename = os.path.basename(self.file.name)
+
+    #         # Extract extension
+    #         _, ext = os.path.splitext(self.original_filename)
+    #         self.file_extension = ext.lstrip(".").lower()
+
+    #         # Determine MIME type
+    #         # mime = magic.from_buffer(self.file.read(2048), mime=True)
+    #         # self.file.seek(0)
+    #         self.file_mimetype = (
+    #             mimetypes.guess_type(self.original_filename)[0]
+    #             or "application/octet-stream"
+    #         )
+
+    #         # Calculate file hash for integrity checking
+    #         self._calculate_file_hash()
+
+    #     except Exception as ex:
+    #         # logger.error(f"Error processing file metadata for {self.id}: {e}")
+    #         raise ValidationError(
+    #             _(f"Error processing uploaded file. Error : {str(ex)}")
+    #         )
 
     def _calculate_file_hash(self):
         """Calculate SHA-256 hash of the file content."""

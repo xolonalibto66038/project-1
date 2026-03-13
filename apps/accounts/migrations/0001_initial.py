@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("auth", "0012_alter_user_first_name_max_length"),
-        ("curriculum", "0002_specialty_created_at_specialty_updated_at_and_more"),
+        ("curriculum", "0001_initial"),
     ]
 
     operations = [

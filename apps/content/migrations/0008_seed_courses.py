@@ -182,6 +182,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("content", "0007_resource_content"),
+        ("curriculum", "0012_populate_gradesubject_slugs"),
     ]
 
     operations = [

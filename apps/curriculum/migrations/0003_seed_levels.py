@@ -34,7 +34,7 @@ def unseed_levels(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("curriculum", "0002_specialty_created_at_specialty_updated_at_and_more"),
+        ("curriculum", "0001_initial"),
     ]
 
     operations = [
