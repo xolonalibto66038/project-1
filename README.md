@@ -40,4 +40,4 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/xolonalibto66038/project-1.git
-cd yourproject
+cd project-1
