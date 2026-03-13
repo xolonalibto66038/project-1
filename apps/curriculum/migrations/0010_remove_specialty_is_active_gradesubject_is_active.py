@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('curriculum', '0009_specialty_is_active'),
+        ("curriculum", "0009_specialty_is_active"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='specialty',
-            name='is_active',
+            model_name="specialty",
+            name="is_active",
         ),
         migrations.AddField(
-            model_name='gradesubject',
-            name='is_active',
+            model_name="gradesubject",
+            name="is_active",
             field=models.BooleanField(blank=True, default=True, null=True),
         ),
     ]

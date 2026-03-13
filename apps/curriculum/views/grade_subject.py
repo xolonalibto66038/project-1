@@ -1,11 +1,11 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
-from django.db.models import Count
 
+from apps.assessment.models import Quiz
 from apps.content.choices import ResourceType, Term
 from apps.content.models import Resource
-from apps.assessment.models import Quiz
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
@@ -266,9 +266,9 @@ class GradeSubjectResourceListByTermView(ListView):
 
 
 class GradeSubjectQuizzesView(GradeSubjectQuarterMixin, ListView):
-    template_name       = "apps/curriculum/grade_subjects/quizzes.html"
+    template_name = "apps/curriculum/grade_subjects/quizzes.html"
     context_object_name = "quizzes"
-    paginate_by         = 12
+    paginate_by = 12
 
     def dispatch(self, request, *args, **kwargs):
         # Force resolution before get_queryset is called
@@ -279,8 +279,7 @@ class GradeSubjectQuizzesView(GradeSubjectQuarterMixin, ListView):
         q = self.request.GET.get("q", "").strip()
 
         qs = (
-            Quiz.objects
-            .filter(
+            Quiz.objects.filter(
                 grade_subject=self.grade_subject,
                 is_published=True,
             )
@@ -302,9 +301,11 @@ class GradeSubjectQuizzesView(GradeSubjectQuarterMixin, ListView):
         qp = self.request.GET.copy()
         qp.pop("page", None)
 
-        context.update({
-            "filter_q":    self.request.GET.get("q", ""),
-            "querystring": qp.urlencode(),
-        })
+        context.update(
+            {
+                "filter_q": self.request.GET.get("q", ""),
+                "querystring": qp.urlencode(),
+            }
+        )
 
         return context

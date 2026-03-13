@@ -18,7 +18,7 @@ from django.views.generic import (
     UpdateView,
 )
 
-from apps.authentication.mixins import TeacherRequiredMixin, StudentRequiredMixin
+from apps.authentication.mixins import StudentRequiredMixin, TeacherRequiredMixin
 from apps.curriculum.models import GradeSubject
 
 from ..forms import (
@@ -151,7 +151,7 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
         )
 
     def get(self, request, grade_subject_pk, pk):
-        quiz          = get_object_or_404(Quiz, pk=pk)
+        quiz = get_object_or_404(Quiz, pk=pk)
         grade_subject = self._get_grade_subject()
 
         if not quiz.is_available:
@@ -173,9 +173,7 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
             attempt = existing_attempt
         else:
             attempt_number = (
-                Attempt.objects.filter(
-                    student=request.user, quiz=quiz
-                ).count() + 1
+                Attempt.objects.filter(student=request.user, quiz=quiz).count() + 1
             )
             attempt = Attempt.objects.create(
                 student=request.user,
@@ -185,20 +183,22 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
                 user_agent=request.META.get("HTTP_USER_AGENT", ""),
             )
 
-        questions = (
-            quiz.quiz_questions
-            .select_related("question_content_type")
-            .order_by("order")
-        )
+        questions = quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
 
-        return render(request, self.template_name, {
-            "quiz":            quiz,
-            "attempt":         attempt,
-            "questions":       questions,
-            "grade_subject":   grade_subject,
-            "back_url":        self._get_back_url(),
-            "time_remaining":  attempt.time_remaining,
-        })
+        return render(
+            request,
+            self.template_name,
+            {
+                "quiz": quiz,
+                "attempt": attempt,
+                "questions": questions,
+                "grade_subject": grade_subject,
+                "back_url": self._get_back_url(),
+                "time_remaining": attempt.time_remaining,
+            },
+        )
 
     def post(self, request, grade_subject_pk, pk):
         quiz = get_object_or_404(Quiz, pk=pk)
@@ -214,15 +214,14 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
             attempt.submit(auto_submit=True)
             messages.warning(request, "Time is up. Quiz auto-submitted.")
             return redirect(
-                reverse("assessment:quiz:quiz-result",
-                        kwargs={"attempt_id": attempt.pk})
+                reverse(
+                    "assessment:quiz:quiz-result", kwargs={"attempt_id": attempt.pk}
+                )
             )
 
-        questions = (
-            quiz.quiz_questions
-            .select_related("question_content_type")
-            .order_by("order")
-        )
+        questions = quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
 
         with transaction.atomic():
             for qq in questions:
@@ -252,9 +251,9 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
                     selected_ids = request.POST.getlist(field_name)
                     if selected_ids:
                         valid_ids = list(
-                            question.choices.filter(
-                                pk__in=selected_ids
-                            ).values_list("pk", flat=True)
+                            question.choices.filter(pk__in=selected_ids).values_list(
+                                "pk", flat=True
+                            )
                         )
                         answer.selected_choices.set(valid_ids)
                         answer.save(update_fields=["updated_at"])
@@ -270,13 +269,13 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
 
         messages.success(request, "Quiz submitted successfully.")
         return redirect(
-            reverse("assessment:quiz:quiz-result",
-                    kwargs={"attempt_id": attempt.pk})
+            reverse("assessment:quiz:quiz-result", kwargs={"attempt_id": attempt.pk})
         )
+
 
 class QuizAddQuestionView(TeacherRequiredMixin, FormView):
     template_name = "apps/assessement/quizzes/add_question.html"
-    form_class    = AddQuestionToQuizForm
+    form_class = AddQuestionToQuizForm
 
     def dispatch(self, request, *args, **kwargs):
         self.quiz = get_object_or_404(
@@ -299,9 +298,9 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        question_data   = form.cleaned_data["question"]
-        q_type          = question_data["q_type"]
-        question        = question_data["question"]
+        question_data = form.cleaned_data["question"]
+        q_type = question_data["q_type"]
+        question = question_data["question"]
         points_override = form.cleaned_data.get("points_override")
 
         content_type = ContentType.objects.get_for_model(question)
@@ -317,11 +316,11 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
             return self.form_invalid(form)
 
         next_order = (
-            QuizQuestion.objects
-            .filter(quiz=self.quiz)
+            QuizQuestion.objects.filter(quiz=self.quiz)
             .order_by("-order")
             .values_list("order", flat=True)
-            .first() or 0
+            .first()
+            or 0
         ) + 1
 
         with transaction.atomic():
@@ -345,11 +344,9 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["quiz"] = self.quiz
-        context["quiz_questions"] = (
-            self.quiz.quiz_questions
-            .select_related("question_content_type")
-            .order_by("order")
-        )
+        context["quiz_questions"] = self.quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
         return context
 
 
@@ -359,12 +356,12 @@ class QuizResultView(StudentRequiredMixin, View):
     def get(self, request, attempt_id):
         attempt = get_object_or_404(
             Attempt.objects.select_related(
-                'quiz',
-                'quiz__grade_subject',
-                'quiz__grade_subject__grade',
-                'quiz__grade_subject__grade__level',
-                'quiz__grade_subject__subject',
-                'student',
+                "quiz",
+                "quiz__grade_subject",
+                "quiz__grade_subject__grade",
+                "quiz__grade_subject__grade__level",
+                "quiz__grade_subject__subject",
+                "student",
             ),
             pk=attempt_id,
             student=request.user,
@@ -374,16 +371,14 @@ class QuizResultView(StudentRequiredMixin, View):
         quiz = attempt.quiz
 
         # ── Build question + answer pairs ──────────────────────────────
-        quiz_questions = (
-            quiz.quiz_questions
-            .select_related('question_content_type')
-            .order_by('order')
-        )
+        quiz_questions = quiz.quiz_questions.select_related(
+            "question_content_type"
+        ).order_by("order")
 
         # Bulk-fetch all answers for this attempt — no N+1
         answers_map = {
             (str(a.question_content_type_id), str(a.question_object_id)): a
-            for a in attempt.answers.prefetch_related('selected_choices').all()
+            for a in attempt.answers.prefetch_related("selected_choices").all()
         }
 
         question_results = []
@@ -392,56 +387,63 @@ class QuizResultView(StudentRequiredMixin, View):
             if question is None:
                 continue
 
-            ct_id  = str(qq.question_content_type_id)
+            ct_id = str(qq.question_content_type_id)
             obj_id = str(qq.question_object_id)
             answer = answers_map.get((ct_id, obj_id))
 
-            question_results.append({
-                'order':            qq.order,
-                'question':         question,
-                'question_type':    qq.question_type,
-                'effective_points': qq.effective_points,
-                'answer':           answer,
-                'is_correct':       answer.is_correct if answer else None,
-                'points_earned':    answer.points_earned if answer else 0,
-                # Type-specific helpers
-                'selected_choices': (
-                    answer.selected_choices.all()
-                    if answer and qq.question_type == 'mcq'
-                    else []
-                ),
-                'answer_boolean': (
-                    answer.answer_boolean
-                    if answer and qq.question_type == 'tf'
-                    else None
-                ),
-                'answer_text': (
-                    answer.answer_text
-                    if answer and qq.question_type == 'essay'
-                    else ''
-                ),
-            })
+            question_results.append(
+                {
+                    "order": qq.order,
+                    "question": question,
+                    "question_type": qq.question_type,
+                    "effective_points": qq.effective_points,
+                    "answer": answer,
+                    "is_correct": answer.is_correct if answer else None,
+                    "points_earned": answer.points_earned if answer else 0,
+                    # Type-specific helpers
+                    "selected_choices": (
+                        answer.selected_choices.all()
+                        if answer and qq.question_type == "mcq"
+                        else []
+                    ),
+                    "answer_boolean": (
+                        answer.answer_boolean
+                        if answer and qq.question_type == "tf"
+                        else None
+                    ),
+                    "answer_text": (
+                        answer.answer_text
+                        if answer and qq.question_type == "essay"
+                        else ""
+                    ),
+                }
+            )
 
         # ── Back URL ──────────────────────────────────────────────────
         back_url = None
         if quiz.grade_subject:
             back_url = reverse(
-                'curriculum:grade-subject:grade-subject-quizzes-list',
-                kwargs={'pk': quiz.grade_subject.pk},
+                "curriculum:grade-subject:grade-subject-quizzes-list",
+                kwargs={"pk": quiz.grade_subject.pk},
             )
 
-        return render(request, self.template_name, {
-            'attempt':          attempt,
-            'quiz':             quiz,
-            'question_results': question_results,
-            'is_passed':        attempt.is_passed,
-            'grade_letter':     attempt.get_grade_letter(),
-            'back_url':         back_url,
-            'grade_subject':    quiz.grade_subject,
-        })
-    
+        return render(
+            request,
+            self.template_name,
+            {
+                "attempt": attempt,
+                "quiz": quiz,
+                "question_results": question_results,
+                "is_passed": attempt.is_passed,
+                "grade_letter": attempt.get_grade_letter(),
+                "back_url": back_url,
+                "grade_subject": quiz.grade_subject,
+            },
+        )
+
+
 class QuizAttemptsView(StudentRequiredMixin, ListView):
-    template_name       = "apps/assessement/quizzes/attempts.html"
+    template_name = "apps/assessement/quizzes/attempts.html"
     context_object_name = "attempts"
 
     def dispatch(self, request, *args, **kwargs):
@@ -449,16 +451,14 @@ class QuizAttemptsView(StudentRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return (
-            Attempt.objects
-            .filter(student=self.request.user, quiz=self.quiz)
-            .order_by("-started_at")
-        )
+        return Attempt.objects.filter(
+            student=self.request.user, quiz=self.quiz
+        ).order_by("-started_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["quiz"]      = self.quiz
-        context["back_url"]  = (
+        context["quiz"] = self.quiz
+        context["back_url"] = (
             reverse(
                 "curriculum:grade-subject:grade-subject-quizzes-list",
                 kwargs={"pk": self.quiz.grade_subject.pk},
@@ -467,7 +467,8 @@ class QuizAttemptsView(StudentRequiredMixin, ListView):
             else None
         )
         return context
-    
+
+
 class QuizDetailView(TeacherRequiredMixin, DetailView):
     model = Quiz
     template_name = "apps/assessement/quizzes/detail.html"

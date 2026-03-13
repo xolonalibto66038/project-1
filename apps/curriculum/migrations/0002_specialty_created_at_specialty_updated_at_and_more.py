@@ -9,24 +9,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('curriculum', '0001_initial'),
+        ("curriculum", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='specialty',
-            name='created_at',
-            field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now),
+            model_name="specialty",
+            name="created_at",
+            field=models.DateTimeField(
+                auto_now_add=True, db_index=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='specialty',
-            name='updated_at',
+            model_name="specialty",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AlterField(
-            model_name='specialty',
-            name='id',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+            model_name="specialty",
+            name="id",
+            field=models.UUIDField(
+                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+            ),
         ),
     ]

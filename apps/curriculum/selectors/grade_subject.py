@@ -27,8 +27,8 @@ def get_grade_subject_by_pk(pk, term=None):
                 filter=Q(courses__is_active=True) & term_filter,
                 distinct=True,
             ),
-            quizzes_count = Count(
-                'quizzes',
+            quizzes_count=Count(
+                "quizzes",
                 filter=Q(quizzes__is_published=True),
                 distinct=True,
             ),

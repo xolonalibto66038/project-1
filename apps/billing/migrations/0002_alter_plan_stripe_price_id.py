@@ -6,13 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('billing', '0001_initial'),
+        ("billing", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='plan',
-            name='stripe_price_id',
-            field=models.CharField(blank=True, default=None, help_text='Set this after creating the price in Stripe dashboard.', max_length=100, null=True, unique=True),
+            model_name="plan",
+            name="stripe_price_id",
+            field=models.CharField(
+                blank=True,
+                default=None,
+                help_text="Set this after creating the price in Stripe dashboard.",
+                max_length=100,
+                null=True,
+                unique=True,
+            ),
         ),
     ]

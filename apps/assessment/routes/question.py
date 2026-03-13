@@ -6,9 +6,9 @@ from ..views.question import (
     MultipleChoiceQuestionCreateView,
     MultipleChoiceQuestionUpdateView,
     QuestionListView,
+    QuestionTypeSelectView,
     TrueFalseQuestionCreateView,
     TrueFalseQuestionUpdateView,
-    QuestionTypeSelectView
 )
 
 app_name = "question"
@@ -49,6 +49,9 @@ urlpatterns = [
         QuestionListView.as_view(),
         name="question-list",
     ),
-    path("questions/create/", QuestionTypeSelectView.as_view(), name="question-type-select"),
-
+    path(
+        "questions/create/",
+        QuestionTypeSelectView.as_view(),
+        name="question-type-select",
+    ),
 ]

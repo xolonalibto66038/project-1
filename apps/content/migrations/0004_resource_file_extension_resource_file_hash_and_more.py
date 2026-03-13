@@ -6,33 +6,64 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0003_resource_created_by_videoresource_created_by'),
+        ("content", "0003_resource_created_by_videoresource_created_by"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resource',
-            name='file_extension',
-            field=models.CharField(blank=True, editable=False, help_text='File extension (without dot)', max_length=10, verbose_name='File Extension'),
+            model_name="resource",
+            name="file_extension",
+            field=models.CharField(
+                blank=True,
+                editable=False,
+                help_text="File extension (without dot)",
+                max_length=10,
+                verbose_name="File Extension",
+            ),
         ),
         migrations.AddField(
-            model_name='resource',
-            name='file_hash',
-            field=models.CharField(blank=True, db_index=True, editable=False, help_text='SHA-256 hash for file integrity verification', max_length=64, verbose_name='File Hash (SHA-256)'),
+            model_name="resource",
+            name="file_hash",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                editable=False,
+                help_text="SHA-256 hash for file integrity verification",
+                max_length=64,
+                verbose_name="File Hash (SHA-256)",
+            ),
         ),
         migrations.AddField(
-            model_name='resource',
-            name='file_mimetype',
-            field=models.CharField(blank=True, editable=False, help_text='File MIME type for proper handling', max_length=100, verbose_name='MIME Type'),
+            model_name="resource",
+            name="file_mimetype",
+            field=models.CharField(
+                blank=True,
+                editable=False,
+                help_text="File MIME type for proper handling",
+                max_length=100,
+                verbose_name="MIME Type",
+            ),
         ),
         migrations.AddField(
-            model_name='resource',
-            name='file_size',
-            field=models.PositiveIntegerField(blank=True, editable=False, help_text='File size in bytes, automatically calculated', null=True, verbose_name='File Size (bytes)'),
+            model_name="resource",
+            name="file_size",
+            field=models.PositiveIntegerField(
+                blank=True,
+                editable=False,
+                help_text="File size in bytes, automatically calculated",
+                null=True,
+                verbose_name="File Size (bytes)",
+            ),
         ),
         migrations.AddField(
-            model_name='resource',
-            name='original_filename',
-            field=models.CharField(blank=True, editable=False, help_text='Original name of the uploaded file', max_length=255, verbose_name='Original Filename'),
+            model_name="resource",
+            name="original_filename",
+            field=models.CharField(
+                blank=True,
+                editable=False,
+                help_text="Original name of the uploaded file",
+                max_length=255,
+                verbose_name="Original Filename",
+            ),
         ),
     ]

@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('curriculum', '0005_seed_subjects'),
-        ('curriculum', '0006_seed_specialities'),
+        ("curriculum", "0005_seed_subjects"),
+        ("curriculum", "0006_seed_specialities"),
     ]
 
-    operations = [
-    ]
+    operations = []

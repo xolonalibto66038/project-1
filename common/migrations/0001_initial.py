@@ -11,24 +11,56 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('taggit', '0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        (
+            "taggit",
+            "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx",
+        ),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UUIDTaggedItem',
+            name="UUIDTaggedItem",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('object_id', models.UUIDField(help_text='ID of the object being tagged', verbose_name='Object ID')),
-                ('content_type', models.ForeignKey(help_text='Type of object being rated', on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype', verbose_name='Content Type')),
-                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='uuid_tagged_items', to='taggit.tag')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "object_id",
+                    models.UUIDField(
+                        help_text="ID of the object being tagged",
+                        verbose_name="Object ID",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        help_text="Type of object being rated",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                        verbose_name="Content Type",
+                    ),
+                ),
+                (
+                    "tag",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="uuid_tagged_items",
+                        to="taggit.tag",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': '05 - UUIDTag',
-                'verbose_name_plural': '05 - UUIDTags',
+                "verbose_name": "05 - UUIDTag",
+                "verbose_name_plural": "05 - UUIDTags",
             },
         ),
     ]

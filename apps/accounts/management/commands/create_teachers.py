@@ -5,7 +5,6 @@ from apps.accounts.choices import Gender, UserRole, Wilaya
 from apps.accounts.models import CustomUser
 from apps.curriculum.models import Level, Subject
 
-
 DEFAULT_PASSWORD = "Pass.123"
 
 TEACHERS = [
@@ -15,7 +14,7 @@ TEACHERS = [
         "last_name": "Messaoudi",
         "gender": Gender.MALE,
         "wilaya": Wilaya.CONSTANTINE,
-        "level_name": "moyen",       # must match Level name in DB
+        "level_name": "moyen",  # must match Level name in DB
         "subject_name": "Mathematics",  # must match Subject name in DB
         "bio": "10 years teaching Maths in Moyen.",
         "hour_price": 500.00,
@@ -47,7 +46,9 @@ class Command(BaseCommand):
             email = data["email"]
 
             if CustomUser.objects.filter(email=email).exists():
-                self.stdout.write(self.style.WARNING(f"  [SKIP] {email} already exists."))
+                self.stdout.write(
+                    self.style.WARNING(f"  [SKIP] {email} already exists.")
+                )
                 skipped_count += 1
                 continue
 
@@ -69,7 +70,9 @@ class Command(BaseCommand):
             subject = None
             if data.get("subject_name"):
                 try:
-                    subject = Subject.objects.get(name=data["subject_name"], level=level)
+                    subject = Subject.objects.get(
+                        name=data["subject_name"], level=level
+                    )
                 except Subject.DoesNotExist:
                     self.stdout.write(
                         self.style.ERROR(

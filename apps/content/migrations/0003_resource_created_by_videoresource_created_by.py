@@ -8,19 +8,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0002_chapter_created_at_chapter_updated_at_and_more'),
+        ("content", "0002_chapter_created_at_chapter_updated_at_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='resource',
-            name='created_by',
-            field=models.ForeignKey(help_text='The teacher who created this resource.', limit_choices_to={'role': 'teacher'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='resources', to=settings.AUTH_USER_MODEL, verbose_name='Author'),
+            model_name="resource",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="The teacher who created this resource.",
+                limit_choices_to={"role": "teacher"},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="resources",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Author",
+            ),
         ),
         migrations.AddField(
-            model_name='videoresource',
-            name='created_by',
-            field=models.ForeignKey(help_text='The teacher who created this resource.', limit_choices_to={'role': 'teacher'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='videos', to=settings.AUTH_USER_MODEL, verbose_name='Author'),
+            model_name="videoresource",
+            name="created_by",
+            field=models.ForeignKey(
+                help_text="The teacher who created this resource.",
+                limit_choices_to={"role": "teacher"},
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="videos",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Author",
+            ),
         ),
     ]

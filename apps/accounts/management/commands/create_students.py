@@ -5,7 +5,6 @@ from apps.accounts.choices import Gender, UserRole, Wilaya
 from apps.accounts.models import CustomUser
 from apps.curriculum.models import Grade, Specialty
 
-
 DEFAULT_PASSWORD = "Pass.123"
 
 STUDENTS = [
@@ -15,8 +14,8 @@ STUDENTS = [
         "last_name": "Benali",
         "gender": Gender.MALE,
         "wilaya": Wilaya.ALGIERS,
-        "grade_name": "1st Year Middle",   # must match Grade name in DB
-        "specialty_name": None,              # None for Primaire/Moyen
+        "grade_name": "1st Year Middle",  # must match Grade name in DB
+        "specialty_name": None,  # None for Primaire/Moyen
         "bio": "Passionate about mathematics.",
     },
     {
@@ -43,7 +42,9 @@ class Command(BaseCommand):
             email = data["email"]
 
             if CustomUser.objects.filter(email=email).exists():
-                self.stdout.write(self.style.WARNING(f"  [SKIP] {email} already exists."))
+                self.stdout.write(
+                    self.style.WARNING(f"  [SKIP] {email} already exists.")
+                )
                 skipped_count += 1
                 continue
 

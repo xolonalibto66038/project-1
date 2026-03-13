@@ -6,16 +6,24 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('feedback', '0001_initial'),
+        ("feedback", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='interaction',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Interaction', 'verbose_name_plural': 'Interactions'},
+            name="interaction",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Interaction",
+                "verbose_name_plural": "Interactions",
+            },
         ),
         migrations.AlterModelOptions(
-            name='rating',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Rating', 'verbose_name_plural': 'Ratings'},
+            name="rating",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Rating",
+                "verbose_name_plural": "Ratings",
+            },
         ),
     ]

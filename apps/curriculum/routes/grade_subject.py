@@ -3,8 +3,8 @@ from django.urls import path
 from ..views import (  # GradeSubjectResourceListView,
     GradeSubjectCoursesByQuarterView,
     GradeSubjectDetailView,
+    GradeSubjectQuizzesView,
     GradeSubjectResourceListByTermView,
-    GradeSubjectQuizzesView
 )
 
 app_name = "grade-subject"
@@ -47,5 +47,4 @@ urlpatterns = [
         GradeSubjectQuizzesView.as_view(),
         name="grade-subject-quizzes-list",
     ),
-
 ]

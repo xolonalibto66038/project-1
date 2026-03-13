@@ -13,28 +13,93 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ContentProgress',
+            name="ContentProgress",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('object_id', models.UUIDField()),
-                ('is_completed', models.BooleanField(default=False)),
-                ('first_viewed_at', models.DateTimeField(default=django.utils.timezone.now, help_text='Timestamp when the student first accessed this content.', verbose_name='First Viewed At')),
-                ('completed_at', models.DateTimeField(blank=True, help_text='Timestamp when the student completed this content.', null=True, verbose_name='Completed At')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='content_progress', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("object_id", models.UUIDField()),
+                ("is_completed", models.BooleanField(default=False)),
+                (
+                    "first_viewed_at",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now,
+                        help_text="Timestamp when the student first accessed this content.",
+                        verbose_name="First Viewed At",
+                    ),
+                ),
+                (
+                    "completed_at",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Timestamp when the student completed this content.",
+                        null=True,
+                        verbose_name="Completed At",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="content_progress",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['student', 'content_type'], name='progress_co_student_b858e3_idx'), models.Index(fields=['content_type', 'object_id'], name='progress_co_content_0c2e02_idx'), models.Index(fields=['student', 'is_completed'], name='progress_co_student_58773e_idx'), models.Index(fields=['completed_at'], name='progress_co_complet_999f5f_idx')],
-                'constraints': [models.CheckConstraint(condition=models.Q(models.Q(('completed_at__isnull', True), ('is_completed', False)), models.Q(('completed_at__isnull', False), ('is_completed', True)), _connector='OR'), name='completed_state_consistency')],
-                'unique_together': {('student', 'content_type', 'object_id')},
+                "indexes": [
+                    models.Index(
+                        fields=["student", "content_type"],
+                        name="progress_co_student_b858e3_idx",
+                    ),
+                    models.Index(
+                        fields=["content_type", "object_id"],
+                        name="progress_co_content_0c2e02_idx",
+                    ),
+                    models.Index(
+                        fields=["student", "is_completed"],
+                        name="progress_co_student_58773e_idx",
+                    ),
+                    models.Index(
+                        fields=["completed_at"], name="progress_co_complet_999f5f_idx"
+                    ),
+                ],
+                "constraints": [
+                    models.CheckConstraint(
+                        condition=models.Q(
+                            models.Q(
+                                ("completed_at__isnull", True), ("is_completed", False)
+                            ),
+                            models.Q(
+                                ("completed_at__isnull", False), ("is_completed", True)
+                            ),
+                            _connector="OR",
+                        ),
+                        name="completed_state_consistency",
+                    )
+                ],
+                "unique_together": {("student", "content_type", "object_id")},
             },
         ),
     ]

@@ -14,7 +14,7 @@ class GradeSubjectAdmin(admin.ModelAdmin):
         "subject",
         "specialty",
         "is_active",
-        "level_display",
+        "slug",
         "edit_button",
         "delete_button",
     )

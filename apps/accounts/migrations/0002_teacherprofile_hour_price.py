@@ -6,13 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0001_initial'),
+        ("accounts", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='teacherprofile',
-            name='hour_price',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Price per hour for tutoring sessions.', max_digits=6, verbose_name='Hourly Price'),
+            model_name="teacherprofile",
+            name="hour_price",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                help_text="Price per hour for tutoring sessions.",
+                max_digits=6,
+                verbose_name="Hourly Price",
+            ),
         ),
     ]

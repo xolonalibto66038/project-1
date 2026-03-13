@@ -1,7 +1,6 @@
 from itertools import chain
 from operator import attrgetter
 
-from django.views.generic import TemplateView
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -14,6 +13,7 @@ from django.views.generic import (
     DetailView,
     FormView,
     ListView,
+    TemplateView,
     UpdateView,
 )
 

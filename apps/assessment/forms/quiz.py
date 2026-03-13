@@ -65,11 +65,12 @@ class QuizForm(forms.ModelForm):
         #     raise ValidationError(
         #         "Quiz must be linked to either a Subject or a Course, not both."
         #     )
-        
+
         # Only reject if BOTH are set — having neither is now fine
         if grade_subject and course:
-            raise ValidationError("Quiz cannot be linked to both a Subject and a Course.")
-
+            raise ValidationError(
+                "Quiz cannot be linked to both a Subject and a Course."
+            )
 
         return cleaned_data
 

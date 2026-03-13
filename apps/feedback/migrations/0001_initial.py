@@ -12,68 +12,266 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Bookmark',
+            name="Bookmark",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('object_id', models.UUIDField(blank=True, help_text='ID of the object being bookmarked', verbose_name='Object ID')),
-                ('note', models.TextField(blank=True, default='', help_text='Optional note the student can attach to the bookmark.', verbose_name='Personal Note')),
-                ('content_type', models.ForeignKey(blank=True, help_text='Type of object being bookmarked', null=True, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype', verbose_name='Content Type')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarks', to=settings.AUTH_USER_MODEL, verbose_name='Student')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "object_id",
+                    models.UUIDField(
+                        blank=True,
+                        help_text="ID of the object being bookmarked",
+                        verbose_name="Object ID",
+                    ),
+                ),
+                (
+                    "note",
+                    models.TextField(
+                        blank=True,
+                        default="",
+                        help_text="Optional note the student can attach to the bookmark.",
+                        verbose_name="Personal Note",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Type of object being bookmarked",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                        verbose_name="Content Type",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bookmarks",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Student",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Bookmark',
-                'verbose_name_plural': 'Bookmarks',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['content_type', 'object_id'], name='feedback_bo_content_99b74e_idx'), models.Index(fields=['student', 'content_type'], name='feedback_bo_student_b2866c_idx'), models.Index(fields=['student', '-created_at'], name='feedback_bo_student_b6493e_idx')],
-                'constraints': [models.UniqueConstraint(fields=('student', 'content_type', 'object_id'), name='unique_bookmark_per_student_object')],
+                "verbose_name": "Bookmark",
+                "verbose_name_plural": "Bookmarks",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["content_type", "object_id"],
+                        name="feedback_bo_content_99b74e_idx",
+                    ),
+                    models.Index(
+                        fields=["student", "content_type"],
+                        name="feedback_bo_student_b2866c_idx",
+                    ),
+                    models.Index(
+                        fields=["student", "-created_at"],
+                        name="feedback_bo_student_b6493e_idx",
+                    ),
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("student", "content_type", "object_id"),
+                        name="unique_bookmark_per_student_object",
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='Interaction',
+            name="Interaction",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('object_id', models.UUIDField(blank=True, help_text='ID of the object being rated', null=True, verbose_name='Object ID')),
-                ('interaction_type', models.CharField(choices=[('view', 'View'), ('download', 'Download'), ('rate', 'Rate'), ('bookmark', 'Bookmark')], default='rate', max_length=20)),
-                ('content_type', models.ForeignKey(blank=True, help_text='Type of object being rated', null=True, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype', verbose_name='Content Type')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='interactions', to=settings.AUTH_USER_MODEL, verbose_name='Student')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "object_id",
+                    models.UUIDField(
+                        blank=True,
+                        help_text="ID of the object being rated",
+                        null=True,
+                        verbose_name="Object ID",
+                    ),
+                ),
+                (
+                    "interaction_type",
+                    models.CharField(
+                        choices=[
+                            ("view", "View"),
+                            ("download", "Download"),
+                            ("rate", "Rate"),
+                            ("bookmark", "Bookmark"),
+                        ],
+                        default="rate",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Type of object being rated",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                        verbose_name="Content Type",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="interactions",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Student",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': '01 - Interaction',
-                'verbose_name_plural': '01 - Interactions',
-                'db_table': 'user_interactions',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['student', 'interaction_type'], name='user_intera_student_0c339f_idx'), models.Index(fields=['content_type', 'object_id', 'interaction_type'], name='user_intera_content_40505e_idx')],
+                "verbose_name": "01 - Interaction",
+                "verbose_name_plural": "01 - Interactions",
+                "db_table": "user_interactions",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["student", "interaction_type"],
+                        name="user_intera_student_0c339f_idx",
+                    ),
+                    models.Index(
+                        fields=["content_type", "object_id", "interaction_type"],
+                        name="user_intera_content_40505e_idx",
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='Rating',
+            name="Rating",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('value', models.PositiveSmallIntegerField(choices=[(None, 'Rate this'), (1, '★☆☆☆☆'), (2, '★★☆☆☆'), (3, '★★★☆☆'), (4, '★★★★☆'), (5, '★★★★★')], help_text='Rating value from the predefined choices', verbose_name='Rating Value')),
-                ('object_id', models.UUIDField(help_text='ID of the object being rated', verbose_name='Object ID')),
-                ('active', models.BooleanField(default=True, help_text='Whether this rating is active (soft delete)', verbose_name='Active')),
-                ('active_updated_at', models.DateTimeField(blank=True, help_text='Timestamp when active status was last changed', null=True, verbose_name='Active Status Updated At')),
-                ('content_type', models.ForeignKey(help_text='Type of object being rated', on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype', verbose_name='Content Type')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ratings', to=settings.AUTH_USER_MODEL, verbose_name='Student')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "value",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (None, "Rate this"),
+                            (1, "★☆☆☆☆"),
+                            (2, "★★☆☆☆"),
+                            (3, "★★★☆☆"),
+                            (4, "★★★★☆"),
+                            (5, "★★★★★"),
+                        ],
+                        help_text="Rating value from the predefined choices",
+                        verbose_name="Rating Value",
+                    ),
+                ),
+                (
+                    "object_id",
+                    models.UUIDField(
+                        help_text="ID of the object being rated",
+                        verbose_name="Object ID",
+                    ),
+                ),
+                (
+                    "active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Whether this rating is active (soft delete)",
+                        verbose_name="Active",
+                    ),
+                ),
+                (
+                    "active_updated_at",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="Timestamp when active status was last changed",
+                        null=True,
+                        verbose_name="Active Status Updated At",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        help_text="Type of object being rated",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                        verbose_name="Content Type",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ratings",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Student",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': '00 - Rating',
-                'verbose_name_plural': '00 - Ratings',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['content_type', 'object_id'], name='feedback_ra_content_3353c8_idx'), models.Index(fields=['student', 'active'], name='feedback_ra_student_873b52_idx'), models.Index(fields=['active', 'created_at'], name='feedback_ra_active_6de21e_idx')],
-                'constraints': [models.UniqueConstraint(condition=models.Q(('active', True)), fields=('student', 'content_type', 'object_id'), name='unique_user_rating_per_object', violation_error_message='Student has already rated this object.'), models.CheckConstraint(condition=models.Q(('value__gte', 1)), name='rating_value_positive', violation_error_message='Rating value must be positive.')],
+                "verbose_name": "00 - Rating",
+                "verbose_name_plural": "00 - Ratings",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["content_type", "object_id"],
+                        name="feedback_ra_content_3353c8_idx",
+                    ),
+                    models.Index(
+                        fields=["student", "active"],
+                        name="feedback_ra_student_873b52_idx",
+                    ),
+                    models.Index(
+                        fields=["active", "created_at"],
+                        name="feedback_ra_active_6de21e_idx",
+                    ),
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        condition=models.Q(("active", True)),
+                        fields=("student", "content_type", "object_id"),
+                        name="unique_user_rating_per_object",
+                        violation_error_message="Student has already rated this object.",
+                    ),
+                    models.CheckConstraint(
+                        condition=models.Q(("value__gte", 1)),
+                        name="rating_value_positive",
+                        violation_error_message="Rating value must be positive.",
+                    ),
+                ],
             },
         ),
     ]

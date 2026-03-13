@@ -1,10 +1,11 @@
 from django import forms
+
 from ..models import EssayQuestion, MultipleChoiceQuestion, TrueFalseQuestion
 
 QUESTION_MODELS = {
-    "mcq":   (MultipleChoiceQuestion, "Multiple Choice"),
-    "essay": (EssayQuestion,          "Essay"),
-    "tf":    (TrueFalseQuestion,      "True / False"),
+    "mcq": (MultipleChoiceQuestion, "Multiple Choice"),
+    "essay": (EssayQuestion, "Essay"),
+    "tf": (TrueFalseQuestion, "True / False"),
 }
 
 
@@ -29,11 +30,7 @@ class AddQuestionToQuizForm(forms.Form):
         choices = [("", "— Select a question —")]
 
         for q_type, (model, label) in QUESTION_MODELS.items():
-            questions = (
-                model.objects
-                .filter(created_by=teacher)
-                .order_by("-created_at")
-            )
+            questions = model.objects.filter(created_by=teacher).order_by("-created_at")
             for q in questions:
                 # Encode type + id together: "mcq:uuid"
                 value = f"{q_type}:{q.id}"
@@ -65,9 +62,10 @@ class AddQuestionToQuizForm(forms.Form):
 
         # Return a dict so form_valid has everything it needs
         return {
-            "q_type":   q_type,
+            "q_type": q_type,
             "question": question,
         }
+
 
 # from django import forms
 # from django.contrib.contenttypes.models import ContentType
