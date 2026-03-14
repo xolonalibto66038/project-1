@@ -166,11 +166,149 @@ class TeacherResourceListView(TeacherRequiredMixin, ListView):
         return context
 
 
+# class ResourceDetailView(DetailView):
+#     """
+#     Generic resource detail view.
+#     Works for any ResourceType — template switches on resource.resource_type.
+#     Currently wired for EXERCISE; extend template for other types.
+#     """
+
+#     model = Resource
+#     context_object_name = "resource"
+#     pk_url_kwarg = "pk"
+
+#     def get_template_names(self):
+#         """
+#         Route to type-specific template.
+#         Fallback: content/resources/detail.html
+#         """
+#         type_template_map = {
+#             ResourceType.EXERCISE: "apps/content/resources/exercise_detail.html",
+#             ResourceType.LESSON: "apps/content/resources/lesson_detail.html",
+#             ResourceType.HOMEWORK: "apps/content/resources/homework_detail.html",
+#             ResourceType.TEST: "apps/content/resources/test_detail.html",
+#             ResourceType.EXAM: "apps/content/resources/exam_detail.html",
+#             ResourceType.PAST_PAPER: "apps/content/resources/exam_detail.html",
+#             ResourceType.MOCK_EXAM: "apps/content/resources/exam_detail.html",
+#             ResourceType.FOREIGN_BOOK: "apps/content/resources/book_detail.html",
+#             ResourceType.TEXTBOOK: "apps/content/resources/book_detail.html",
+#             ResourceType.STUDY_GUIDE: "apps/content/resources/book_detail.html",
+#         }
+#         resource_type = getattr(self, "_resource_type", None)
+#         return [
+#             type_template_map.get(resource_type, "apps/content/resources/detail.html")
+#         ]
+
+#     def get(self, request, *args, **kwargs):
+#         response = super().get(request, *args, **kwargs)
+#         resource = self.object
+#         user = request.user
+
+#         # ── Increment view count for everyone, deduped per session ──
+#         session_key = f"viewed_resource_{resource.pk}"
+#         if not request.session.get(session_key, False):
+#             resource.increment_view_count()
+#             request.session[session_key] = True
+
+#         resource.refresh_from_db(fields=["view_count", "download_count"])
+
+#         # ── Track progress for authenticated students ──
+#         if user.is_authenticated and getattr(user, "is_student", False):
+#             self._progress, _ = get_or_create_resource_progress(user, resource)
+
+#         return response
+
+#     def get_object(self, queryset=None):
+#         try:
+#             resource = get_resource_for_detail(self.kwargs["pk"])
+#         except Resource.DoesNotExist:
+#             raise Http404("Resource not found or not published.")
+
+#         # Pre-fetch the full hierarchy so the recommender's live-extraction
+#         # fallback doesn't fire extra queries if the vector is missing.
+#         # If get_resource_for_detail already does select_related, this is a no-op.
+#         Resource.objects.filter(pk=resource.pk).select_related(
+#             "course__chapter__grade_subject__grade__level",
+#             "course__chapter__grade_subject__subject",
+#             "course__chapter__grade_subject__specialty",
+#             "course__grade_subject__grade__level",
+#             "course__grade_subject__subject",
+#             "course__grade_subject__specialty",
+#             "grade_subject__grade__level",
+#             "grade_subject__subject",
+#             "grade_subject__specialty",
+#         )
+
+#         self._resource_type = resource.resource_type
+
+#         logger.info(
+#             "ResourceDetailView accessed",
+#             extra={
+#                 "user_id": (
+#                     self.request.user.id if self.request.user.is_authenticated else None
+#                 ),
+#                 "resource_pk": str(resource.pk),
+#                 "type": resource.resource_type,
+#             },
+#         )
+
+#         return resource
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         resource = self.object
+#         user = self.request.user
+
+#         # ── Breadcrumb context ────────────────────────────────────────────
+#         gs = resource.course.effective_grade_subject if resource.course else None
+#         grade_subject = gs.subject if gs else resource.grade_subject
+#         grade = gs.grade if gs else None
+#         level = (
+#             grade.level
+#             if grade
+#             else (grade_subject.subject.level if grade_subject.subject else None)
+#         )
+
+#         context.update(
+#             {
+#                 "grade_subject": grade_subject,
+#                 "grade": grade,
+#                 "level": level,
+#                 "course": resource.course,
+#             }
+#         )
+
+#         # ── Student-specific context ──────────────────────────────────────
+#         is_student = user.is_authenticated and getattr(user, "is_student", False)
+#         context["is_student"] = is_student
+
+#         if is_student:
+#             progress, _ = get_or_create_resource_progress(user, resource)
+#             context["progress"] = progress
+#             context["user_rating"] = get_resource_user_rating(user, resource)
+#         else:
+#             context["progress"] = None
+#             context["user_rating"] = None
+
+#         # ── Recommendations ───────────────────────────────────────────────────
+#         try:
+#             context["recommended_resources"] = _recommender.similar_to(
+#                 resource, limit=6
+#             )
+#         except Exception:
+#             # Never let a recommendation failure break the detail page.
+#             logger.exception(
+#                 "RecommendationService failed for Resource pk=%s", resource.pk
+#             )
+#             context["recommended_resources"] = []
+
+#         return context
+
+
 class ResourceDetailView(DetailView):
     """
     Generic resource detail view.
     Works for any ResourceType — template switches on resource.resource_type.
-    Currently wired for EXERCISE; extend template for other types.
     """
 
     model = Resource
@@ -178,10 +316,6 @@ class ResourceDetailView(DetailView):
     pk_url_kwarg = "pk"
 
     def get_template_names(self):
-        """
-        Route to type-specific template.
-        Fallback: content/resources/detail.html
-        """
         type_template_map = {
             ResourceType.EXERCISE: "apps/content/resources/exercise_detail.html",
             ResourceType.LESSON: "apps/content/resources/lesson_detail.html",
@@ -195,60 +329,98 @@ class ResourceDetailView(DetailView):
             ResourceType.STUDY_GUIDE: "apps/content/resources/book_detail.html",
         }
         resource_type = getattr(self, "_resource_type", None)
-        return [
-            type_template_map.get(resource_type, "apps/content/resources/detail.html")
-        ]
+        template = type_template_map.get(
+            resource_type, "apps/content/resources/detail.html"
+        )
+
+        logger.debug(
+            "resource.template_resolved",
+            extra={
+                "resource_type": resource_type,
+                "template": template,
+            },
+        )
+
+        return [template]
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
         resource = self.object
         user = request.user
 
-        # ── Increment view count for everyone, deduped per session ──
+        # ── View count ────────────────────────────────────────────────────────
         session_key = f"viewed_resource_{resource.pk}"
         if not request.session.get(session_key, False):
             resource.increment_view_count()
             request.session[session_key] = True
+            logger.debug(
+                "resource.view_count_incremented",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "resource_type": resource.resource_type,
+                },
+            )
+        else:
+            logger.debug(
+                "resource.view_count_skipped",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "reason": "already_viewed_in_session",
+                },
+            )
 
         resource.refresh_from_db(fields=["view_count", "download_count"])
 
-        # ── Track progress for authenticated students ──
+        # ── Progress tracking ─────────────────────────────────────────────────
         if user.is_authenticated and getattr(user, "is_student", False):
-            self._progress, _ = get_or_create_resource_progress(user, resource)
+            self._progress, created = get_or_create_resource_progress(user, resource)
+            logger.debug(
+                "resource.progress_fetched",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "user_id": str(user.pk),
+                    "created": created,
+                },
+            )
 
         return response
 
     def get_object(self, queryset=None):
-        try:
-            resource = get_resource_for_detail(self.kwargs["pk"])
-        except Resource.DoesNotExist:
-            raise Http404("Resource not found or not published.")
+        pk = self.kwargs["pk"]
+        user = self.request.user
 
-        # Pre-fetch the full hierarchy so the recommender's live-extraction
-        # fallback doesn't fire extra queries if the vector is missing.
-        # If get_resource_for_detail already does select_related, this is a no-op.
-        Resource.objects.filter(pk=resource.pk).select_related(
-            "course__chapter__grade_subject__grade__level",
-            "course__chapter__grade_subject__subject",
-            "course__chapter__grade_subject__specialty",
-            "course__grade_subject__grade__level",
-            "course__grade_subject__subject",
-            "course__grade_subject__specialty",
-            "grade_subject__grade__level",
-            "grade_subject__subject",
-            "grade_subject__specialty",
+        logger.debug(
+            "resource.detail_lookup_started",
+            extra={
+                "resource_id": str(pk),
+                "user_id": str(user.pk) if user.is_authenticated else None,
+            },
         )
+
+        try:
+            resource = get_resource_for_detail(pk)
+        except Resource.DoesNotExist:
+            logger.warning(
+                "resource.not_found",
+                extra={
+                    "resource_id": str(pk),
+                    "user_id": str(user.pk) if user.is_authenticated else None,
+                    "reason": "does_not_exist_or_unpublished",
+                },
+            )
+            raise Http404("Resource not found or not published.")
 
         self._resource_type = resource.resource_type
 
         logger.info(
-            "ResourceDetailView accessed",
+            "resource.detail_viewed",
             extra={
-                "user_id": (
-                    self.request.user.id if self.request.user.is_authenticated else None
-                ),
-                "resource_pk": str(resource.pk),
-                "type": resource.resource_type,
+                "resource_id": str(resource.pk),
+                "resource_type": resource.resource_type,
+                "resource_slug": resource.slug,
+                "user_id": str(user.pk) if user.is_authenticated else None,
+                "is_free": resource.is_free,
+                "status": resource.status,
             },
         )
 
@@ -259,14 +431,18 @@ class ResourceDetailView(DetailView):
         resource = self.object
         user = self.request.user
 
-        # ── Breadcrumb context ────────────────────────────────────────────
+        # ── Breadcrumb context ────────────────────────────────────────────────
         gs = resource.course.effective_grade_subject if resource.course else None
         grade_subject = gs.subject if gs else resource.grade_subject
         grade = gs.grade if gs else None
         level = (
             grade.level
             if grade
-            else (grade_subject.subject.level if grade_subject.subject else None)
+            else (
+                grade_subject.subject.level
+                if grade_subject and grade_subject.subject
+                else None
+            )
         )
 
         context.update(
@@ -278,7 +454,18 @@ class ResourceDetailView(DetailView):
             }
         )
 
-        # ── Student-specific context ──────────────────────────────────────
+        logger.debug(
+            "resource.breadcrumb_resolved",
+            extra={
+                "resource_id": str(resource.pk),
+                "grade_subject_id": str(grade_subject.pk) if grade_subject else None,
+                "grade_id": str(grade.pk) if grade else None,
+                "level_id": str(level.pk) if level else None,
+                "course_id": str(resource.course.pk) if resource.course else None,
+            },
+        )
+
+        # ── Student-specific context ──────────────────────────────────────────
         is_student = user.is_authenticated and getattr(user, "is_student", False)
         context["is_student"] = is_student
 
@@ -286,19 +473,39 @@ class ResourceDetailView(DetailView):
             progress, _ = get_or_create_resource_progress(user, resource)
             context["progress"] = progress
             context["user_rating"] = get_resource_user_rating(user, resource)
+
+            logger.debug(
+                "resource.student_context_loaded",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "user_id": str(user.pk),
+                    "progress_status": getattr(progress, "status", None),
+                    "has_rating": context["user_rating"] is not None,
+                },
+            )
         else:
             context["progress"] = None
             context["user_rating"] = None
 
         # ── Recommendations ───────────────────────────────────────────────────
         try:
-            context["recommended_resources"] = _recommender.similar_to(
-                resource, limit=6
+            recommendations = _recommender.similar_to(resource, limit=6)
+            context["recommended_resources"] = recommendations
+
+            logger.debug(
+                "resource.recommendations_loaded",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "count": len(recommendations),
+                },
             )
         except Exception:
-            # Never let a recommendation failure break the detail page.
             logger.exception(
-                "RecommendationService failed for Resource pk=%s", resource.pk
+                "resource.recommendations_failed",
+                extra={
+                    "resource_id": str(resource.pk),
+                    "user_id": str(user.pk) if user.is_authenticated else None,
+                },
             )
             context["recommended_resources"] = []
 
