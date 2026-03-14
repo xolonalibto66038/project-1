@@ -1,0 +1,195 @@
+{% extends "layouts/base.html" %}
+{% load static allauth i18n %}
+
+{% block title %}{% trans "Email Addresses" %}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0 text-dark">
+          <i class="fas fa-envelope text-primary mr-2"></i>
+          {% trans "Email Addresses" %}
+        </h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <!-- ===================== MANAGE EMAILS ===================== -->
+    <div class="card card-primary card-outline">
+      <div class="card-header">
+        <h3 class="card-title font-weight-semibold">
+          {% trans "Manage Email Addresses" %}
+        </h3>
+      </div>
+
+      <div class="card-body">
+
+        {% if emailaddresses %}
+
+          <p class="text-muted">
+            {% trans "The following email addresses are associated with your account." %}
+          </p>
+
+          {% url 'account_email' as email_url %}
+          {% element form form=form action=email_url method="post" tags="email,list" %}
+            {% slot body %}
+              {% csrf_token %}
+
+              <div class="list-group list-group-flush">
+
+                {% for radio in emailaddress_radios %}
+                  {% with emailaddress=radio.emailaddress %}
+
+                  <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+                      <!-- Radio + Email -->
+                      <div class="custom-control custom-radio">
+                        <input
+                          type="radio"
+                          id="{{ radio.id }}"
+                          name="email"
+                          value="{{ emailaddress.email }}"
+                          class="custom-control-input"
+                          {% if radio.checked %}checked{% endif %}
+                        >
+                        <label class="custom-control-label font-weight-normal" for="{{ radio.id }}">
+                          {{ emailaddress.email }}
+                        </label>
+                      </div>
+
+                      <!-- Status -->
+                      <div class="mt-2 mt-md-0">
+
+                        {% if emailaddress.verified %}
+                          <span class="badge badge-success">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            {% trans "Verified" %}
+                          </span>
+                        {% else %}
+                          <span class="badge badge-warning">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            {% trans "Unverified" %}
+                          </span>
+                        {% endif %}
+
+                        {% if emailaddress.primary %}
+                          <span class="badge badge-primary ml-1">
+                            <i class="fas fa-star mr-1"></i>
+                            {% trans "Primary" %}
+                          </span>
+                        {% endif %}
+
+                      </div>
+                    </div>
+                  </div>
+
+                  {% endwith %}
+                {% endfor %}
+
+              </div>
+
+            {% endslot %}
+
+            {% slot actions %}
+              <div class="card-footer bg-white px-0 pb-0 pt-4 border-0">
+
+                <div class="btn-group" role="group">
+
+                  <button type="submit"
+                          name="action_primary"
+                          class="btn btn-primary">
+                    <i class="fas fa-star mr-1"></i>
+                    {% trans "Make Primary" %}
+                  </button>
+
+                  <button type="submit"
+                          name="action_send"
+                          class="btn btn-warning">
+                    <i class="fas fa-paper-plane mr-1"></i>
+                    {% trans "Re-send Verification" %}
+                  </button>
+
+                  <button type="submit"
+                          name="action_remove"
+                          class="btn btn-danger">
+                    <i class="fas fa-trash mr-1"></i>
+                    {% trans "Remove" %}
+                  </button>
+
+                </div>
+
+              </div>
+            {% endslot %}
+          {% endelement %}
+
+        {% else %}
+
+          <div class="alert alert-warning mb-0">
+            {% include "account/snippets/warn_no_email.html" %}
+          </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ===================== ADD EMAIL ===================== -->
+    {% if can_add_email %}
+    <div class="card card-secondary card-outline mt-4">
+      <div class="card-header">
+        <h3 class="card-title font-weight-semibold">
+          {% trans "Add Email Address" %}
+        </h3>
+      </div>
+
+      <div class="card-body">
+
+        {% url 'account_email' as action_url %}
+        {% element form form=form method="post" action=action_url tags="email,add" %}
+          {% slot body %}
+            {% csrf_token %}
+            {% element fields form=form %}
+            {% endelement %}
+          {% endslot %}
+
+          {% slot actions %}
+            <div class="card-footer bg-white px-0 pb-0 pt-3 border-0">
+              <button type="submit"
+                      name="action_add"
+                      class="btn btn-success">
+                <i class="fas fa-plus mr-1"></i>
+                {% trans "Add Email Address" %}
+              </button>
+            </div>
+          {% endslot %}
+        {% endelement %}
+
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'account/js/account.js' %}"></script>
+<script src="{% static 'account/js/onload.js' %}"></script>
+
+<script
+  data-allauth-onload="allauth.account.forms.manageEmailForm"
+  type="application/json">
+{
+  "i18n": {
+    "confirmDelete": "{% trans 'Do you really want to remove the selected email address?' %}"
+  }
+}
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,69 @@
+{% load static %}
+{% load i18n %}
+{% load allauth %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% trans "Account Inactive" %} | EMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Font -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- AdminLTE -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+
+<body class="hold-transition login-page">
+
+<div class="login-box">
+  <div class="card card-outline card-warning shadow">
+    
+    <!-- Header -->
+    <div class="card-header text-center">
+      <a href="{% url 'pages:landing' %}" class="h1">
+        <b>E</b>MS
+      </a>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body text-center">
+      <div class="mb-3">
+        <i class="fas fa-user-lock fa-3x text-warning"></i>
+      </div>
+
+      <h4 class="font-weight-bold">
+        {% trans "Account Inactive" %}
+      </h4>
+
+      <p class="text-muted mt-2">
+        {% trans "This account is currently inactive." %}
+      </p>
+
+      <p class="small text-muted">
+        {% trans "Please contact your administrator or teacher for activation." %}
+      </p>
+
+      <hr>
+
+      <a href="{% url 'account_login' %}" class="btn btn-outline-primary btn-block">
+        <i class="fas fa-arrow-left mr-1"></i>
+        {% trans "Back to Login" %}
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+
+</body>
+</html>
