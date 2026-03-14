@@ -1,24 +1,167 @@
 import logging
 
+from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DetailView
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
+from apps.authentication.mixins import OwnerRequiredMixin, TeacherRequiredMixin
 from apps.progress.models import ContentProgress
 
-from ..choices import ResourceType
+from ..choices import DifficultyLevel, ResourceType
+from ..forms.resource import ResourceCreateForm, ResourceEditForm
 from ..models import Resource
 from ..selectors import (
     get_or_create_resource_progress,
     get_resource_for_detail,
     get_resource_user_rating,
 )
-from ..services import _track_student_first_view
+
+# from ..services import _track_student_first_view
 
 logger = logging.getLogger(__name__)
+
+
+class ResourceCreateView(TeacherRequiredMixin, OwnerRequiredMixin, CreateView):
+    model = Resource
+    form_class = ResourceCreateForm
+    template_name = "apps/content/resources/form.html"
+    success_url = reverse_lazy("content:resource:teacher-resource-list")
+    owner_field = "created_by"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["teacher"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        messages.success(self.request, _("Resource created successfully."))
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _("Please fix the errors below."))
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = _("Create Resource")
+        context["submit_label"] = _("Create Resource")
+        return context
+
+
+class ResourceUpdateView(TeacherRequiredMixin, OwnerRequiredMixin, UpdateView):
+    model = Resource
+    form_class = ResourceEditForm
+    template_name = "apps/content/resources/form.html"  # reuse create template
+    owner_field = "created_by"
+
+    def get_object(self, queryset=None):
+        if not hasattr(self, "_object"):
+            self._object = (
+                Resource.objects.select_related(
+                    "course",
+                    "grade_subject__grade",
+                    "grade_subject__subject",
+                )
+                .prefetch_related("tags")
+                .get(pk=self.kwargs["pk"])
+            )
+        return self._object
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["teacher"] = self.request.user
+        return kwargs
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "content:resource:teacher-resource-detail", kwargs={"pk": self.object.pk}
+        )
+
+    def form_valid(self, form):
+        messages.success(self.request, _("Resource updated successfully."))
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, _("Please fix the errors below."))
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = _("Edit Resource")
+        context["submit_label"] = _("Save Changes")
+        context["is_edit"] = True
+        return context
+
+
+class ResourceDeleteView(TeacherRequiredMixin, OwnerRequiredMixin, DeleteView):
+    model = Resource
+    template_name = "apps/content/resources/confirm_delete.html"
+    success_url = reverse_lazy("content:resource:teacher-resource-list")
+    owner_field = "created_by"
+
+    def form_valid(self, form):
+        title = self.get_object().title
+        messages.success(
+            self.request,
+            _(f"Resource {str(title)} deleted successfully.")
+            % {"title": self.get_object().title},
+        )
+        return super().form_valid(form)
+
+
+class TeacherResourceListView(TeacherRequiredMixin, ListView):
+    model = Resource
+    template_name = "apps/content/resources/list.html"
+    context_object_name = "resources"
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = (
+            Resource.objects.filter(created_by=self.request.user)
+            .select_related("course", "grade_subject")
+            .prefetch_related("tags")
+            .order_by("-created_at")
+        )
+        if q := self.request.GET.get("q"):
+            qs = qs.filter(title__icontains=q)
+        if status := self.request.GET.get("status"):
+            qs = qs.filter(status=status)
+        if resource_type := self.request.GET.get("resource_type"):
+            qs = qs.filter(resource_type=resource_type)
+        if difficulty := self.request.GET.get("difficulty"):
+            qs = qs.filter(difficulty=difficulty)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        base_qs = Resource.objects.filter(created_by=self.request.user)
+        context["total_count"] = base_qs.count()
+        context["published_count"] = base_qs.filter(status="published").count()
+        context["draft_count"] = base_qs.filter(status="draft").count()
+        context["difficulty_choices"] = DifficultyLevel.choices
+        context["resource_type_choices"] = ResourceType.choices
+        context["filter_q"] = self.request.GET.get("q", "")
+        context["filter_status"] = self.request.GET.get("status", "")
+        context["filter_resource_type"] = self.request.GET.get("resource_type", "")
+        context["filter_difficulty"] = self.request.GET.get("difficulty", "")
+        # Preserve filters in pagination links
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        context["querystring"] = params.urlencode()
+        return context
 
 
 class ResourceDetailView(DetailView):
@@ -134,6 +277,47 @@ class ResourceDetailView(DetailView):
         return context
 
 
+class TeacherResourceDetailView(TeacherRequiredMixin, DetailView):
+    model = Resource
+    template_name = "apps/content/resources/detail.html"
+    context_object_name = "resource"
+
+    def test_func(self):
+        resource = self.get_object()
+        return (
+            self.request.user.role == "teacher"
+            and resource.created_by == self.request.user
+        )
+
+    def get_object(self, queryset=None):
+        # Cache to avoid double DB hit (test_func + get_context_data)
+        if not hasattr(self, "_object"):
+            self._object = (
+                Resource.objects.select_related(
+                    "course",
+                    "grade_subject__grade",
+                    "grade_subject__subject",
+                    "created_by",
+                )
+                .prefetch_related("tags")
+                .get(pk=self.kwargs["pk"])
+            )
+        return self._object
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        # Increment view count on every visit
+        self.get_object().increment_view_count()
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        resource = self.get_object()
+        context["parent"] = resource.course or resource.grade_subject
+        context["parent_type"] = "course" if resource.course else "grade_subject"
+        return context
+
+
 def resource_download_view(request, pk):
     resource = get_object_or_404(Resource, pk=pk, is_active=True)
 
@@ -166,50 +350,3 @@ def resource_download_view(request, pk):
             "Content-Disposition": f'inline; filename="{resource.original_filename}"'
         },
     )
-
-
-# def resource_download_view(request, pk):
-#     resource = get_object_or_404(Resource, pk=pk, is_active=True)
-
-#     if not resource.file:
-#         raise Http404("File not found.")
-
-#     user = request.user
-
-#     # Only students increment download count
-#     if user.is_authenticated and getattr(user, "is_student", False):
-#         session_key = f"downloaded_resource_{resource.pk}"
-
-#         if not request.session.get(session_key, False):
-#             with transaction.atomic():
-#                 resource.increment_download_count()
-
-#             request.session[session_key] = True
-
-#         content_type = ContentType.objects.get_for_model(
-#             Resource, for_concrete_model=False
-#         )
-
-#         progress, created = ContentProgress.objects.get_or_create(
-#             student=user,
-#             content_type=content_type,
-#             object_id=resource.pk,
-#         )
-
-#         # Only increment first time student downloads
-#         if created or not getattr(progress, "downloaded_at", None):
-#             with transaction.atomic():
-#                 resource.increment_download_count()
-
-#                 ContentProgress.objects.filter(pk=progress.pk).update(
-#                     downloaded_at=timezone.now()
-#                 )
-
-#     # Serve file
-#     return FileResponse(
-#         resource.file.open("rb"),
-#         content_type=resource.file_mimetype or "application/octet-stream",
-#         headers={
-#             "Content-Disposition": f'inline; filename="{resource.original_filename}"'
-#         },
-#     )

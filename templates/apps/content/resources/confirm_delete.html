@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete Resource" %}{% endblock %}
+
+{% block content %}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>{% trans "Delete Resource" %}</h1>
+      </div>
+      <div class="col-sm-6 text-right">
+        <a href="{% url 'content:resource:teacher-resource-detail' resource.pk %}"
+           class="btn btn-secondary btn-sm">
+          <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to Resource" %}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+
+        <div class="card card-outline card-danger">
+          <div class="card-header">
+            <h3 class="card-title text-danger">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              {% trans "Confirm Deletion" %}
+            </h3>
+          </div>
+
+          <div class="card-body">
+
+            <p class="mb-3">
+              {% blocktrans with title=resource.title %}
+                Are you sure you want to delete <strong>{{ title }}</strong>?
+                This action cannot be undone.
+              {% endblocktrans %}
+            </p>
+
+            {# Resource summary #}
+            <div class="p-3 mb-4 border rounded bg-light">
+              <div class="d-flex flex-wrap" style="gap:6px; margin-bottom:8px;">
+                <span class="badge badge-secondary">
+                  {{ resource.get_resource_type_display }}
+                </span>
+                <span class="badge badge-warning">
+                  {{ resource.get_difficulty_display }}
+                </span>
+                {% if resource.term %}
+                <span class="badge badge-info">
+                  {{ resource.get_term_display }}
+                </span>
+                {% endif %}
+                {% if resource.has_solution %}
+                <span class="badge badge-success">
+                  <i class="fas fa-check mr-1"></i>{% trans "Has Solution" %}
+                </span>
+                {% endif %}
+              </div>
+              <small class="text-muted">
+                {% if resource.course %}
+                <i class="fas fa-book mr-1"></i>{{ resource.course.title }}
+                {% elif resource.grade_subject %}
+                <i class="fas fa-graduation-cap mr-1"></i>{{ resource.grade_subject }}
+                {% endif %}
+                <span class="ml-3">
+                  <i class="fas fa-download mr-1"></i>{{ resource.download_count }}
+                </span>
+                <span class="ml-2">
+                  <i class="fas fa-eye mr-1"></i>{{ resource.view_count }}
+                </span>
+              </small>
+            </div>
+
+            {% if resource.file %}
+            <div class="alert alert-warning py-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              {% trans "The attached file will also be permanently deleted." %}
+            </div>
+            {% endif %}
+
+            {% if resource.has_solution and resource.solution_file %}
+            <div class="alert alert-warning py-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              {% trans "The solution file will also be permanently deleted." %}
+            </div>
+            {% endif %}
+
+          </div>
+
+          <div class="card-footer d-flex justify-content-end" style="gap:8px;">
+            <a href="{% url 'content:resource:teacher-resource-detail' resource.pk %}"
+               class="btn btn-secondary">
+              <i class="fas fa-times mr-1"></i>{% trans "Cancel" %}
+            </a>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash mr-1"></i>{% trans "Yes, Delete" %}
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -46,18 +46,21 @@
         {% if form.errors %}
         <div class="alert alert-danger">
           <ul class="mb-0">
-          {% for field in form %}
-            {% for error in field.errors %}
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
               <li>{{ error }}</li>
             {% endfor %}
-          {% endfor %}
           </ul>
         </div>
         {% endif %}
 
         <!-- Remember + Submit -->
         <div class="row">
-          <div class="col-7">
+          {% comment %} <div class="col-7">
 
             <div class="form-check">
               {{ form.remember }}
@@ -66,9 +69,9 @@
               </label>
             </div>
 
-          </div>
+          </div> {% endcomment %}
 
-          <div class="col-5">
+          <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">
               {% trans "Sign In" %}
             </button>
