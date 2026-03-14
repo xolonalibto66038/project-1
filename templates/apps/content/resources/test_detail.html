@@ -377,6 +377,60 @@
         </div>
 
       </div>
+
+      <!-- ===================== RECOMMENDED RESOURCES ===================== -->
+      <div class="col-lg-12 col-md-4">
+        <div class="card card-outline card-info h-100">
+          <div class="card-header">
+            <h3 class="card-title font-weight-bold">
+              <i class="fas fa-lightbulb mr-1"></i>
+              {% trans "Recommended" %}
+            </h3>
+          </div>
+
+          <div class="card-body p-2" style="overflow-y:auto; max-height:800px;">
+
+            {% if recommended_resources %}
+              <ul class="list-group list-group-flush">
+                {% for rec in recommended_resources %}
+                  <li class="list-group-item px-2 py-2">
+                    <a href="{% url 'content:resource-detail' rec.pk %}"
+                      class="d-block text-decoration-none">
+
+                      <strong class="text-primary">
+                        {{ rec.title|truncatechars:50 }}
+                      </strong>
+
+                      <div class="small text-muted mt-1">
+                        <span class="badge badge-light border">
+                          {{ rec.get_type_display }}
+                        </span>
+
+                        {% if rec.rating_avg %}
+                          <span class="ml-1 text-warning">
+                            ⭐ {{ rec.get_rating_display }}
+                          </span>
+                        {% endif %}
+                        <!-- {% if rec.difficulty_level == resource.difficulty_level %}
+                          <span class="badge badge-success ml-1">
+                            {% trans "Same level" %}
+                          </span>
+                        {% endif %} -->
+                      </div>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-muted text-center p-3">
+                <i class="fas fa-info-circle mr-1"></i>
+                {% trans "No recommendations available." %}
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

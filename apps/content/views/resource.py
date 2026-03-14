@@ -18,6 +18,7 @@ from django.views.generic import (
 
 from apps.authentication.mixins import OwnerRequiredMixin, TeacherRequiredMixin
 from apps.progress.models import ContentProgress
+from apps.recommender.service import RecommendationService
 
 from ..choices import DifficultyLevel, ResourceType
 from ..forms.resource import ResourceCreateForm, ResourceEditForm
@@ -31,6 +32,7 @@ from ..selectors import (
 # from ..services import _track_student_first_view
 
 logger = logging.getLogger(__name__)
+_recommender = RecommendationService()
 
 
 class ResourceCreateView(TeacherRequiredMixin, OwnerRequiredMixin, CreateView):
@@ -222,7 +224,21 @@ class ResourceDetailView(DetailView):
         except Resource.DoesNotExist:
             raise Http404("Resource not found or not published.")
 
-        # cache type for get_template_names
+        # Pre-fetch the full hierarchy so the recommender's live-extraction
+        # fallback doesn't fire extra queries if the vector is missing.
+        # If get_resource_for_detail already does select_related, this is a no-op.
+        Resource.objects.filter(pk=resource.pk).select_related(
+            "course__chapter__grade_subject__grade__level",
+            "course__chapter__grade_subject__subject",
+            "course__chapter__grade_subject__specialty",
+            "course__grade_subject__grade__level",
+            "course__grade_subject__subject",
+            "course__grade_subject__specialty",
+            "grade_subject__grade__level",
+            "grade_subject__subject",
+            "grade_subject__specialty",
+        )
+
         self._resource_type = resource.resource_type
 
         logger.info(
@@ -273,6 +289,18 @@ class ResourceDetailView(DetailView):
         else:
             context["progress"] = None
             context["user_rating"] = None
+
+        # ── Recommendations ───────────────────────────────────────────────────
+        try:
+            context["recommended_resources"] = _recommender.similar_to(
+                resource, limit=6
+            )
+        except Exception:
+            # Never let a recommendation failure break the detail page.
+            logger.exception(
+                "RecommendationService failed for Resource pk=%s", resource.pk
+            )
+            context["recommended_resources"] = []
 
         return context
 

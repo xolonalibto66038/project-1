@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Exercise" %}: {{ resource.title }}{% endblock %}
+{% block title %}{% trans "Exam" %}: {{ resource.title }}{% endblock %}
 
 {% block content %}
 
@@ -13,7 +13,7 @@
       <div class="col-sm-7">
         <h1 class="font-weight-bold mb-0">
           <i class="fas fa-pencil-ruler mr-2 text-warning"></i>
-          {% trans "Exercise" %}: {{ resource.title }}
+          {% trans "Exam" %}: {{ resource.title }}
         </h1>
       </div>
 
@@ -67,13 +67,16 @@
           <span class="badge badge-warning mr-2 mb-1">
             Difficulty: {{ resource.get_difficulty_level_display }}
           </span>
-          {% if resource.rating_avg %}
+          {% comment %} {% if resource.rating_avg %} {% endcomment %}
           <span class="badge badge-success mr-2 mb-1">
-            ⭐ {{ resource.get_rating_display }} ({{ resource.rating_count }} ratings)
+            {% for star in resource.get_rating_display.stars %}
+              <i class="fas fa-star {% if star <= resource.get_rating_display.average %}text-warning{% else %}text-muted{% endif %}"></i>
+            {% endfor %}
+          <small>({{ resource.get_rating_display.count }} ratings)</small>
           </span>
-          {% else %}
+          {% comment %} {% else %}
           <span class="badge badge-secondary mr-2 mb-1">No ratings yet</span>
-          {% endif %}
+          {% endif %} {% endcomment %}
           <span class="badge badge-light border mr-2 mb-1">
             👁 Views: {{ resource.view_count }}
           </span>
@@ -84,7 +87,7 @@
 
         <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
 
-          {% if user.is_authenticated and user.is_student %}
+          {% comment %} {% if user.is_authenticated and user.is_student %}
 
             <!-- RATING STARS -->
             <!-- <div class="d-flex align-items-center mr-3">
@@ -136,7 +139,7 @@
               <span class="text-muted ml-1">({{ resource.rating_count }})</span>
             </div>
 
-          {% endif %}
+          {% endif %} {% endcomment %}
 
           <!-- DOWNLOAD BUTTON -->
           {% if resource.file %}
@@ -217,12 +220,6 @@
                    alt="{{ resource.title }}">
               {% endif %}
             </div>
-            {% endif %}
-
-            {% if resource.content %}
-              <div class="resource-content">
-                {{ resource.content }}
-              </div>
             {% endif %}
 
             {# Metadata #}
@@ -441,12 +438,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  MathJax = {
-    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-  };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <script>
 (function () {
   const container = document.querySelector('.rating-stars');

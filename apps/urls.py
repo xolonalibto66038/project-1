@@ -10,4 +10,5 @@ urlpatterns = [
     path("progress/", include("apps.progress.urls")),
     path("feedback/", include("apps.feedback.urls")),
     path("assessment/", include("apps.assessment.urls")),
+    path("recommender/", include("apps.recommender.urls")),
 ]

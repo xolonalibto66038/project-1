@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     # thirdparty apps
+    "rest_framework",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
     "apps.assessment",
     "apps.billing",
     "apps.tutoring",
+    "apps.recommender",
 ]
 
 SITE_ID = 1
