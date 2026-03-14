@@ -178,6 +178,26 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ── Session expiry ─────────────────────────────────────────────────────────────
+
+# Session cookie age in seconds — 4 minutes = 240 seconds
+SESSION_COOKIE_AGE = 60 * 60 * 2
+
+# Force the session to expire when the browser closes,
+# regardless of SESSION_COOKIE_AGE
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Use a DB-backed session so expiry is enforced server-side too,
+# not just by the cookie lifetime on the client.
+# This prevents a user from manually extending their cookie.
+# SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# If you want the session timer to reset on every request
+# (i.e. "4 minutes of inactivity" rather than "4 minutes from login"):
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = False  # set True in production (HTTPS only)
+SESSION_COOKIE_HTTPONLY = True  # JS cannot access the cookie
+SESSION_COOKIE_SAMESITE = "Lax"
 
 # ── allauth core ──
 ACCOUNT_LOGIN_METHODS = {"email"}

@@ -20,6 +20,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+admin.site.site_header = "Educational Management Admin"
+admin.site.site_title = "EMS Admin Portal"
+admin.site.index_title = "Welcome to the Educational Management System"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("apps.urls")),
@@ -28,3 +32,9 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+handler400 = "config.errors.error_400"
+handler403 = "config.errors.error_403"
+handler404 = "config.errors.error_404"
+handler500 = "config.errors.error_500"
