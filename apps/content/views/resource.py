@@ -19,6 +19,7 @@ from django.views.generic import (
 from apps.authentication.mixins import OwnerRequiredMixin, TeacherRequiredMixin
 from apps.progress.models import ContentProgress
 from apps.recommender.service import RecommendationService
+from common.mixins.ratelimit import RatelimitMixin
 
 from ..choices import DifficultyLevel, ResourceType
 from ..forms.resource import ResourceCreateForm, ResourceEditForm
@@ -305,7 +306,7 @@ class TeacherResourceListView(TeacherRequiredMixin, ListView):
 #         return context
 
 
-class ResourceDetailView(DetailView):
+class ResourceDetailView(RatelimitMixin, DetailView):
     """
     Generic resource detail view.
     Works for any ResourceType — template switches on resource.resource_type.
@@ -314,6 +315,10 @@ class ResourceDetailView(DetailView):
     model = Resource
     context_object_name = "resource"
     pk_url_kwarg = "pk"
+    ratelimit_key = "user_or_ip"
+    ratelimit_rate = "3/m"  # ← tighten temporarily for testing (normally 120/m)
+    ratelimit_method = "GET"
+    ratelimit_block = True
 
     def get_template_names(self):
         type_template_map = {

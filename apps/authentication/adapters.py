@@ -1,6 +1,11 @@
+import logging
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
+from django.http import HttpRequest
+
+logger = logging.getLogger(__name__)
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -36,6 +41,25 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         """Hook — add custom context if needed for email templates."""
         super().send_confirmation_mail(request, emailconfirmation, signup)
+
+    def raise_rate_limit_exceeded(
+        self, request: HttpRequest, action: str, **kwargs
+    ) -> None:
+        """
+        Called by allauth before raising RateLimitExceeded.
+        Log the event here then let the exception propagate.
+        """
+        logger.warning(
+            "allauth.rate_limit_exceeded",
+            extra={
+                "action": action,
+                "path": request.path,
+                "user_id": (
+                    str(request.user.pk) if request.user.is_authenticated else None
+                ),
+            },
+        )
+        super().raise_rate_limit_exceeded(request, action, **kwargs)
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):

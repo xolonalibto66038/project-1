@@ -15,7 +15,7 @@ from pathlib import Path
 
 import environ
 
-from .logging import LOGGING
+# from .logging import LOGGING
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,6 +94,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     # internal
     "apps.authentication.middleware.OnboardingMiddleware",
+    "common.middleware.allauth_ratelimit.AllauthRateLimitMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -199,6 +200,82 @@ SESSION_COOKIE_SECURE = False  # set True in production (HTTPS only)
 SESSION_COOKIE_HTTPONLY = True  # JS cannot access the cookie
 SESSION_COOKIE_SAMESITE = "Lax"
 
+
+# ── Rate Limiting ──────────────────────────────────────────────────────────────
+RATELIMIT_USE_CACHE = "default"
+RATELIMIT_ENABLE = True
+
+# Paths that bypass rate limiting entirely
+RATELIMIT_SKIP_PATHS = [
+    "/admin/",
+    "/static/",
+    "/media/",
+]
+
+# RATE_LIMIT_MAP = {
+#     # ── Auth ──────────────────────────────────────────────────────────────────
+#     "login": {
+#         "key": "post:username",
+#         "rate": "5/m",
+#         "reason": "brute force protection",
+#     },
+#     "register": {"key": "ip", "rate": "3/h", "reason": "account farming"},
+#     "password_reset_request": {
+#         "key": "post:email",
+#         "rate": "3/h",
+#         "reason": "email bombing",
+#     },
+#     "password_reset_confirm": {
+#         "key": "ip",
+#         "rate": "10/h",
+#         "reason": "token brute force",
+#     },
+#     # ── Content browsing ──────────────────────────────────────────────────────
+#     "resource_detail": {
+#         "key": "user_or_ip",
+#         "rate": "120/m",
+#         "reason": "normal browsing",
+#     },
+#     "course_detail": {
+#         "key": "user_or_ip",
+#         "rate": "120/m",
+#         "reason": "normal browsing",
+#     },
+#     "resource_download": {
+#         "key": "user_or_ip",
+#         "rate": "20/m",
+#         "reason": "scraping prevention",
+#     },
+#     # ── Search ────────────────────────────────────────────────────────────────
+#     "search": {"key": "user_or_ip", "rate": "20/m", "reason": "expensive queries"},
+#     # ── Student actions ───────────────────────────────────────────────────────
+#     "submit_rating": {"key": "user", "rate": "10/m", "reason": "rating spam"},
+#     "submit_comment": {"key": "user", "rate": "5/m", "reason": "comment spam"},
+#     "mark_progress": {"key": "user", "rate": "60/m", "reason": "normal study activity"},
+#     # ── API ───────────────────────────────────────────────────────────────────
+#     "api_anonymous": {"key": "ip", "rate": "30/m", "reason": "abuse prevention"},
+#     "api_authenticated": {"key": "user", "rate": "200/m", "reason": "normal API usage"},
+# }
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "ratelimit-testing",
+    }
+}
+# # for production
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": env("REDIS_URL"),
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         },
+#     }
+# }
+
+
 # ── allauth core ──
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = [
@@ -249,6 +326,29 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online", "prompt": "select_account"},
         "OAUTH_PKCE_ENABLED": True,
     }
+}
+
+ACCOUNT_RATE_LIMITS = {
+    # ── Login ──────────────────────────────────────────────────────────────────
+    # 5 failed login attempts per 5 minutes per IP
+    "login_failed": "5/5m",
+    # ── Signup ─────────────────────────────────────────────────────────────────
+    # 5 signups per hour per IP — prevents account farming
+    "signup": "5/h",
+    # ── Password reset ─────────────────────────────────────────────────────────
+    # 3 reset emails per hour per IP
+    "reset_password": "3/h",
+    # 10 reset confirmation attempts per hour — prevents token brute force
+    "reset_password_from_key": "10/h",
+    # ── Email confirmation ──────────────────────────────────────────────────────
+    # 3 confirmation email resends per hour
+    "confirm_email": "3/h",
+    # ── 2FA (if you use it) ────────────────────────────────────────────────────
+    "login_by_code": "5/m",  # OTP submission
+    "request_login_by_code": "5/m",  # OTP request
+    # ── Email management ────────────────────────────────────────────────────────
+    "add_email": "5/h",  # adding a new email address
+    "change_password": "5/h",  # password change form
 }
 
 # ── email backend (dev) ──
