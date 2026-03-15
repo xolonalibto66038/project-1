@@ -439,7 +439,8 @@ class ResourceDetailView(RatelimitMixin, DetailView):
         # ── Breadcrumb context ────────────────────────────────────────────────
         gs = resource.course.effective_grade_subject if resource.course else None
         grade_subject = gs.subject if gs else resource.grade_subject
-        grade = gs.grade if gs else None
+
+        grade = gs.grade if gs else grade_subject.grade
         level = (
             grade.level
             if grade

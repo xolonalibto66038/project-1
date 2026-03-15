@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Exam" %}: {{ resource.title }}{% endblock %}
+{% block title %}{% trans "Exam" %}{% endblock %}
 
 {% block content %}
 
@@ -17,7 +17,7 @@
         </h1>
       </div>
 
-      <div class="col-sm-5">
+      {% comment %} <div class="col-sm-5">
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item">
             <a href="{% url 'pages:landing' %}">
@@ -44,6 +44,36 @@
           {% endif %}
           <li class="breadcrumb-item active font-weight-bold">
             {{ resource.title }}
+          </li>
+        </ol>
+      </div> {% endcomment %}
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}">
+              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
+              {{ level.name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item"> 
+            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}{% if grade_subject.specialty %}?specialty={{ grade_subject.specialty.pk }}{% endif %}">
+              {{ grade.name }} {% if grade_subject.specialty %}| {{ grade_subject.specialty.short_name }}{% endif %}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:grade-subject:grade-subject-detail' pk=grade_subject.pk %}">
+              {{ grade_subject.subject.short_name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">
+            {% trans "Exam" %} : {{ resource.title|title }}
           </li>
         </ol>
       </div>
