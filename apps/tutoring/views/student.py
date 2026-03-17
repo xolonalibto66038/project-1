@@ -61,8 +61,13 @@ def available_teachers(request, subject_pk=None):
     if subject_pk:
         teachers = teachers.filter(teacher_profile__subject__id=subject_pk)
 
+    free_teachers = teachers.filter(teacher_profile__hour_price=0)
+
+    paid_teachers = teachers.filter(teacher_profile__hour_price__gt=0)
+
     context = {
-        "teachers": teachers,
+        "free_teachers": free_teachers,
+        "paid_teachers": paid_teachers,
         "subject_pk": subject_pk,
     }
 
@@ -85,11 +90,17 @@ def select_teacher(request, teacher_id):
     )
 
     try:
-
         session, created = SessionService.create_session(
             student=request.user,
             teacher=teacher,
         )
+
+        # ✅ CASE 1: FREE teacher → skip Stripe
+        if teacher.teacher_profile.hour_price == 0:
+            return redirect(
+                "tutoring:student:student-sessions",  # 🔁 adjust to your real URL name
+                # session_id=session.id,
+            )
 
         # Create Stripe checkout session if needed
         if created or not session.stripe_checkout_session_id:
@@ -113,7 +124,9 @@ def select_teacher(request, teacher_id):
     except Exception as ex:
         print(f"Failed to create tutoring session : {str(ex)}")
 
-        messages.error(request, "Unable to create session. Please try again.")
+        messages.error(
+            request, f"Unable to create session. Please try again. {str(ex)}"
+        )
 
         return redirect(
             "tutoring:student:available-teachers",

@@ -79,6 +79,12 @@ class TeacherProfile(TimeStampModel):
 
     def save(self, *args, **kwargs):
         self.full_clean()
+        if self.pk:
+            old = TeacherProfile.objects.get(pk=self.pk)
+
+            if old.is_verified_teacher:
+                self.level = old.level
+                self.subject = old.subject
         super().save(*args, **kwargs)
 
     def __str__(self):

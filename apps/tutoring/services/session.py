@@ -25,9 +25,38 @@ class SessionService:
         # hourly_rate = teacher.teacher_profile.hourly_rate
         profile = getattr(teacher, "teacher_profile", None)
         hourly_rate = getattr(profile, "hour_price", 100) if profile else 100
+        is_free = hourly_rate == 0
 
-        if hourly_rate <= 0:
-            raise ValueError("Invalid teacher rate")
+        # ✅ 🚫 BLOCK: existing confirmed free session not started yet
+        if is_free:
+            existing_free = (
+                TutoringSession.objects.select_for_update()
+                .filter(
+                    student=student,
+                    teacher=teacher,
+                    price=0,
+                    status=TutoringSession.Status.CONFIRMED,
+                    started_at__isnull=True,  # not started yet
+                )
+                .first()
+            )
+
+            if existing_free:
+                raise ValueError(
+                    "You already have a confirmed session with this teacher."
+                )
+
+        status = TutoringSession.Status.PENDING_PAYMENT
+
+        # if is_free:
+        #     raise ValueError("Invalid teacher rate")
+
+        # ✅ Prevent duplicate pending sessions (fix your bug)
+        pending_status = (
+            TutoringSession.Status.PAYMENT_AUTHORIZED
+            if is_free
+            else TutoringSession.Status.PENDING_PAYMENT
+        )
 
         # Prevent duplicate pending sessions
         existing = (
@@ -35,7 +64,7 @@ class SessionService:
             .filter(
                 student=student,
                 teacher=teacher,
-                status=TutoringSession.Status.PENDING_PAYMENT,
+                status=pending_status,
             )
             .first()
         )
@@ -51,13 +80,19 @@ class SessionService:
 
         teacher_amount = price - platform_fee
 
+        status = (
+            TutoringSession.Status.PAYMENT_AUTHORIZED
+            if is_free
+            else TutoringSession.Status.PENDING_PAYMENT
+        )
+
         session = TutoringSession.objects.create(
             student=student,
             teacher=teacher,
             price=price,
             platform_fee=platform_fee,
             teacher_amount=teacher_amount,
-            status=TutoringSession.Status.PENDING_PAYMENT,
+            status=status,
         )
 
         return session, True

@@ -115,10 +115,16 @@
           {% trans "Your teacher account is pending verification by an admin. You can browse content but cannot publish resources yet." %}
         </div>
         {% else %}
-        <div class="alert alert-success">
-          <i class="fas fa-check-circle mr-2"></i>
-          {% trans "Your account is verified. You can publish resources." %}
-        </div>
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle mr-2"></i>
+            {% trans "Your account is verified. You can publish resources." %}
+          </div>
+          {% if profile.hour_price == 0 %}
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              {% trans "You are currently offering free tutoring sessions. Students can book you without payment." %}
+            </div>
+          {% endif %}
         {% endif %}
       </div>
     </div>

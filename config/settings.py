@@ -354,7 +354,16 @@ ACCOUNT_RATE_LIMITS = {
 }
 
 # ── email backend (dev) ──
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# ── Email (real SMTP) ──
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False  # must be False when TLS is Tr
+
 
 CONTACT_EMAIL = "xolonalibto66038@gmail.com"
 

@@ -65,7 +65,7 @@
 
       {% if request.user.is_authenticated %}
       <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
+      {% comment %} <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
           <i class="far fa-bell"></i>
           <span class="badge badge-warning navbar-badge">15</span>
@@ -90,16 +90,18 @@
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
         </div>
-      </li>
+      </li> {% endcomment %}
+
+      
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
             <i class="fas fa-user-circle"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
           {% if request.user.is_student %}
-            <a href="#" class="dropdown-item"><i class="fas fa-user mr-2"></i>Profile</a>
+            <a href="{% url 'accounts:student' %}" class="dropdown-item"><i class="fas fa-user mr-2"></i>Profile</a>
           {% else %}
-            <a href="#" class="dropdown-item"><i class="fas fa-user mr-2"></i>Profile</a>
+            <a href="{% url 'accounts:teacher' %}" class="dropdown-item"><i class="fas fa-user mr-2"></i>Profile</a>
           {% endif %}
           <a href="{% url 'account_email' %}" class="dropdown-item">
             <i class="fas fa-envelope mr-2"></i> Email Settings

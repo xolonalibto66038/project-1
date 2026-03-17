@@ -1,5 +1,6 @@
 # apps/accounts/models/student_profile.py
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -52,6 +53,26 @@ class StudentProfile(TimeStampModel):
 
     def __str__(self):
         return f"Student: {self.user.get_full_name()}"
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # 🔥 THIS is what you're missing
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """
+        Ensure that the specialty belongs to the selected grade.
+        """
+        super().clean()
+
+        if self.grade and self.specialty:
+            if self.specialty.grade != self.grade:
+                raise ValidationError(
+                    {
+                        "specialty": _(
+                            "The selected specialty does not belong to the selected grade."
+                        )
+                    }
+                )
 
     @property
     def full_name(self):

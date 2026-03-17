@@ -9,3 +9,5 @@ media
 staticfiles
 logs/
 *.log
+bin
+scripts

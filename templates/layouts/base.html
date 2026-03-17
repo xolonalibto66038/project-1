@@ -70,7 +70,7 @@
               {% endif %}
 
               {# -------- Slim Email Alert -------- #}
-              {% if not request.user.is_email_verified %}
+              {% comment %} {% if not request.user.is_email_verified %}
                 <div class="alert alert-info alert-dismissible py-2 px-3 mb-2 shadow-sm border-0">
                   <button type="button" class="close pt-2" data-dismiss="alert" aria-hidden="true">&times;</button>
                   
@@ -85,7 +85,7 @@
                     </a>
                   </div>
                 </div>
-              {% endif %}
+              {% endif %} {% endcomment %}
 
             </div>
           </div>
