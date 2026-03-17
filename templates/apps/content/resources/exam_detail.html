@@ -424,7 +424,7 @@
               <ul class="list-group list-group-flush">
                 {% for rec in recommended_resources %}
                   <li class="list-group-item px-2 py-2">
-                    <a href="{% url 'content:resource-detail' rec.pk %}"
+                    <a href="{% url 'content:resource:resource-detail' rec.pk %}"
                       class="d-block text-decoration-none">
 
                       <strong class="text-primary">
@@ -433,7 +433,7 @@
 
                       <div class="small text-muted mt-1">
                         <span class="badge badge-light border">
-                          {{ rec.get_type_display }}
+                          {{ rec.resource_type }}
                         </span>
 
                         {% if rec.rating_avg %}

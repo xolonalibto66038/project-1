@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 # from .logging import LOGGING
 
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "taggit",
+    "django_celery_beat",
     # internal apps
     "common",
     "apps.curriculum",
@@ -152,7 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Algiers"
 
 USE_I18N = True
 
@@ -380,3 +382,19 @@ ZOOM_HOST_EMAIL = env("ZOOM_HOST_EMAIL", default="")
 
 GOOGLE_SERVICE_ACCOUNT_FILE = env("GOOGLE_SERVICE_ACCOUNT_FILE")
 GOOGLE_CALENDAR_HOST_EMAIL = env("GOOGLE_CALENDAR_HOST_EMAIL")
+
+
+# Broker (Redis)
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
+# Serialization
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+# Timezone (important — matches Django's timezone)
+CELERY_TIMEZONE = TIME_ZONE
+
+# Prevent tasks from piling up if the worker was down for a while
+CELERY_BEAT_MAX_LOOP_INTERVAL = 300  # seconds

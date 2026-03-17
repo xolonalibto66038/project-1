@@ -495,7 +495,10 @@ class ResourceDetailView(RatelimitMixin, DetailView):
 
         # ── Recommendations ───────────────────────────────────────────────────
         try:
-            recommendations = _recommender.similar_to(resource, limit=6)
+            # recommendations = _recommender.similar_to(resource, limit=6)
+            recommendations = _recommender.similar_resources_in_grade_subject(
+                grade_subject=grade_subject, limit=6
+            )
             context["recommended_resources"] = recommendations
 
             logger.debug(
