@@ -304,6 +304,9 @@ class Attempt(TimeStampModel):
         graded_answers = answers.filter(is_correct__isnull=False).count()
         self.is_graded = graded_answers >= total_answers_needed
 
+        if self.is_graded:
+            self.auto_graded_at = timezone.now()
+
     def get_answers(self):
         """Get all answers for this attempt"""
         quiz_questions = self.quiz.quiz_questions.all()

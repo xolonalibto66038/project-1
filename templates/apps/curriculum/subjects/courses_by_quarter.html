@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block title %}
-  {{ subject.name }} — {% trans "Courses" %} ({{ quarter_display }})
+  {{ quarter_display }} — {% trans "Courses" %}
 {% endblock %}
 
 {% block content %}
@@ -39,8 +39,13 @@
             </a>
           </li>
           <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">
-              {{ subject.short_name }}
+            <a href="{% url 'curriculum:grade:grade-detail' pk=grade.pk %}">
+              {{ grade.name }}
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:grade-subject:grade-subject-detail' pk=grade_subject.pk %}">
+              {{ grade_subject.subject.short_name }}
             </a>
           </li>
           <li class="breadcrumb-item active font-weight-bold">

@@ -2,6 +2,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from common.models import TimeStampModel
@@ -220,14 +221,34 @@ class Answer(TimeStampModel):
             selected_ids = set(self.selected_choices.values_list("id", flat=True))
             self.is_correct = correct_ids == selected_ids
 
+        elif q.question_type == "essay":
+
+            if not q.is_auto_gradable:
+                # Leave ungraded — needs manual review
+                self.is_correct = None
+                return
+            result = q.grade(self.answer_text)
+            self.is_correct = result["is_correct"]
+            self.points_earned = result["awarded_points"]
+            self.feedback = result.get("feedback", "")
+            self.graded_at = timezone.now()
+            self.save(
+                update_fields=[
+                    "is_correct",
+                    "points_earned",
+                    "feedback",
+                    "graded_at",
+                    "updated_at",
+                ]
+            )
+            return
+
         else:
-            # Text / essay questions cannot be auto-graded safely
             self.is_correct = None
             return
 
-        if self.is_correct:
-            self.points_earned = q.points
-        else:
-            self.points_earned = 0
-
-        self.save(update_fields=["is_correct", "points_earned", "updated_at"])
+        self.points_earned = q.points if self.is_correct else 0
+        self.graded_at = timezone.now()
+        self.save(
+            update_fields=["is_correct", "points_earned", "graded_at", "updated_at"]
+        )

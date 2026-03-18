@@ -86,42 +86,42 @@
     <div class="row mb-4">
 
       <div class="col-lg-3 col-md-6 mb-3">
-        <div class="small-box bg-info mb-0">
+        <div class="small-box bg-info w-100 h-100">
           <div class="inner">
-            <h3>{{ courses_count }}</h3>
-            <p>{% trans "Courses" %}</p>
+            <h3>{{ course_count|default:0 }}</h3>
+            <p>{% trans "Course" %}{{ course_count|pluralize }}</p>
           </div>
           <div class="icon"><i class="fas fa-layer-group"></i></div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6 mb-3">
-        <div class="small-box bg-success mb-0">
+        <div class="small-box bg-success w-100 h-100">
           <div class="inner">
-            <h3>{{ exercises_count }}</h3>
-            <p>{% trans "Exercises" %}</p>
+            <h3>{{ quiz_count|default:0 }}</h3>
+            <p>{% trans "Quiz" %}{{ quiz_count|pluralize:"zes" }}</p>
           </div>
           <div class="icon"><i class="fas fa-pencil-alt"></i></div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6 mb-3">
-        <div class="small-box bg-warning mb-0">
+        <div class="small-box bg-warning w-100 h-100">
           <div class="inner">
-            {% if is_student %}
-              <h3>{{ resources_count }}</h3>
-              <p>{% trans "All Resources" %}</p>
-            {% else %}
-              <h3>{{ subject_resources_count }}</h3>
+            {% comment %} {% if is_student %} {% endcomment %}
+              <h3>{{ resource_count|default:0 }}</h3>
+              <p>{% trans "Resource" %}{{ resource_count|pluralize }}</p>
+            {% comment %} {% else %}
+              <h3>{{ subject_resources_count|default:0 }}</h3>
               <p>{% trans "Tests & Exams" %}</p>
-            {% endif %}
+            {% endif %} {% endcomment %}
           </div>
           <div class="icon"><i class="fas fa-folder-open"></i></div>
         </div>
       </div>
 
       <div class="col-lg-3 col-md-6 mb-3">
-        <div class="small-box bg-danger mb-0">
+        <div class="small-box bg-danger w-100 h-100">
           <div class="inner">
             {% if is_student %}
               <h3>{{ progress }}%</h3>

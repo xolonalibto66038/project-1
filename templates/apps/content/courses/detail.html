@@ -21,7 +21,8 @@
           </h3>
 
           {# Mark complete button — students only #}
-          {% if user.is_authenticated and user.is_student %}
+          {% comment %} {% if user.is_authenticated and user.is_student %} {% endcomment %}
+          {% if is_matching_student %}
           <form method="post"
                 action="{% url 'content:course:course-mark-completed' course.pk %}"
                 class="mb-0 d-inline">
@@ -84,7 +85,8 @@
         {% endif %}
 
         {# ── Progress bar (students only) ── #}
-        {% if user.is_authenticated and user.is_student and progress %}
+        {% comment %} {% if user.is_authenticated and user.is_student and progress %} {% endcomment %}
+        {% if is_matching_student and progress %}
         <div class="mb-4">
           <h5 class="font-weight-bold">
             <i class="fas fa-chart-line mr-2 text-primary"></i>

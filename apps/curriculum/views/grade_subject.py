@@ -9,7 +9,11 @@ from apps.content.models import Resource
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
-from ..selectors import get_grade_subject_by_pk, get_grade_subject_counts_by_quarter
+from ..selectors import (
+    get_grade_subject_by_pk,
+    get_grade_subject_counts,
+    get_grade_subject_counts_by_quarter,
+)
 from ..services import build_grade_subject_courses_page
 
 SUBJECT_RESOURCE_TYPE_CONFIG = {
@@ -79,6 +83,7 @@ class GradeSubjectDetailView(DetailView):
 
         # One DB hit per term (3 total) — returns counts for all quarters
         counts_by_quarter = get_grade_subject_counts_by_quarter(pk=self.kwargs["pk"])
+        counts = get_grade_subject_counts(pk=self.kwargs["pk"])
 
         context.update(
             {
@@ -88,6 +93,9 @@ class GradeSubjectDetailView(DetailView):
                 "specialty": gs.specialty,
                 "quarters": Term.choices,
                 "current_quarter": Term.FIRST,
+                "course_count": counts["course_count"],
+                "resource_count": counts["resource_count"],
+                "quiz_count": counts["quiz_count"],
                 "counts_by_quarter": counts_by_quarter,
                 "is_student": (
                     self.request.user.is_authenticated

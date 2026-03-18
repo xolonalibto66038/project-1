@@ -278,6 +278,40 @@ def get_grade_subject_counts_by_quarter(pk):
     return result
 
 
+def get_grade_subject_counts(pk):
+    """
+    Returns total counts of courses, quizzes, and resources
+    for a given GradeSubject pk.
+
+    Courses are counted from both:
+      - direct FK (grade_subject_id = pk)
+      - via chapter (chapter__grade_subject_id = pk)
+    """
+    from apps.assessment.models import Quiz  # adjust import to your app
+    from apps.content.models import Course, Resource
+
+    course_count = Course.objects.filter(
+        Q(grade_subject_id=pk) | Q(chapter__grade_subject_id=pk),
+        is_active=True,
+    ).count()
+
+    resource_count = Resource.objects.filter(
+        grade_subject_id=pk,
+        is_active=True,
+    ).count()
+
+    quiz_count = Quiz.objects.filter(
+        grade_subject_id=pk,
+        is_published=True,
+    ).count()
+
+    return {
+        "course_count": course_count,
+        "resource_count": resource_count,
+        "quiz_count": quiz_count,
+    }
+
+
 def get_grade_subject_resources(grade_subject, resource_type, filters=None, user=None):
     """
     Generic resource selector for any subject resource type.

@@ -34,19 +34,19 @@
               {{ level.name }}
             </a>
           </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:grade:grade-detail' pk=grade.pk %}">
-              {{ grade.short_name }}
+          <li class="breadcrumb-item"> 
+            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}{% if course.grade_subject.specialty %}?specialty={{ course.grade_subject.specialty.pk }}{% endif %}">
+              {{ grade.name }} {% if course.grade_subject.specialty %}| {{ course.grade_subject.specialty.short_name }}{% endif %}
             </a>
           </li>
           <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">
-              {{ subject.short_name }}
+            <a href="{% url 'curriculum:grade-subject:grade-subject-detail' course.grade_subject.pk %}">
+              {{ course.grade_subject.subject.short_name }}
             </a>
           </li>
-          {% if chapter %}
+          {% if course.chapter %}
           <li class="breadcrumb-item text-muted">
-            {{ chapter.title }}
+            {{ course.chapter.title }}
           </li>
           {% endif %}
           <li class="breadcrumb-item active font-weight-bold">

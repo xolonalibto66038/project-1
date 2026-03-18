@@ -227,15 +227,56 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
             "question_content_type"
         ).order_by("order")
 
+        # with transaction.atomic():
+        #     for qq in questions:
+        #         question = qq.question
+
+        #         if question is None:
+        #             continue
+
+        #         content_type = ContentType.objects.get_for_model(question)
+
+        #         answer, _ = Answer.objects.get_or_create(
+        #             student=request.user,
+        #             attempt=attempt,
+        #             question_content_type=content_type,
+        #             question_object_id=question.pk,
+        #         )
+
+        #         field_name = f"question_{qq.pk}"
+
+        #         if question.question_type == "tf":
+        #             value = request.POST.get(field_name)
+        #             if value in ("true", "false"):
+        #                 answer.answer_boolean = value == "true"
+        #                 answer.save(update_fields=["answer_boolean", "updated_at"])
+
+        #         elif question.question_type == "mcq":
+        #             selected_ids = request.POST.getlist(field_name)
+        #             if selected_ids:
+        #                 valid_ids = list(
+        #                     question.choices.filter(pk__in=selected_ids).values_list(
+        #                         "pk", flat=True
+        #                     )
+        #                 )
+        #                 answer.selected_choices.set(valid_ids)
+        #                 answer.save(update_fields=["updated_at"])
+
+        #         else:
+        #             text = request.POST.get(field_name, "").strip()
+        #             answer.answer_text = text
+        #             answer.save(update_fields=["answer_text", "updated_at"])
+
+        #         answer.auto_grade()
+
+        #     attempt.submit(auto_submit=False)
         with transaction.atomic():
             for qq in questions:
                 question = qq.question
-
                 if question is None:
                     continue
 
                 content_type = ContentType.objects.get_for_model(question)
-
                 answer, _ = Answer.objects.get_or_create(
                     student=request.user,
                     attempt=attempt,
@@ -262,14 +303,30 @@ class StudentTakeQuizView(StudentRequiredMixin, View):
                         answer.selected_choices.set(valid_ids)
                         answer.save(update_fields=["updated_at"])
 
-                else:
+                else:  # essay
                     text = request.POST.get(field_name, "").strip()
                     answer.answer_text = text
                     answer.save(update_fields=["answer_text", "updated_at"])
 
+            # ← submit FIRST so is_completed = True
+            attempt.submit(auto_submit=False)
+
+            # ← THEN auto_grade each answer
+            for answer in attempt.answers.select_related("attempt"):
                 answer.auto_grade()
 
-            attempt.submit(auto_submit=False)
+            # ← recalculate score after grading
+            attempt.calculate_score()
+            attempt.save(
+                update_fields=[
+                    "total_points_possible",
+                    "total_points_earned",
+                    "score_percentage",
+                    "is_graded",
+                    "auto_graded_at",
+                    "updated_at",
+                ]
+            )
 
         messages.success(request, "Quiz submitted successfully.")
         return redirect(

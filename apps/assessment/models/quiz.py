@@ -95,6 +95,11 @@ class Quiz(TimeStampModel):
         blank=True,
     )
 
+    # Cached at submission time — reflects state when student submitted
+    is_auto_gradable_snapshot = models.BooleanField(
+        default=False, editable=False, help_text="Cached at attempt submission time."
+    )
+
     class Meta:
         db_table = "quizzes"
         ordering = ["-created_at"]
@@ -159,6 +164,30 @@ class Quiz(TimeStampModel):
 
         if self.end_date and now > self.end_date:
             return False
+
+        return True
+
+    @property
+    def is_auto_gradable(self):
+        """
+        A quiz is auto-gradable only if every question in it is auto-gradable.
+        - TrueFalse → always True
+        - MCQ → always True
+        - Essay → only if question.is_auto_gradable = True
+        """
+        quiz_questions = self.quiz_questions.select_related(
+            "question_content_type"
+        )  # .prefetch_related("question")
+
+        if not quiz_questions.exists():
+            return False
+
+        for qq in quiz_questions:
+            question = qq.question
+            if question is None:
+                return False
+            if question.question_type == "essay" and not question.is_auto_gradable:
+                return False
 
         return True
 

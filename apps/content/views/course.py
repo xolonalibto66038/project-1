@@ -100,9 +100,24 @@ class CourseDetailView(CourseMixin, DetailView):
         context["subject"] = crumbs["subject"]
         context["chapter"] = crumbs["chapter"]
 
+        is_matching_student = False
+        if self.request.user.is_authenticated and self.request.user.is_student:
+            student_grade = getattr(self.request.user.student_profile, "grade", None)
+            course_grade = (
+                course.effective_grade_subject.grade
+                if course.effective_grade_subject
+                else None
+            )
+            is_matching_student = (
+                student_grade is not None and student_grade == course_grade
+            )
+
+        context["is_matching_student"] = is_matching_student
+
         # Progress (students only)
         context["progress"] = None
-        if user.is_authenticated and getattr(user, "is_student", False):
+
+        if is_matching_student:
             context["progress"] = get_course_progress(user, course)
 
         return context
