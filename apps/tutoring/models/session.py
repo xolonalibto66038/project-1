@@ -83,3 +83,13 @@ class TutoringSession(TimeStampModel):
     teacher_paid = models.BooleanField(default=False)
 
     teacher_paid_at = models.DateTimeField(null=True)
+
+    # apps/tutoring/models.py
+
+    canceled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="canceled_sessions",
+    )

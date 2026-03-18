@@ -160,6 +160,13 @@
                     {% trans "Completed" %}
                   </span>
 
+                {% elif session.status == "canceled" %}
+
+                  <span class="badge badge-dark">
+                    <i class="fas fa-check-double mr-1"></i>
+                    {% trans "Canceled by " %} : {{ session.canceled_by }}
+                  </span>
+
                 {% else %}
 
                   <span class="badge badge-light">
@@ -233,6 +240,21 @@
                     {% trans "View Meeting" %}
                   </a>
 
+                {% endif %}
+
+                {% if session.status == "confirmed" or session.status == "payment_authorized" %}
+                  <form
+                    method="post"
+                    action="{% url 'tutoring:teacher:cancel-session-confirm' session.id %}"
+                    class="d-inline-block ml-2"
+                    onsubmit="return confirm('{% trans "Are you sure you want to cancel this session?" %}')"
+                  >
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                      <i class="fas fa-times mr-1"></i>
+                      {% trans "Cancel" %}
+                    </button>
+                  </form>
                 {% endif %}
 
 

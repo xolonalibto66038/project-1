@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs, urlparse
 
 import stripe
+from django.shortcuts import redirect
 from django.utils import timezone
 
 
@@ -47,3 +48,11 @@ def convert_to_browser_join_url(zoom_join_url: str) -> str:
         browser_url += f"?pwd={pwd}"
 
     return browser_url
+
+
+def redirect_back(request):
+    """Fallback redirect if no referer."""
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    return redirect("pages:landing")

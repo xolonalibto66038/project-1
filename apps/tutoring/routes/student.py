@@ -6,6 +6,7 @@ from ..views.student import (
     session_detail,
     student_sessions,
 )
+from ..views.teacher import cancel_session, cancel_session_confirm
 
 app_name = "student"
 
@@ -29,5 +30,11 @@ urlpatterns = [
         "sessions/<uuid:session_id>/",
         session_detail,
         name="session-detail",
+    ),
+    path("sessions/<uuid:session_id>/cancel/", cancel_session, name="cancel-session"),
+    path(
+        "sessions/<uuid:session_id>/cancel/confirm/",
+        cancel_session_confirm,
+        name="cancel-session-confirm",
     ),
 ]
