@@ -74,13 +74,72 @@ def available_teachers(request, subject_pk=None):
     return render(request, "apps/tutoring/student/available_teachers.html", context)
 
 
+# @login_required
+# @student_required
+# @subscription_required
+# @require_POST
+# @transaction.atomic
+# def select_teacher(request, teacher_id):
+
+#     teacher = get_object_or_404(
+#         CustomUser,
+#         id=teacher_id,
+#         role=UserRole.TEACHER,
+#         is_active=True,
+#         teacher_profile__is_verified_teacher=True,
+#     )
+
+#     try:
+#         session, created = SessionService.create_session(
+#             student=request.user,
+#             teacher=teacher,
+#         )
+
+#         # ✅ CASE 1: FREE teacher → skip Stripe
+#         if teacher.teacher_profile.hour_price == 0:
+#             return redirect(
+#                 "tutoring:student:student-sessions",  # 🔁 adjust to your real URL name
+#                 # session_id=session.id,
+#             )
+
+#         # Create Stripe checkout session if needed
+#         if created or not session.stripe_checkout_session_id:
+
+#             checkout = StripeService.create_checkout_session(session)
+
+#             if not checkout:
+#                 raise Exception("Stripe checkout session creation failed")
+
+#             session.stripe_checkout_session_id = checkout.id
+#             session.save(update_fields=["stripe_checkout_session_id"])
+
+#         else:
+#             # Retrieve existing Stripe checkout session
+#             checkout = stripe.checkout.Session.retrieve(
+#                 session.stripe_checkout_session_id
+#             )
+
+#         return redirect(checkout.url)
+
+#     except Exception as ex:
+#         print(f"Failed to create tutoring session : {str(ex)}")
+
+#         messages.error(
+#             request, f"Unable to create session. Please try again. {str(ex)}"
+#         )
+
+#         return redirect(
+#             "tutoring:student:available-teachers",
+#             subject_pk=teacher.teacher_profile.subject.pk,
+#         )
+
+
 @login_required
 @student_required
 @subscription_required
 @require_POST
-@transaction.atomic
 def select_teacher(request, teacher_id):
-
+    print()
     teacher = get_object_or_404(
         CustomUser,
         id=teacher_id,
@@ -90,44 +149,29 @@ def select_teacher(request, teacher_id):
     )
 
     try:
-        session, created = SessionService.create_session(
+        # FREE teacher → create session directly, no Stripe
+        if teacher.teacher_profile.hour_price == 0:
+            SessionService.create_free_session(
+                student=request.user,
+                teacher=teacher,
+            )
+            return redirect("tutoring:student:student-sessions")
+
+        # PAID teacher → create Stripe checkout only, no DB session yet
+        checkout = StripeService.create_checkout_session(
             student=request.user,
             teacher=teacher,
         )
 
-        # ✅ CASE 1: FREE teacher → skip Stripe
-        if teacher.teacher_profile.hour_price == 0:
-            return redirect(
-                "tutoring:student:student-sessions",  # 🔁 adjust to your real URL name
-                # session_id=session.id,
-            )
-
-        # Create Stripe checkout session if needed
-        if created or not session.stripe_checkout_session_id:
-
-            checkout = StripeService.create_checkout_session(session)
-
-            if not checkout:
-                raise Exception("Stripe checkout session creation failed")
-
-            session.stripe_checkout_session_id = checkout.id
-            session.save(update_fields=["stripe_checkout_session_id"])
-
-        else:
-            # Retrieve existing Stripe checkout session
-            checkout = stripe.checkout.Session.retrieve(
-                session.stripe_checkout_session_id
-            )
+        if not checkout:
+            raise Exception("Stripe checkout session creation failed")
 
         return redirect(checkout.url)
 
     except Exception as ex:
-        print(f"Failed to create tutoring session : {str(ex)}")
-
         messages.error(
             request, f"Unable to create session. Please try again. {str(ex)}"
         )
-
         return redirect(
             "tutoring:student:available-teachers",
             subject_pk=teacher.teacher_profile.subject.pk,

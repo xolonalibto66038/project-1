@@ -18,7 +18,11 @@ from django.views.generic import (
     UpdateView,
 )
 
-from apps.authentication.mixins import StudentRequiredMixin, TeacherRequiredMixin
+from apps.authentication.mixins import (
+    StudentRequiredMixin,
+    TeacherRequiredMixin,
+    VerifiedTeacherRequiredMixin,
+)
 from apps.curriculum.models import GradeSubject
 
 from ..forms import (
@@ -62,7 +66,7 @@ class QuizListView(TeacherRequiredMixin, ListView):
         )
 
 
-class QuizCreateView(TeacherRequiredMixin, CreateView):
+class QuizCreateView(VerifiedTeacherRequiredMixin, CreateView):
     model = Quiz
     form_class = QuizForm
     template_name = "apps/assessement/quizzes/create.html"
@@ -86,7 +90,7 @@ class QuizCreateView(TeacherRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class QuizUpdateView(TeacherRequiredMixin, UpdateView):
+class QuizUpdateView(VerifiedTeacherRequiredMixin, UpdateView):
     model = Quiz
     form_class = QuizForm
     template_name = "apps/assessement/quizzes/create.html"  # reuse template
@@ -110,7 +114,7 @@ class QuizUpdateView(TeacherRequiredMixin, UpdateView):
         return super().form_invalid(form)
 
 
-class QuizDeleteView(TeacherRequiredMixin, DeleteView):
+class QuizDeleteView(VerifiedTeacherRequiredMixin, DeleteView):
     model = Quiz
     template_name = "apps/assessement/quizzes/confirm_delete.html"
     success_url = reverse_lazy("assessment:quiz:quiz-list")

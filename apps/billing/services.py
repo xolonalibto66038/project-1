@@ -7,30 +7,35 @@ stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 class StripeService:
 
     @staticmethod
-    def create_checkout_session(session):
+    def create_checkout_session(student, teacher):
 
-        print(session.teacher.teacher_profile.hour_price)
+        profile = teacher.teacher_profile
+        price = int(profile.hour_price * 100)  # Stripe expects cents
 
         try:
             checkout = stripe.checkout.Session.create(
                 mode="payment",
-                customer_email=session.student.email,
+                customer_email=student.email,
                 line_items=[
                     {
                         "price_data": {
                             "currency": "usd",
                             "product_data": {
-                                "name": f"Tutoring session with {session.teacher.get_full_name()}",
+                                "name": f"Tutoring session with {teacher.get_full_name()}",
                             },
-                            "unit_amount": int(
-                                session.teacher.teacher_profile.hour_price * 100
-                            ),
+                            "unit_amount": price,
                         },
                         "quantity": 1,
                     }
                 ],
-                metadata={"session_id": str(session.id), "type": "tutoring_payment"},
-                success_url=f"{settings.DOMAIN}/billing/payment_success/",
+                metadata={
+                    # "session_id": str(session.id),
+                    "type": "tutoring_payment",
+                    "student_id": str(student.id),
+                    "teacher_id": str(teacher.id),
+                },
+                success_url=f"{settings.DOMAIN}/billing/payment_success/"
+                + "?session_id={CHECKOUT_SESSION_ID}",
                 cancel_url=f"{settings.DOMAIN}/billing/cancel/",
             )
 

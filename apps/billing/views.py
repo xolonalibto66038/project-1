@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 
+from apps.tutoring.models import TutoringSession
+
 from .models import Plan
 from .selectors import get_pricing_context, get_user_subscription
 
@@ -115,7 +117,24 @@ class PaymentSuccessView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['user_subscription'] = get_user_subscription(self.request.user)
+
+        stripe_session_id = self.request.GET.get("session_id")
+
+        if stripe_session_id:
+            tutoring_session = (
+                TutoringSession.objects.filter(
+                    stripe_checkout_session_id=stripe_session_id,
+                    student=self.request.user,
+                )
+                .select_related(
+                    "teacher",
+                    "teacher__teacher_profile",
+                )
+                .first()
+            )
+
+            context["session"] = tutoring_session
+
         return context
 
 

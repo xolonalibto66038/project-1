@@ -51,11 +51,12 @@
             </div>
             {% endif %}
 
-            <a href="#"
+            <a href="{% if session %}{% url 'tutoring:student:session-detail' session_id=session.id %}{% else %}{% url 'tutoring:student:student-sessions' %}{% endif %}"
               class="btn btn-primary btn-block btn-lg mb-3"
               style="border-radius:50px;">
               <i class="fas fa-video mr-2"></i>
-              {% trans "Open session" %}
+              {% if session %}{% trans "Open session" %}{% else %}{% trans "My sessions" %}{% endif %}
+              
             </a>
 
             <a href="{% url 'pages:landing' %}"

@@ -16,7 +16,11 @@ from django.views.generic import (
     UpdateView,
 )
 
-from apps.authentication.mixins import OwnerRequiredMixin, TeacherRequiredMixin
+from apps.authentication.mixins import (
+    OwnerRequiredMixin,
+    TeacherRequiredMixin,
+    VerifiedTeacherRequiredMixin,
+)
 from apps.progress.models import ContentProgress
 from apps.recommender.service import RecommendationService
 from common.mixins.ratelimit import RatelimitMixin
@@ -36,7 +40,7 @@ logger = logging.getLogger(__name__)
 _recommender = RecommendationService()
 
 
-class ResourceCreateView(TeacherRequiredMixin, OwnerRequiredMixin, CreateView):
+class ResourceCreateView(VerifiedTeacherRequiredMixin, OwnerRequiredMixin, CreateView):
     model = Resource
     form_class = ResourceCreateForm
     template_name = "apps/content/resources/form.html"
@@ -64,7 +68,7 @@ class ResourceCreateView(TeacherRequiredMixin, OwnerRequiredMixin, CreateView):
         return context
 
 
-class ResourceUpdateView(TeacherRequiredMixin, OwnerRequiredMixin, UpdateView):
+class ResourceUpdateView(VerifiedTeacherRequiredMixin, OwnerRequiredMixin, UpdateView):
     model = Resource
     form_class = ResourceEditForm
     template_name = "apps/content/resources/form.html"  # reuse create template
@@ -109,7 +113,7 @@ class ResourceUpdateView(TeacherRequiredMixin, OwnerRequiredMixin, UpdateView):
         return context
 
 
-class ResourceDeleteView(TeacherRequiredMixin, OwnerRequiredMixin, DeleteView):
+class ResourceDeleteView(VerifiedTeacherRequiredMixin, OwnerRequiredMixin, DeleteView):
     model = Resource
     template_name = "apps/content/resources/confirm_delete.html"
     success_url = reverse_lazy("content:resource:teacher-resource-list")

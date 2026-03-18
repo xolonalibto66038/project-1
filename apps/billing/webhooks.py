@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models.custom_user import CustomUser
 from apps.tutoring.models import TutoringSession
+from apps.tutoring.services import SessionService
 
 from .models import Plan, Subscription
 
@@ -109,39 +110,64 @@ def _handle_checkout_completed(session):
                 "current_period_end": current_period_end,
             },
         )
+
     elif session["mode"] == "payment":
-        session_id = session["metadata"]["session_id"]
+
+        metadata = session.get("metadata", {})
+        student_id = metadata.get("student_id")
+        teacher_id = metadata.get("teacher_id")
+
+        if not student_id or not teacher_id:
+            return HttpResponse(status=400)
 
         try:
 
             with transaction.atomic():
-
-                tutoring_session = TutoringSession.objects.select_for_update().get(
-                    id=session_id
-                )
-
-                # idempotency protection
-                if tutoring_session.status == TutoringSession.Status.PAYMENT_AUTHORIZED:
-
+                # Idempotency — skip if already processed
+                if TutoringSession.objects.filter(
+                    stripe_checkout_session_id=session["id"]
+                ).exists():
                     return HttpResponse(status=200)
 
-                tutoring_session.status = TutoringSession.Status.PAYMENT_AUTHORIZED
-
-                tutoring_session.stripe_checkout_session_id = session["id"]
-
-                tutoring_session.stripe_payment_intent_id = session["payment_intent"]
-
-                tutoring_session.payment_authorized_at = timezone.now()
-
-                tutoring_session.save(
-                    update_fields=[
-                        "status",
-                        "stripe_checkout_session_id",
-                        "stripe_payment_intent_id",
-                        "payment_authorized_at",
-                        "updated_at",
-                    ]
+                student = CustomUser.objects.get(id=student_id)
+                teacher = CustomUser.objects.select_related("teacher_profile").get(
+                    id=teacher_id
                 )
+
+                # Now create the DB session — payment is confirmed
+                tutoring_session = SessionService.create_paid_session(
+                    student=student,
+                    teacher=teacher,
+                    stripe_checkout_session_id=session["id"],
+                    stripe_payment_intent_id=session["payment_intent"],
+                )
+
+                # tutoring_session = TutoringSession.objects.select_for_update().get(
+                #     id=session_id
+                # )
+
+                # # idempotency protection
+                # if tutoring_session.status == TutoringSession.Status.PAYMENT_AUTHORIZED:
+
+                #     return HttpResponse(status=200)
+
+                # tutoring_session.status = TutoringSession.Status.PAYMENT_AUTHORIZED
+
+                # tutoring_session.stripe_checkout_session_id = session["id"]
+
+                # tutoring_session.stripe_payment_intent_id = session["payment_intent"]
+
+                # tutoring_session.payment_authorized_at = timezone.now()
+
+                # tutoring_session.save(
+                #     update_fields=[
+                #         "status",
+                #         "stripe_checkout_session_id",
+                #         "stripe_payment_intent_id",
+                #         "payment_authorized_at",
+                #         "updated_at",
+                #     ]
+                # )
         except TutoringSession.DoesNotExist:
             return HttpResponse(status=200)
 

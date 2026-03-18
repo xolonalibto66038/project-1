@@ -165,7 +165,7 @@
               {% comment %} {% if request.user.subscription and request.user.subscription.is_active %} {% endcomment %}
               
               <div class="text-center">
-                <a href="{% url 'tutoring:student:available-teachers' subject.pk %}"
+                <a href="{% if request.user.subscription and request.user.subscription.is_active %}{% url 'tutoring:student:available-teachers' subject.pk %}{% else %}{% url 'billing:pricing' %}{% endif %}"
                   class="btn btn-primary btn-block">
                   <i class="fas fa-user-graduate mr-2"></i>
                   {% trans "Ask for an Online Tutor" %}
