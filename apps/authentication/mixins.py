@@ -27,13 +27,25 @@ class TeacherRequiredMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
-    """Allows access only to verified teachers."""
+# class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
+#     """Allows access only to verified teachers."""
 
+
+#     def dispatch(self, request, *args, **kwargs):
+#         response = super().dispatch(request, *args, **kwargs)
+#         # super() already checked is_teacher
+#         if not request.user.teacher_profile.is_verified_teacher:
+#             raise PermissionDenied(_("Your teacher account is pending verification."))
+#         return response
+class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
-        # super() already checked is_teacher
-        if not request.user.teacher_profile.is_verified_teacher:
+        # Use select_related to avoid extra query, or cache on request
+        teacher_profile = getattr(request.user, "_cached_teacher_profile", None)
+        if teacher_profile is None:
+            teacher_profile = request.user.teacher_profile
+            request.user._cached_teacher_profile = teacher_profile
+        if not teacher_profile.is_verified_teacher:
             raise PermissionDenied(_("Your teacher account is pending verification."))
         return response
 

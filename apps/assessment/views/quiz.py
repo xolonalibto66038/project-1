@@ -23,6 +23,7 @@ from apps.authentication.mixins import (
     TeacherRequiredMixin,
     VerifiedTeacherRequiredMixin,
 )
+from apps.content.models import Course
 from apps.curriculum.models import GradeSubject
 
 from ..forms import (
@@ -34,6 +35,7 @@ from ..forms import (
     QuizForm,
     TrueFalseQuestionForm,
 )
+from ..mixins import QuizFormMixin
 from ..models import (
     Answer,
     Attempt,
@@ -66,11 +68,42 @@ class QuizListView(TeacherRequiredMixin, ListView):
         )
 
 
-class QuizCreateView(VerifiedTeacherRequiredMixin, CreateView):
+class QuizCreateView(VerifiedTeacherRequiredMixin, QuizFormMixin, CreateView):
     model = Quiz
     form_class = QuizForm
     template_name = "apps/assessement/quizzes/create.html"
     success_url = reverse_lazy("assessment:quiz:quiz-list")
+
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     teacher_profile = self.request.user.teacher_profile
+
+    #     # GradeSubject: same subject as the teacher, within their level
+    #     form.fields["grade_subject"].queryset = (
+    #         GradeSubject.objects.filter(
+    #             subject=teacher_profile.subject,
+    #             grade__level=teacher_profile.level,
+    #         )
+    #         .select_related("grade", "subject", "specialty")
+    #         .only(
+    #             "id",
+    #             "grade__short_name",
+    #             "subject__short_name",
+    #             "specialty__short_name",
+    #         )
+    #     )
+
+    #     # Course: those linked to any of the above GradeSubjects
+    #     form.fields["course"].queryset = (
+    #         Course.objects.filter(
+    #             grade_subject__subject=teacher_profile.subject,
+    #             grade_subject__grade__level=teacher_profile.level,
+    #         )
+    #         .select_related("grade_subject__grade", "grade_subject__subject")
+    #         .only("id", "title", "grade_subject_id")
+    #     )
+
+    #     return form
 
     def form_valid(self, form):
         with transaction.atomic():
@@ -90,7 +123,7 @@ class QuizCreateView(VerifiedTeacherRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class QuizUpdateView(VerifiedTeacherRequiredMixin, UpdateView):
+class QuizUpdateView(VerifiedTeacherRequiredMixin, QuizFormMixin, UpdateView):
     model = Quiz
     form_class = QuizForm
     template_name = "apps/assessement/quizzes/create.html"  # reuse template
@@ -101,6 +134,35 @@ class QuizUpdateView(VerifiedTeacherRequiredMixin, UpdateView):
         Ensure teacher can only edit their own quizzes
         """
         return Quiz.objects.filter(created_by=self.request.user)
+
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     teacher_profile = self.request.user.teacher_profile
+
+    #     form.fields["grade_subject"].queryset = (
+    #         GradeSubject.objects.filter(
+    #             subject=teacher_profile.subject,
+    #             grade__level=teacher_profile.level,
+    #         )
+    #         .select_related("grade", "subject", "specialty")
+    #         .only(
+    #             "id",
+    #             "grade__short_name",
+    #             "subject__short_name",
+    #             "specialty__short_name",
+    #         )
+    #     )
+
+    #     form.fields["course"].queryset = (
+    #         Course.objects.filter(
+    #             grade_subject__subject=teacher_profile.subject,
+    #             grade_subject__grade__level=teacher_profile.level,
+    #         )
+    #         .select_related("grade_subject__grade", "grade_subject__subject")
+    #         .only("id", "title", "grade_subject_id")
+    #     )
+
+    #     return form
 
     def form_valid(self, form):
         with transaction.atomic():
