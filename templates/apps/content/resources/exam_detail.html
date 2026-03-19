@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
+{% load breadcrumbs %}
 
 {% block title %}{% trans "Exam" %}{% endblock %}
 
@@ -10,45 +11,15 @@
   <div class="container-fluid">
     <div class="row align-items-center mb-2">
 
-      <div class="col-sm-7">
+      <div class="col-sm-5">
         <h1 class="font-weight-bold mb-0">
           <i class="fas fa-pencil-ruler mr-2 text-warning"></i>
           {% trans "Exam" %}: {{ resource.title }}
         </h1>
       </div>
-
-      {% comment %} <div class="col-sm-5">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          {% if level %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">{{ level.name }}</a>
-          </li>
-          {% endif %}
-          {% if subject %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">{{ subject.short_name }}</a>
-          </li>
-          {% endif %}
-          {% if course %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'content:course:course-detail' pk=course.pk %}">{{ course.title }}</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'content:course:course-exercises' pk=course.pk %}">{% trans "Exercises" %}</a>
-          </li>
-          {% endif %}
-          <li class="breadcrumb-item active font-weight-bold">
-            {{ resource.title }}
-          </li>
-        </ol>
-      </div> {% endcomment %}
-      <div class="col-sm-5">
-        <ol class="breadcrumb float-sm-right">
+      <div class="col-sm-7">
+        {% breadcrumb crumbs %}
+        {% comment %} <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item">
             <a href="{% url 'pages:landing' %}">
               <i class="fas fa-home mr-1"></i>{% trans "Home" %}
@@ -75,7 +46,7 @@
           <li class="breadcrumb-item active font-weight-bold">
             {% trans "Exam" %} : {{ resource.title|title }}
           </li>
-        </ol>
+        </ol> {% endcomment %}
       </div>
 
     </div>

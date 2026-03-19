@@ -1,5 +1,6 @@
 {# templates/content/courses/_header.html #}
 {% load i18n %}
+{% load breadcrumbs %}
 
 <section class="content-header">
   <div class="container-fluid">
@@ -17,10 +18,11 @@
           {% endif %}
           {{ subject.name }} · {{ grade.short_name }} · {{ level.name }}
         </small>
-      </div>
+      </div> 
 
       <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
+        {% breadcrumb crumbs %}
+        {% comment %} <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item">
             <a href="{% url 'pages:landing' %}">
               <i class="fas fa-home mr-1"></i>{% trans "Home" %}
@@ -52,7 +54,7 @@
           <li class="breadcrumb-item active font-weight-bold">
             {{ course.title }}
           </li>
-        </ol>
+        </ol> {% endcomment %}
       </div>
 
     </div>

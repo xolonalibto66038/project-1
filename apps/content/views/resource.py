@@ -2,10 +2,9 @@ import logging
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
@@ -441,39 +440,83 @@ class ResourceDetailView(RatelimitMixin, DetailView):
         user = self.request.user
 
         # ── Breadcrumb context ────────────────────────────────────────────────
-        gs = resource.course.effective_grade_subject if resource.course else None
-        grade_subject = gs.subject if gs else resource.grade_subject
-
-        grade = gs.grade if gs else grade_subject.grade
-        level = (
-            grade.level
-            if grade
-            else (
-                grade_subject.subject.level
-                if grade_subject and grade_subject.subject
-                else None
-            )
+        gs = (
+            resource.course.effective_grade_subject
+            if resource.course
+            else resource.grade_subject
         )
+        grade = gs.grade if gs else None
+        level = grade.level if grade else None
+        specialty = gs.specialty if gs else None
 
         context.update(
             {
-                "grade_subject": grade_subject,
+                "grade_subject": gs,
                 "grade": grade,
                 "level": level,
                 "course": resource.course,
             }
         )
 
-        logger.debug(
-            "resource.breadcrumb_resolved",
-            extra={
-                "resource_id": str(resource.pk),
-                "grade_subject_id": str(grade_subject.pk) if grade_subject else None,
-                "grade_id": str(grade.pk) if grade else None,
-                "level_id": str(level.pk) if level else None,
-                "course_id": str(resource.course.pk) if resource.course else None,
-            },
+        # ── Build crumbs ──────────────────────────────────────────────────────
+        grade_url = (
+            reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+            if grade
+            else "#"
         )
+        if specialty and grade:
+            grade_url += f"?specialty={specialty.pk}"
+
+        breadcrumbs = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+        ]
+
+        if level:
+            breadcrumbs.append(
+                {
+                    "label": level.name,
+                    "url": reverse(
+                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                    ),
+                }
+            )
+
+        if grade:
+            breadcrumbs.append(
+                {
+                    "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                    "url": grade_url,
+                }
+            )
+
+        if gs:
+            breadcrumbs.append(
+                {
+                    "label": gs.subject.short_name,
+                    "url": reverse(
+                        "curriculum:grade-subject:grade-subject-detail",
+                        kwargs={"pk": gs.pk},
+                    ),
+                }
+            )
+
+        # Course-based resource → show course in path
+        if resource.course:
+            breadcrumbs.append(
+                {
+                    "label": resource.course.title,
+                    "url": reverse(
+                        "content:course:course-detail",
+                        kwargs={"pk": resource.course.pk},
+                    ),
+                }
+            )
+
+        breadcrumbs.append({"label": resource.title, "url": None})
+
+        context["crumbs"] = breadcrumbs
+        # ─────────────────────────────────────────────────────────────────────
 
         # ── Student-specific context ──────────────────────────────────────────
         is_student = user.is_authenticated and getattr(user, "is_student", False)
@@ -483,35 +526,16 @@ class ResourceDetailView(RatelimitMixin, DetailView):
             progress, _ = get_or_create_resource_progress(user, resource)
             context["progress"] = progress
             context["user_rating"] = get_resource_user_rating(user, resource)
-
-            logger.debug(
-                "resource.student_context_loaded",
-                extra={
-                    "resource_id": str(resource.pk),
-                    "user_id": str(user.pk),
-                    "progress_status": getattr(progress, "status", None),
-                    "has_rating": context["user_rating"] is not None,
-                },
-            )
         else:
             context["progress"] = None
             context["user_rating"] = None
 
         # ── Recommendations ───────────────────────────────────────────────────
         try:
-            # recommendations = _recommender.similar_to(resource, limit=6)
             recommendations = _recommender.similar_resources_in_grade_subject(
-                grade_subject=grade_subject, limit=6
+                grade_subject=gs, limit=6
             )
             context["recommended_resources"] = recommendations
-
-            logger.debug(
-                "resource.recommendations_loaded",
-                extra={
-                    "resource_id": str(resource.pk),
-                    "count": len(recommendations),
-                },
-            )
         except Exception:
             logger.exception(
                 "resource.recommendations_failed",

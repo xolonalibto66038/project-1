@@ -113,12 +113,56 @@ class CourseDetailView(CourseMixin, DetailView):
             )
 
         context["is_matching_student"] = is_matching_student
-
-        # Progress (students only)
         context["progress"] = None
-
         if is_matching_student:
             context["progress"] = get_course_progress(user, course)
+
+        # ── Breadcrumb ────────────────────────────────────────────────────────────
+        level = crumbs["level"]
+        grade = crumbs["grade"]
+        subject = crumbs["subject"]
+        chapter = crumbs["chapter"]
+        gs = course.effective_grade_subject
+        specialty = gs.specialty if gs else None
+
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
+
+        breadcrumbs = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {
+                "label": level.name,
+                "url": reverse(
+                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                ),
+            },
+            {
+                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                "url": grade_url,
+            },
+            {
+                "label": subject.short_name,
+                "url": reverse(
+                    "curriculum:grade-subject:grade-subject-detail",
+                    kwargs={"pk": gs.pk},
+                ),
+            },
+        ]
+
+        if chapter:
+            breadcrumbs.append(
+                {
+                    "label": chapter.title,
+                    "url": None,  # add chapter detail URL here if you have one
+                }
+            )
+
+        breadcrumbs.append({"label": course.title, "url": None})
+
+        context["crumbs"] = breadcrumbs
+        # ─────────────────────────────────────────────────────────────────────────
 
         return context
 
@@ -182,22 +226,76 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
 
         videos = course.videos.filter(is_active=True).order_by("order")
 
-        # Resolve current video from ?video=<pk>
         video_pk = self.request.GET.get("video")
         current_video = (
             videos.filter(pk=video_pk).first() if video_pk else None
         ) or videos.first()
 
-        # Attach completion status if student
         is_student = self.request.user.is_authenticated and getattr(
             self.request.user, "is_student", False
         )
 
-        # ── Resolve grade/subject/level safely ──
-        gs = course.effective_grade_subject  # your existing property
+        gs = course.effective_grade_subject
         grade = gs.grade if gs else None
         subject = gs.subject if gs else None
         level = grade.level if grade else None
+        specialty = gs.specialty if gs else None
+        chapter = course.chapter
+
+        grade_url = (
+            reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+            if grade
+            else "#"
+        )
+        if specialty and grade:
+            grade_url += f"?specialty={specialty.pk}"
+
+        breadcrumbs = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+        ]
+
+        if level:
+            breadcrumbs.append(
+                {
+                    "label": level.name,
+                    "url": reverse(
+                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                    ),
+                }
+            )
+
+        if grade:
+            breadcrumbs.append(
+                {
+                    "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                    "url": grade_url,
+                }
+            )
+
+        if gs and subject:
+            breadcrumbs.append(
+                {
+                    "label": subject.short_name,
+                    "url": reverse(
+                        "curriculum:grade-subject:grade-subject-detail",
+                        kwargs={"pk": gs.pk},
+                    ),
+                }
+            )
+
+        if chapter:
+            breadcrumbs.append({"label": chapter.title, "url": None})
+
+        breadcrumbs += [
+            {
+                "label": course.title,
+                "url": reverse(
+                    "content:course:course-detail", kwargs={"pk": course.pk}
+                ),
+            },
+            {"label": "Videos", "url": None},
+        ]
 
         context.update(
             {
@@ -208,6 +306,7 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
                 "grade": grade,
                 "subject": subject,
                 "level": level,
+                "crumbs": breadcrumbs,
             }
         )
 
@@ -274,8 +373,60 @@ class CourseResourceListView(CourseMixin, ListView):
         context = super().get_context_data(**kwargs)
         config = self._get_config()
 
+        course = self.course
+        gs = course.effective_grade_subject
+        grade = context["grade"]
+        level = context["level"]
+        subject = context["subject"]
+        specialty = gs.specialty if gs else None
+        chapter = course.chapter
+
         qp = self.request.GET.copy()
         qp.pop("page", None)
+
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
+
+        breadcrumbs = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {
+                "label": level.name,
+                "url": reverse(
+                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                ),
+            },
+            {
+                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                "url": grade_url,
+            },
+            {
+                "label": subject.short_name,
+                "url": reverse(
+                    "curriculum:grade-subject:grade-subject-detail",
+                    kwargs={"pk": gs.pk},
+                ),
+            },
+        ]
+
+        if chapter:
+            breadcrumbs.append(
+                {
+                    "label": chapter.title,
+                    "url": None,
+                }
+            )
+
+        breadcrumbs += [
+            {
+                "label": course.title,
+                "url": reverse(
+                    "content:course:course-detail", kwargs={"pk": course.pk}
+                ),
+            },
+            {"label": config["title"], "url": None},
+        ]
 
         context.update(
             {
@@ -294,6 +445,7 @@ class CourseResourceListView(CourseMixin, ListView):
                 "filter_difficulty": self.request.GET.get("difficulty", ""),
                 "filter_has_solution": self.request.GET.get("has_solution", ""),
                 "filter_completed": self.request.GET.get("completed", ""),
+                "crumbs": breadcrumbs,
             }
         )
 
