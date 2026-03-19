@@ -83,6 +83,11 @@ def get_course_by_pk(pk):
                 filter=Q(videos__is_active=True),
                 distinct=True,
             ),
+            quizzes_count=Count(
+                "quizzes",
+                filter=Q(quizzes__is_published=True),
+                distinct=True,
+            ),
         )
         .get(pk=pk)
     )

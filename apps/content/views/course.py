@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -12,9 +12,11 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, ListView
 
+from apps.assessment.models import Quiz
+from apps.authentication.mixins import StudentRequiredMixin
 from apps.progress.models import ContentProgress
 
-from ..choices import DifficultyLevel, ResourceType
+from ..choices import DifficultyLevel, ResourceType, Term
 from ..mixins.course import CourseMixin
 from ..models import Course
 from ..selectors import (
@@ -346,7 +348,7 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
         return context
 
 
-class MarkCourseCompletedView(LoginRequiredMixin, View):
+class MarkCourseCompletedView(StudentRequiredMixin, View):
 
     def post(self, request, pk):
 
@@ -478,6 +480,162 @@ class CourseResourceListView(CourseMixin, ListView):
                 "filter_difficulty": self.request.GET.get("difficulty", ""),
                 "filter_has_solution": self.request.GET.get("has_solution", ""),
                 "filter_completed": self.request.GET.get("completed", ""),
+                "crumbs": breadcrumbs,
+            }
+        )
+
+        return context
+
+
+class CourseQuizzesView(LoginRequiredMixin, CourseMixin, DetailView):
+    model = Course
+    template_name = "apps/content/courses/quizzes.html"
+    context_object_name = "course"
+
+    def get_queryset(self):
+        return Course.objects.select_related(
+            "chapter__grade_subject__grade__level",
+            "chapter__grade_subject__subject",
+            "grade_subject__grade__level",
+            "grade_subject__subject",
+        ).filter(is_active=True)
+
+    def _get_filters(self):
+        GET = self.request.GET
+        return {
+            "q": GET.get("q", "").strip(),
+            "teacher": GET.get("teacher", "").strip(),
+            "auto_grade": GET.get("auto_gradable", "").strip(),
+            "term": GET.get("term", "").strip(),
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course = self.object
+        f = self._get_filters()
+
+        qs = (
+            Quiz.objects.filter(
+                course=course,
+                is_published=True,
+            )
+            .select_related("created_by")
+            .annotate(
+                questions_count=Count("quiz_questions", distinct=True),
+                user_attempts_count=Count(
+                    "quiz_attempts",
+                    filter=Q(quiz_attempts__student=self.request.user),
+                    distinct=True,
+                ),
+            )
+            .order_by("-created_at")
+        )
+
+        if f["q"]:
+            qs = qs.filter(
+                Q(title__icontains=f["q"]) | Q(description__icontains=f["q"])
+            )
+        if f["teacher"]:
+            qs = qs.filter(created_by_id=f["teacher"])
+        if f["auto_grade"] == "1":
+            qs = qs.filter(is_auto_gradable_snapshot=True)
+        elif f["auto_grade"] == "0":
+            qs = qs.filter(is_auto_gradable_snapshot=False)
+        if f["term"]:
+            qs = qs.filter(term=f["term"])
+
+        # Teachers scoped to this course's quizzes
+        teachers = (
+            User.objects.filter(
+                created_quizzes__course=course,
+                created_quizzes__is_published=True,
+            )
+            .distinct()
+            .only("id", "first_name", "last_name")
+        )
+
+        is_student = self.request.user.is_authenticated and getattr(
+            self.request.user, "is_student", False
+        )
+
+        gs = course.effective_grade_subject
+        grade = gs.grade if gs else None
+        subject = gs.subject if gs else None
+        level = grade.level if grade else None
+        specialty = gs.specialty if gs else None
+        chapter = course.chapter
+
+        grade_url = (
+            reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+            if grade
+            else "#"
+        )
+        if specialty and grade:
+            grade_url += f"?specialty={specialty.pk}"
+
+        qp = self.request.GET.copy()
+        qp.pop("page", None)
+
+        breadcrumbs = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+        ]
+        if level:
+            breadcrumbs.append(
+                {
+                    "label": level.name,
+                    "url": reverse(
+                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                    ),
+                }
+            )
+        if grade:
+            breadcrumbs.append(
+                {
+                    "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                    "url": grade_url,
+                }
+            )
+        if gs and subject:
+            breadcrumbs.append(
+                {
+                    "label": subject.short_name,
+                    "url": reverse(
+                        "curriculum:grade-subject:grade-subject-detail",
+                        kwargs={"pk": gs.pk},
+                    ),
+                }
+            )
+        if chapter:
+            breadcrumbs.append({"label": chapter.title, "url": None})
+
+        breadcrumbs += [
+            {
+                "label": course.title,
+                "url": reverse(
+                    "content:course:course-detail", kwargs={"pk": course.pk}
+                ),
+            },
+            {"label": "Quizzes", "url": None},
+        ]
+
+        context.update(
+            {
+                "quizzes": qs,
+                "is_student": is_student,
+                "grade_subject": gs,
+                "subject": subject,
+                "grade": grade,
+                "level": level,
+                "teachers": teachers,
+                "term_choices": Term.choices,
+                "filter_q": f["q"],
+                "filter_teacher": f["teacher"],
+                "filter_auto_grade": f["auto_grade"],
+                "filter_term": f["term"],
+                "filter_course": "",  # not applicable here — keeps template compatible
+                "courses": Course.objects.none(),  # same reason
+                "querystring": qp.urlencode(),
                 "crumbs": breadcrumbs,
             }
         )

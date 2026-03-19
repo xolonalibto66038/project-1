@@ -22,39 +22,6 @@
 
       <div class="col-sm-6">
         {% breadcrumb crumbs %}
-        {% comment %} <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
-              {{ level.name }}
-            </a>
-          </li>
-          <li class="breadcrumb-item"> 
-            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}{% if course.grade_subject.specialty %}?specialty={{ course.grade_subject.specialty.pk }}{% endif %}">
-              {{ grade.name }} {% if course.grade_subject.specialty %}| {{ course.grade_subject.specialty.short_name }}{% endif %}
-            </a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:grade-subject:grade-subject-detail' course.grade_subject.pk %}">
-              {{ course.grade_subject.subject.short_name }}
-            </a>
-          </li>
-          {% if course.chapter %}
-          <li class="breadcrumb-item text-muted">
-            {{ course.chapter.title }}
-          </li>
-          {% endif %}
-          <li class="breadcrumb-item active font-weight-bold">
-            {{ course.title }}
-          </li>
-        </ol> {% endcomment %}
       </div>
 
     </div>
@@ -92,10 +59,10 @@
 
       <li class="nav-item">
         <a class="nav-link {% if active_tab == 'quizzes' %}active{% endif %}"
-           href="#">
+           href="{% url 'content:course:course-quizzes-list' course.pk %}">
           <i class="fas fa-brain mr-1"></i>
           {% trans "Quizzes" %}
-          <span class="badge badge-secondary ml-1">0</span>
+          <span class="badge badge-secondary ml-1">{{ course.quizzes_count }}</span>
         </a>
       </li>
 
