@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.views.generic import DetailView, ListView
 
 from ..mixins import LevelQuerySetMixin
@@ -64,6 +65,10 @@ class LevelListView(LevelQuerySetMixin, ListView):
             )
 
         context["enriched_levels"] = enriched
+        context["crumbs"] = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": None},
+        ]
         return context
 
 
@@ -79,8 +84,13 @@ class LevelDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         level = self.object
 
-        # context['grade_groups'] = get_grade_groups(level)
         context["grade_groups"] = get_grade_groups_with_specialties(level)
         context["stats"] = get_level_stats(level)
+
+        context["crumbs"] = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {"label": level.get_name_display(), "url": None},
+        ]
 
         return context

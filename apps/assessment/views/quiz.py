@@ -339,6 +339,8 @@ class QuizAddQuestionView(TeacherRequiredMixin, FormView):
     form_class = AddQuestionToQuizForm
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         self.quiz = get_object_or_404(
             Quiz,
             pk=kwargs["pk"],

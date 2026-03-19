@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
+{% load breadcrumbs %}
 
 {% block title %}{% trans "Select an Online Teacher" %}{% endblock %}
 
@@ -17,6 +17,9 @@
         <p class="text-muted mb-0">
           {% trans "Choose a teacher for your tutoring session" %}
         </p>
+      </div>
+      <div class="col-sm-6">
+        {% breadcrumb crumbs %}
       </div>
     </div>
   </div>

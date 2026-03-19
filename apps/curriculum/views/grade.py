@@ -1,5 +1,6 @@
 import logging
 
+from django.urls import reverse
 from django.views.generic import DetailView
 
 from ..mixins import GradeLoggingMixin
@@ -28,6 +29,20 @@ class GradeDetailView(GradeLoggingMixin, DetailView):
             specialty=specialty,
         )
         context["specialty"] = specialty
+        context["crumbs"] = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {
+                "label": grade.level.get_name_display(),
+                "url": reverse(
+                    "curriculum:level:level-detail", kwargs={"pk": grade.level.pk}
+                ),
+            },
+            {
+                "label": f"{grade.short_name}{' - ' + specialty.short_name if specialty else ''}",
+                "url": None,
+            },
+        ]
         return context
 
     def _resolve_specialty(self, user, grade):

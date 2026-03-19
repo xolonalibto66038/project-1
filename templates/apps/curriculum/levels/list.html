@@ -1,5 +1,6 @@
 {% extends "layouts/base-full.html" %}
 {% load static i18n %}
+{% load breadcrumbs %}
 
 {% block title %}{% trans "Educational Levels" %}{% endblock %}
 
@@ -53,14 +54,7 @@
         </h1>
       </div>
       <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "Levels" %}</li>
-        </ol>
+        {% breadcrumb crumbs %}
       </div>
     </div>
   </div>

@@ -2,8 +2,8 @@ import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from apps.accounts.choices import UserRole
@@ -22,17 +22,7 @@ stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 @student_required
 @subscription_required
 def available_teachers(request, subject_pk=None):
-    """
-    Display list of available teachers for tutoring.
 
-    Filters:
-    - role = TEACHER
-    - active users only
-    - verified teachers only (recommended)
-    - optional subject filter
-    """
-
-    # for better performance, prefetch related subjects
     teachers = (
         CustomUser.objects.filter(
             role=UserRole.TEACHER,
@@ -46,29 +36,70 @@ def available_teachers(request, subject_pk=None):
             "first_name",
             "last_name",
             "avatar",
-            # "teacher_profile__average_rating",
-            # "teacher_profile__years_of_experience",
             "teacher_profile__bio",
         )
-        .order_by(
-            "last_name"
-            # "-teacher_profile__average_rating",
-            # "-teacher_profile__years_of_experience",
-        )
+        .order_by("last_name")
     )
 
-    # Optional: filter by subject
     if subject_pk:
         teachers = teachers.filter(teacher_profile__subject__id=subject_pk)
 
     free_teachers = teachers.filter(teacher_profile__hour_price=0)
-
     paid_teachers = teachers.filter(teacher_profile__hour_price__gt=0)
+
+    # Build full breadcrumb path if subject is provided
+    crumbs = [
+        {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+    ]
+
+    if subject_pk:
+        from apps.curriculum.models import GradeSubject
+
+        gs = (
+            GradeSubject.objects.select_related("grade__level", "subject", "specialty")
+            .filter(subject__id=subject_pk)
+            .first()
+        )
+
+        if gs:
+            grade = gs.grade
+            level = grade.level
+            specialty = gs.specialty
+
+            grade_url = reverse(
+                "curriculum:grade:grade-detail", kwargs={"pk": grade.pk}
+            )
+            if specialty:
+                grade_url += f"?specialty={specialty.pk}"
+
+            crumbs += [
+                {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+                {
+                    "label": level.name,
+                    "url": reverse(
+                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                    ),
+                },
+                # {
+                #     "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                #     "url": grade_url,
+                # },
+                {
+                    "label": gs.subject.short_name,
+                    "url": reverse(
+                        "curriculum:grade-subject:grade-subject-detail",
+                        kwargs={"pk": gs.pk},
+                    ),
+                },
+            ]
+
+    crumbs.append({"label": "Online Teachers", "url": None})
 
     context = {
         "free_teachers": free_teachers,
         "paid_teachers": paid_teachers,
         "subject_pk": subject_pk,
+        "crumbs": crumbs,
     }
 
     return render(request, "apps/tutoring/student/available_teachers.html", context)
@@ -77,61 +108,61 @@ def available_teachers(request, subject_pk=None):
 # @login_required
 # @student_required
 # @subscription_required
-# @require_POST
-# @transaction.atomic
-# def select_teacher(request, teacher_id):
+# def available_teachers(request, subject_pk=None):
+#     """
+#     Display list of available teachers for tutoring.
 
-#     teacher = get_object_or_404(
-#         CustomUser,
-#         id=teacher_id,
-#         role=UserRole.TEACHER,
-#         is_active=True,
-#         teacher_profile__is_verified_teacher=True,
+#     Filters:
+#     - role = TEACHER
+#     - active users only
+#     - verified teachers only (recommended)
+#     - optional subject filter
+#     """
+
+#     # for better performance, prefetch related subjects
+#     teachers = (
+#         CustomUser.objects.filter(
+#             role=UserRole.TEACHER,
+#             is_active=True,
+#             teacher_profile__is_verified_teacher=True,
+#         )
+#         .select_related("teacher_profile")
+#         .prefetch_related("teacher_profile__subject")
+#         .only(
+#             "id",
+#             "first_name",
+#             "last_name",
+#             "avatar",
+#             # "teacher_profile__average_rating",
+#             # "teacher_profile__years_of_experience",
+#             "teacher_profile__bio",
+#         )
+#         .order_by(
+#             "last_name"
+#             # "-teacher_profile__average_rating",
+#             # "-teacher_profile__years_of_experience",
+#         )
 #     )
 
-#     try:
-#         session, created = SessionService.create_session(
-#             student=request.user,
-#             teacher=teacher,
-#         )
+#     # Optional: filter by subject
+#     if subject_pk:
+#         teachers = teachers.filter(teacher_profile__subject__id=subject_pk)
 
-#         # ✅ CASE 1: FREE teacher → skip Stripe
-#         if teacher.teacher_profile.hour_price == 0:
-#             return redirect(
-#                 "tutoring:student:student-sessions",  # 🔁 adjust to your real URL name
-#                 # session_id=session.id,
-#             )
+#     free_teachers = teachers.filter(teacher_profile__hour_price=0)
 
-#         # Create Stripe checkout session if needed
-#         if created or not session.stripe_checkout_session_id:
+#     paid_teachers = teachers.filter(teacher_profile__hour_price__gt=0)
 
-#             checkout = StripeService.create_checkout_session(session)
+#     context = {
+#         "free_teachers": free_teachers,
+#         "paid_teachers": paid_teachers,
+#         "subject_pk": subject_pk,
+#         "crumbs": [
+#             {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+#             {"label": "Online Teachers", "url": None},
+#         ],
+#     }
 
-#             if not checkout:
-#                 raise Exception("Stripe checkout session creation failed")
-
-#             session.stripe_checkout_session_id = checkout.id
-#             session.save(update_fields=["stripe_checkout_session_id"])
-
-#         else:
-#             # Retrieve existing Stripe checkout session
-#             checkout = stripe.checkout.Session.retrieve(
-#                 session.stripe_checkout_session_id
-#             )
-
-#         return redirect(checkout.url)
-
-#     except Exception as ex:
-#         print(f"Failed to create tutoring session : {str(ex)}")
-
-#         messages.error(
-#             request, f"Unable to create session. Please try again. {str(ex)}"
-#         )
-
-#         return redirect(
-#             "tutoring:student:available-teachers",
-#             subject_pk=teacher.teacher_profile.subject.pk,
-#         )
+#     return render(request, "apps/tutoring/student/available_teachers.html", context)
 
 
 @login_required

@@ -21,6 +21,11 @@
 
       <form method="post" action="{% url 'account_login' %}">
         {% csrf_token %}
+        
+        {# preserve the next param #}
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
 
         <!-- Email -->
         <div class="input-group mb-3">

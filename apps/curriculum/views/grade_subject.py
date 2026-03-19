@@ -1,5 +1,6 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
@@ -80,6 +81,7 @@ class GradeSubjectDetailView(DetailView):
         grade = gs.grade
         level = grade.level
         subject = gs.subject
+        specialty = gs.specialty
 
         # One DB hit per term (3 total) — returns counts for all quarters
         counts_by_quarter = get_grade_subject_counts_by_quarter(pk=self.kwargs["pk"])
@@ -90,7 +92,7 @@ class GradeSubjectDetailView(DetailView):
                 "grade": grade,
                 "level": level,
                 "subject": subject,
-                "specialty": gs.specialty,
+                "specialty": specialty,
                 "quarters": Term.choices,
                 "current_quarter": Term.FIRST,
                 "course_count": counts["course_count"],
@@ -114,11 +116,31 @@ class GradeSubjectDetailView(DetailView):
             }
         )
 
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
+
+        context["crumbs"] = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {
+                "label": level.name,
+                "url": reverse(
+                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                ),
+            },
+            {
+                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                "url": grade_url,  # ← correct URL with specialty param when needed
+            },
+            {"label": subject.short_name, "url": None},
+        ]
+
         return context
 
 
 class GradeSubjectCoursesByQuarterView(GradeSubjectQuarterMixin, ListView):
-    template_name = "apps/curriculum/subjects/courses_by_quarter.html"
+    template_name = "apps/curriculum/grade_subjects/courses_by_quarter.html"
     context_object_name = "courses"
     paginate_by = 20
 
@@ -134,72 +156,57 @@ class GradeSubjectCoursesByQuarterView(GradeSubjectQuarterMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        gs = self.grade_subject
+        grade = gs.grade
+        level = gs.grade.level
+        specialty = gs.specialty
         term = self.get_term()
-        context["quarter_display"] = dict(Term.choices).get(term, term or "")
-        context["is_student"] = self.request.user.is_authenticated and getattr(
-            self.request.user, "is_student", False
-        )
+
+        quarter_display = dict(Term.choices).get(term, term or "")
+
         qp = self.request.GET.copy()
         qp.pop("page", None)
-        context["querystring"] = qp.urlencode()
+
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
+
+        context.update(
+            {
+                "quarter_display": quarter_display,
+                "is_student": self.request.user.is_authenticated
+                and getattr(self.request.user, "is_student", False),
+                "querystring": qp.urlencode(),
+                "crumbs": [
+                    {
+                        "label": "Home",
+                        "url": reverse("pages:landing"),
+                        "icon": "fas fa-home",
+                    },
+                    {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+                    {
+                        "label": level.name,
+                        "url": reverse(
+                            "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                        ),
+                    },
+                    {
+                        "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                        "url": grade_url,
+                    },
+                    {
+                        "label": gs.subject.short_name,
+                        "url": reverse(
+                            "curriculum:grade-subject:grade-subject-detail",
+                            kwargs={"pk": gs.pk},
+                        ),
+                    },
+                    {"label": f"Courses — {quarter_display}", "url": None},
+                ],
+            }
+        )
 
         return context
-
-
-# class GradeSubjectResourceListView(ListView):
-#     """
-#     Generic view for all subject resource types (tests, exams, past papers, etc.)
-#     Driven by `resource_slug` URL kwarg — matches keys in SUBJECT_RESOURCE_TYPE_CONFIG.
-
-#     URL example:
-#         path('subjects/<uuid:pk>/resources/<str:resource_slug>/',
-#              SubjectResourceListView.as_view(),
-#              name='subject-resources'),
-#     """
-
-#     template_name = "apps/curriculum/subjects/resource_list.html"
-#     context_object_name = "resources"
-#     paginate_by = 9
-
-#     def _get_config(self):
-#         slug = self.kwargs.get("resource_slug")
-#         config = SUBJECT_RESOURCE_TYPE_CONFIG.get(slug)
-#         if not config:
-#             raise Http404(f"Unknown subject resource type: {slug}")
-#         return config
-
-#     def get_queryset(self):
-#         config = self._get_config()
-#         return get_grade_subject_resources(
-#             grade_subject=self.grade_subject,
-#             resource_type=config["resource_type"],
-#             filters=self.request.GET,
-#             user=self.request.user,
-#         )
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         config = self._get_config()
-
-#         qp = self.request.GET.copy()
-#         qp.pop("page", None)
-
-#         context.update(
-#             {
-#                 "active_tab": config["tab"],
-#                 "resource_type_title": config["title"],
-#                 "resource_type_icon": config["icon"],
-#                 "resource_type": config["resource_type"],
-#                 "difficulty_choices": DifficultyLevel.choices,
-#                 "term_choices": Term.choices,
-#                 "querystring": qp.urlencode(),
-#                 "filter_q": self.request.GET.get("q", ""),
-#                 "filter_difficulty": self.request.GET.get("difficulty", ""),
-#                 "filter_term": self.request.GET.get("term", ""),
-#             }
-#         )
-
-#         return context
 
 
 class GradeSubjectResourceListByTermView(ListView):
@@ -239,17 +246,53 @@ class GradeSubjectResourceListByTermView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["grade_subject"] = self.grade_subject
+
+        gs = self.grade_subject
+        grade = gs.grade
+        level = gs.grade.level
+        specialty = gs.specialty
+
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
+
+        context["grade_subject"] = gs
         context["resource_slug"] = self.resource_slug
-        context["level"] = self.grade_subject.grade.level
-        context["grade"] = self.grade_subject.grade
-        context["subject"] = self.grade_subject.subject
-        context["specialty"] = self.grade_subject.specialty
+        context["level"] = level
+        context["grade"] = grade
+        context["subject"] = gs.subject
+        context["specialty"] = specialty
         context["current_term"] = self.current_term
         context["terms"] = Term.choices
         context["resource_types"] = ResourceType.get_subject_choices()
+        context["crumbs"] = [
+            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
+            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+            {
+                "label": level.name,
+                "url": reverse(
+                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                ),
+            },
+            {
+                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                "url": grade_url,
+            },
+            {
+                "label": gs.subject.short_name,
+                "url": reverse(
+                    "curriculum:grade-subject:grade-subject-detail",
+                    kwargs={"pk": gs.pk},
+                ),
+            },
+            {
+                "label": (
+                    self.resource_slug.title() if self.resource_slug else "Resources"
+                ),
+                "url": None,
+            },
+        ]
 
-        # Group resources by term when no specific term is selected
         if not self.current_term:
             context["resources_by_term"] = self._group_by_term(context["resources"])
 
@@ -305,14 +348,48 @@ class GradeSubjectQuizzesView(GradeSubjectQuarterMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        gs = self.grade_subject
+        grade = gs.grade
+        level = gs.grade.level
+        specialty = gs.specialty
 
         qp = self.request.GET.copy()
         qp.pop("page", None)
+
+        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
+        if specialty:
+            grade_url += f"?specialty={specialty.pk}"
 
         context.update(
             {
                 "filter_q": self.request.GET.get("q", ""),
                 "querystring": qp.urlencode(),
+                "crumbs": [
+                    {
+                        "label": "Home",
+                        "url": reverse("pages:landing"),
+                        "icon": "fas fa-home",
+                    },
+                    {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+                    {
+                        "label": level.name,
+                        "url": reverse(
+                            "curriculum:level:level-detail", kwargs={"pk": level.pk}
+                        ),
+                    },
+                    {
+                        "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
+                        "url": grade_url,
+                    },
+                    {
+                        "label": gs.subject.short_name,
+                        "url": reverse(
+                            "curriculum:grade-subject:grade-subject-detail",
+                            kwargs={"pk": gs.pk},
+                        ),
+                    },
+                    {"label": "Quizzes", "url": None},
+                ],
             }
         )
 
