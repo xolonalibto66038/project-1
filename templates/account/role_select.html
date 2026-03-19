@@ -51,6 +51,23 @@
           </div>
 
         </div>
+
+        {% comment %} # In role_select.html — add checkboxes to the existing form {% endcomment %}
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" name="terms" 
+                id="id_terms" required>
+          <label class="form-check-label" for="id_terms">
+            I agree to the <a href="{% url 'pages:terms' %}" target="_blank">Terms of Service</a>
+          </label>
+        </div>
+
+        <div class="form-check mt-2 mb-3">
+          <input class="form-check-input" type="checkbox" name="privacy" 
+                id="id_privacy" required>
+          <label class="form-check-label" for="id_privacy">
+            I agree to the <a href="{% url 'pages:privacy' %}" target="_blank">Privacy Policy</a>
+          </label>
+        </div>
       </form>
 
       <div class="mt-3 text-center">

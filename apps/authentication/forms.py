@@ -6,6 +6,7 @@ from allauth.account.forms import (
     ResetPasswordForm,
     SignupForm,
 )
+from allauth.socialaccount.forms import SignupForm as SocialSignupForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -47,6 +48,20 @@ class CustomSignupForm(SignupForm):
         initial=UserRole.STUDENT,
         required=True,
     )
+    terms = forms.BooleanField(
+        required=True,
+        label=_("I agree to the Terms of Service"),
+        error_messages={
+            "required": _("You must accept the Terms of Service to register.")
+        },
+    )
+    privacy = forms.BooleanField(
+        required=True,
+        label=_("I agree to the Privacy Policy"),
+        error_messages={
+            "required": _("You must accept the Privacy Policy to register.")
+        },
+    )
 
     # ── Email field override for Bootstrap styling ──
     def __init__(self, *args, **kwargs):
@@ -69,6 +84,26 @@ class CustomSignupForm(SignupForm):
                 "placeholder": _("Confirm Password"),
             }
         )
+        self.fields["terms"].widget.attrs.update(
+            {"class": "form-check-input", "required": "required"}
+        )
+        self.fields["privacy"].widget.attrs.update(
+            {"class": "form-check-input", "required": "required"}
+        )
+
+    def clean_terms(self):
+        if not self.cleaned_data.get("terms"):
+            raise forms.ValidationError(
+                _("You must accept the Terms of Service to register.")
+            )
+        return self.cleaned_data["terms"]
+
+    def clean_privacy(self):
+        if not self.cleaned_data.get("privacy"):
+            raise forms.ValidationError(
+                _("You must accept the Privacy Policy to register.")
+            )
+        return self.cleaned_data["privacy"]
 
     def save(self, request):
         user = super().save(request)
@@ -219,3 +254,54 @@ class TeacherOnboardingForm(forms.Form):
                     _("The selected subject does not belong to this level.")
                 )
         return cleaned
+
+
+# class CustomSocialSignupForm(SocialSignupForm):
+#     # role = forms.ChoiceField(
+#     #     choices=UserRole.choices,
+#     #     label=_("I am a"),
+#     #     widget=forms.RadioSelect(attrs={"class": "role-selector"}),
+#     #     initial=UserRole.STUDENT,
+#     #     required=True,
+#     # )
+#     terms = forms.BooleanField(
+#         required=True,
+#         error_messages={
+#             "required": _("You must accept the Terms of Service to register.")
+#         },
+#     )
+#     privacy = forms.BooleanField(
+#         required=True,
+#         error_messages={
+#             "required": _("You must accept the Privacy Policy to register.")
+#         },
+#     )
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields["terms"].widget.attrs.update(
+#             {"class": "form-check-input", "required": "required"}
+#         )
+#         self.fields["privacy"].widget.attrs.update(
+#             {"class": "form-check-input", "required": "required"}
+#         )
+
+#     def clean_terms(self):
+#         if not self.cleaned_data.get("terms"):
+#             raise forms.ValidationError(
+#                 _("You must accept the Terms of Service to register.")
+#             )
+#         return self.cleaned_data["terms"]
+
+#     def clean_privacy(self):
+#         if not self.cleaned_data.get("privacy"):
+#             raise forms.ValidationError(
+#                 _("You must accept the Privacy Policy to register.")
+#             )
+#         return self.cleaned_data["privacy"]
+
+#     # def save(self, request):
+#     #     user = super().save(request)
+#     #     user.role = self.cleaned_data["role"]
+#     #     user.save()
+#     #     return user

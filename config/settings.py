@@ -314,6 +314,10 @@ ACCOUNT_FORMS = {
     "change_password": "apps.authentication.forms.CustomChangePasswordForm",
 }
 
+# SOCIALACCOUNT_FORMS = {
+#     "signup": "apps.authentication.forms.CustomSocialSignupForm",
+# }
+
 # ── social ──
 SOCIALACCOUNT_PROVIDERS = {
     "google": {

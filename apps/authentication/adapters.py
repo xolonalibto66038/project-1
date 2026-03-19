@@ -90,6 +90,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def save_user(self, request, sociallogin, form=None):
         """Auto-fill first_name, last_name, avatar from Google profile."""
+        # Guard — terms must have been accepted at role_select step
+        if not request.session.pop("pending_terms_accepted", False):
+            from allauth.exceptions import ImmediateHttpResponse
+            from django.shortcuts import redirect
+
+            raise ImmediateHttpResponse(redirect("social_role_select"))
+
         user = super().save_user(request, sociallogin, form)
 
         extra = sociallogin.account.extra_data

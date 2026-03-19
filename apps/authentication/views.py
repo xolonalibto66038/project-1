@@ -108,19 +108,39 @@ class SocialRoleSelectView(FormView):
         return self.render_to_response({})
 
     def post(self, request, *args, **kwargs):
-        from apps.accounts.choices import UserRole
-
         role = request.POST.get("role")
+        terms = request.POST.get("terms")
+        privacy = request.POST.get("privacy")
 
+        errors = {}
         if role not in UserRole.values:
-            return self.render_to_response({"error": _("Please select a valid role.")})
+            errors["role"] = _("Please select a valid role.")
+        if not terms:
+            errors["terms"] = _("You must accept the Terms of Service.")
+        if not privacy:
+            errors["privacy"] = _("You must accept the Privacy Policy.")
 
-        # ✅ store in session — survives the OAuth redirect
+        if errors:
+            return self.render_to_response({"errors": errors})
+
         request.session["pending_role"] = role
-
-        # redirect to Google
-        # from allauth.socialaccount.providers.google.views import oauth2_login
+        request.session["pending_terms_accepted"] = True  # ← store acceptance
         return redirect(reverse("google_login"))
+
+    # def post(self, request, *args, **kwargs):
+    #     from apps.accounts.choices import UserRole
+
+    #     role = request.POST.get("role")
+
+    #     if role not in UserRole.values:
+    #         return self.render_to_response({"error": _("Please select a valid role.")})
+
+    #     # ✅ store in session — survives the OAuth redirect
+    #     request.session["pending_role"] = role
+
+    #     # redirect to Google
+    #     # from allauth.socialaccount.providers.google.views import oauth2_login
+    #     return redirect(reverse("google_login"))
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

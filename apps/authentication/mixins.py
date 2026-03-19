@@ -27,16 +27,6 @@ class TeacherRequiredMixin(LoginRequiredMixin):
         return super().dispatch(request, *args, **kwargs)
 
 
-# class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
-#     """Allows access only to verified teachers."""
-
-
-#     def dispatch(self, request, *args, **kwargs):
-#         response = super().dispatch(request, *args, **kwargs)
-#         # super() already checked is_teacher
-#         if not request.user.teacher_profile.is_verified_teacher:
-#             raise PermissionDenied(_("Your teacher account is pending verification."))
-#         return response
 class VerifiedTeacherRequiredMixin(TeacherRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
