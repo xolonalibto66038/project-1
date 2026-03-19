@@ -119,6 +119,13 @@ class Quiz(TimeStampModel):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        # Recompute the snapshot every time the quiz is saved
+        # This ensures it's accurate even before any student attempts it
+        if self.pk:  # only if quiz already exists (has questions attached)
+            self.is_auto_gradable_snapshot = self.is_auto_gradable
+        super().save(*args, **kwargs)
+
     def clean(self):
         # messages.success(self.request, "Operation completed successfully!")
         pass

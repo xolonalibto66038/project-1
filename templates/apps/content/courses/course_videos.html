@@ -102,6 +102,53 @@
 <section class="content">
 <div class="container-fluid">
 
+    {# ── Filters ── #}
+  {% if videos or filter_q or filter_teacher %}
+  <div class="card card-outline card-secondary mb-3">
+    <div class="card-body py-2">
+      <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
+
+        {# Preserve current video selection across filter submissions #}
+        {% if current_video %}
+          <input type="hidden" name="video" value="{{ current_video.pk }}">
+        {% endif %}
+
+        {# Search #}
+        <div class="input-group input-group-sm" style="width:220px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+          </div>
+          <input type="text" name="q" value="{{ filter_q }}"
+                class="form-control" placeholder="{% trans 'Title or tag…' %}">
+        </div>
+
+        {# Teacher #}
+        <select name="teacher" class="form-control form-control-sm" style="width:180px;">
+          <option value="">{% trans "All teachers" %}</option>
+          {% for t in teachers %}
+            <option value="{{ t.pk }}"
+                    {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+              {{ t.get_full_name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+        </button>
+
+        {% if filter_q or filter_teacher %}
+        <a href="?{% if current_video %}video={{ current_video.pk }}{% endif %}" 
+          class="btn btn-outline-secondary btn-sm">
+          <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+        </a>
+        {% endif %}
+
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
   {% if not videos %}
   {# ── Empty state — full width ── #}
   <div class="card">
@@ -113,6 +160,7 @@
   </div>
 
   {% else %}
+
 
   <div class="row">
 
@@ -132,7 +180,7 @@
 
         <div class="card-body p-0 playlist">
           {% for video in videos %}
-          <a href="?video={{ video.pk }}"
+          <a href="?{% if querystring %}{{ querystring }}&{% endif %}video={{ video.pk }}"
              class="d-flex align-items-start p-3 playlist-item border-bottom
                     {% if video.pk == current_video.pk %}active{% endif %}">
 
@@ -267,10 +315,16 @@
   }));
 
   const activeIndex = items.findIndex(
-    item => item.url === window.location.search
-            || document.querySelector('.playlist-item.active')
-               ?.getAttribute('href') === item.url
-  );
+    item => {
+        try {
+            const itemParams = new URLSearchParams(item.url.replace(/^\?/, ''));
+            const currentParams = new URLSearchParams(window.location.search);
+            return itemParams.get('video') === currentParams.get('video');
+        } catch {
+            return false;
+        }
+    }
+);
 
   // ── Prev / Next buttons ───────────────────────────────────────
   const prevWrap = document.getElementById('nav-prev');

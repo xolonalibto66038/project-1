@@ -25,37 +25,6 @@
         {% breadcrumb crumbs %}
       </div>
 
-      {% comment %} <div class="col-sm-5">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">
-              {{ level.name }}
-            </a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:grade:grade-detail' grade.pk %}{% if grade_subject.specialty %}?specialty={{ grade_subject.specialty.pk }}{% endif %}">
-              {{ grade.name }}{% if grade_subject.specialty %} | {{ grade_subject.specialty.short_name }}{% endif %}
-            </a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:grade-subject:grade-subject-detail' pk=grade_subject.pk %}">
-              {{ grade_subject.subject.short_name }}
-            </a>
-          </li>
-          <li class="breadcrumb-item active font-weight-bold">
-            {% trans "Quizzes" %}
-          </li>
-        </ol>
-      </div> {% endcomment %}
-
     </div>
   </div>
 </section> 
@@ -66,19 +35,49 @@
     {# ── Filters ── #}
     <div class="card card-outline card-secondary mb-3">
       <div class="card-body py-2">
-        <form method="get" class="form-inline flex-wrap" style="gap:8px;">
+        <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
 
-          <input type="text"
-                 name="q"
-                 value="{{ filter_q }}"
-                 placeholder="{% trans 'Search...' %}"
-                 class="form-control form-control-sm">
+          {# Search #}
+          <div class="input-group input-group-sm" style="width:220px;">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" name="q" value="{{ filter_q }}"
+                  class="form-control" placeholder="{% trans 'Title or description…' %}">
+          </div>
+
+          {# Course #}
+          <select name="course" class="form-control form-control-sm" style="width:180px;">
+            <option value="">{% trans "All courses" %}</option>
+            {% for c in courses %}
+              <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
+                {{ c.title }}
+              </option>
+            {% endfor %}
+          </select>
+
+          {# Teacher #}
+          <select name="teacher" class="form-control form-control-sm" style="width:180px;">
+            <option value="">{% trans "All teachers" %}</option>
+            {% for t in teachers %}
+              <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+                {{ t.get_full_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          {# Auto-gradable #}
+          <select name="auto_gradable" class="form-control form-control-sm" style="width:160px;">
+            <option value="">{% trans "Any type" %}</option>
+            <option value="1" {% if filter_auto_grade == "1" %}selected{% endif %}>{% trans "Auto-gradable" %}</option>
+            <option value="0" {% if filter_auto_grade == "0" %}selected{% endif %}>{% trans "Manual grading" %}</option>
+          </select>
 
           <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fas fa-search mr-1"></i>{% trans "Filter" %}
+            <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
           </button>
 
-          {% if filter_q %}
+          {% if filter_q or filter_course or filter_teacher or filter_auto_grade %}
           <a href="?" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
           </a>

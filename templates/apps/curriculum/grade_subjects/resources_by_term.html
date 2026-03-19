@@ -40,6 +40,102 @@
     {# ── Filters ── #}
     <div class="card card-outline card-secondary mb-3">
       <div class="card-body py-2">
+        <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
+
+          {# Search #}
+          <div class="input-group input-group-sm" style="width:200px;">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" name="q" value="{{ filter_q }}"
+                  class="form-control" placeholder="{% trans 'Title, content, tags…' %}">
+          </div>
+
+          {# Resource type — only show when not locked by URL slug #}
+          {% if not resource_slug %}
+          <select name="resource_type" class="form-control form-control-sm" style="width:160px;">
+            <option value="">{% trans "All types" %}</option>
+            {% for val, label in resource_type_choices %}
+              <option value="{{ val }}" {% if filter_resource_type == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+          {% endif %}
+
+          {# Term — only show when not locked by URL kwarg #}
+          {% if not current_term %}
+          <select name="term" class="form-control form-control-sm" style="width:150px;">
+            <option value="">{% trans "All terms" %}</option>
+            {% for val, label in term_choices %}
+              <option value="{{ val }}" {% if filter_term == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+          {% endif %}
+
+          {# Difficulty #}
+          <select name="difficulty" class="form-control form-control-sm" style="width:140px;">
+            <option value="">{% trans "All levels" %}</option>
+            {% for val, label in difficulty_choices %}
+              <option value="{{ val }}" {% if filter_difficulty == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+
+          {# Course #}
+          <select name="course" class="form-control form-control-sm" style="width:170px;">
+            <option value="">{% trans "All courses" %}</option>
+            {% for c in courses %}
+              <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
+                {{ c.title }}
+              </option>
+            {% endfor %}
+          </select>
+
+          {# Teacher #}
+          <select name="teacher" class="form-control form-control-sm" style="width:170px;">
+            <option value="">{% trans "All teachers" %}</option>
+            {% for t in teachers %}
+              <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+                {{ t.get_full_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          {# Has solution #}
+          <select name="has_solution" class="form-control form-control-sm" style="width:145px;">
+            <option value="">{% trans "Solution: any" %}</option>
+            <option value="1" {% if filter_has_solution == "1" %}selected{% endif %}>{% trans "Has solution" %}</option>
+            <option value="0" {% if filter_has_solution == "0" %}selected{% endif %}>{% trans "No solution" %}</option>
+          </select>
+
+          {# Free / Premium #}
+          <select name="is_free" class="form-control form-control-sm" style="width:130px;">
+            <option value="">{% trans "Free: any" %}</option>
+            <option value="1" {% if filter_is_free == "1" %}selected{% endif %}>{% trans "Free only" %}</option>
+            <option value="0" {% if filter_is_free == "0" %}selected{% endif %}>{% trans "Premium only" %}</option>
+          </select>
+
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+          </button>
+
+          {% if filter_q or filter_difficulty or filter_term or filter_resource_type or filter_has_solution or filter_is_free or filter_course or filter_teacher %}
+          <a href="?" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+          </a>
+          {% endif %}
+
+        </form>
+      </div>
+    </div>
+
+    {# ── Filters ── #}
+    {% comment %} <div class="card card-outline card-secondary mb-3">
+      <div class="card-body py-2">
         <form method="get" class="form-inline flex-wrap" style="gap:8px;">
 
           <input type="text"
@@ -80,7 +176,7 @@
 
         </form>
       </div>
-    </div>
+    </div> {% endcomment %}
 
     {# ── Resource list ── #}
     <div class="card card-primary card-outline">

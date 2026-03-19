@@ -8,7 +8,9 @@ from ..selectors import (
 )
 
 
-def build_grade_subject_courses_page(grade_subject, quarter: str, user=None):
+def build_grade_subject_courses_page(
+    grade_subject, quarter: str, user=None, difficulty=None, search=None
+):
     """
     Returns annotated course list for SubjectCoursesByQuarterView.
     Thin wrapper — keeps the view free of selector imports.
@@ -18,6 +20,8 @@ def build_grade_subject_courses_page(grade_subject, quarter: str, user=None):
         grade_subject=grade_subject,
         quarter=quarter,
         user=user,
+        difficulty=difficulty,
+        search=search,
     )
 
 

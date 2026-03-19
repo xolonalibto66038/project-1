@@ -1,8 +1,10 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -23,6 +25,8 @@ from ..selectors import (
     resolve_course_breadcrumb,
 )
 from ..services import record_course_visit
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -222,14 +226,39 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        qp = self.request.GET.copy()
+        qp.pop("video", None)  # ← strip video so it doesn't duplicate
+
         course = self.object
 
+        # ── Filters ──────────────────────────────────────────────────
+        q = self.request.GET.get("q", "").strip()
+        teacher_id = self.request.GET.get("teacher", "").strip()
+
         videos = course.videos.filter(is_active=True).order_by("order")
+
+        if q:
+            videos = videos.filter(
+                Q(title__icontains=q) | Q(tags__name__icontains=q)
+            ).distinct()
+
+        if teacher_id:
+            videos = videos.filter(created_by_id=teacher_id)
 
         video_pk = self.request.GET.get("video")
         current_video = (
             videos.filter(pk=video_pk).first() if video_pk else None
         ) or videos.first()
+
+        # ── Teachers dropdown — scoped to this course ─────────────────
+        teachers = (
+            User.objects.filter(
+                videos__course=course,
+                videos__is_active=True,
+            )
+            .distinct()
+            .only("id", "first_name", "last_name")
+        )
 
         is_student = self.request.user.is_authenticated and getattr(
             self.request.user, "is_student", False
@@ -303,6 +332,10 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
                 "current_video": current_video,
                 "is_student": is_student,
                 "videos_count": videos.count(),
+                "teachers": teachers,
+                "filter_q": q,
+                "filter_teacher": teacher_id,
+                "querystring": qp.urlencode(),
                 "grade": grade,
                 "subject": subject,
                 "level": level,

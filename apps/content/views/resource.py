@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 _recommender = RecommendationService()
 
 
-class ResourceCreateView(VerifiedTeacherRequiredMixin, OwnerRequiredMixin, CreateView):
+class ResourceCreateView(VerifiedTeacherRequiredMixin, CreateView):
     model = Resource
     form_class = ResourceCreateForm
     template_name = "apps/content/resources/form.html"

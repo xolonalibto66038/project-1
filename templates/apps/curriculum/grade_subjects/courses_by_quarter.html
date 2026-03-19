@@ -85,6 +85,52 @@
         </div>
       </div>
 
+      <div class="card-header border-bottom-0 pb-0">
+        <form method="get" class="d-flex flex-wrap align-items-end" style="gap: 10px;">
+          
+          {# Preserve pagination reset on filter #}
+          <div class="form-group mb-0 flex-grow-1" style="min-width: 200px;">
+            <label class="small text-muted mb-1">{% trans "Search" %}</label>
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+              <input
+                type="text"
+                name="q"
+                value="{{ current_search }}"
+                class="form-control"
+                placeholder="{% trans 'Title or description…' %}"
+              >
+            </div>
+          </div>
+
+          <div class="form-group mb-0" style="min-width: 160px;">
+            <label class="small text-muted mb-1">{% trans "Difficulty" %}</label>
+            <select name="difficulty" class="form-control form-control-sm">
+              <option value="">{% trans "All levels" %}</option>
+              {% for value, label in difficulty_choices %}
+                <option value="{{ value }}" {% if current_difficulty == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-info btn-sm mb-0">
+            <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+          </button>
+
+          {% if current_search or current_difficulty %}
+            <a href="?{% if request.resolver_match.kwargs.quarter %}{% endif %}"
+              class="btn btn-outline-secondary btn-sm mb-0">
+              <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+            </a>
+          {% endif %}
+
+        </form>
+      </div>
+
       <div class="card-body p-0">
 
         {% if courses %}

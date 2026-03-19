@@ -165,7 +165,9 @@ def get_grade_subject_by_pk(pk, term=None):
     )
 
 
-def get_grade_subject_courses_by_quarter(grade_subject, quarter: str, user=None):
+def get_grade_subject_courses_by_quarter(
+    grade_subject, quarter: str, user=None, difficulty=None, search=None
+):
     """
     Returns all active courses for a subject in a given quarter.
 
@@ -218,6 +220,12 @@ def get_grade_subject_courses_by_quarter(grade_subject, quarter: str, user=None)
         )
         .order_by("chapter__order", "order")
     )
+    # ── Filters ──────────────────────────────────────────────────────────
+    if difficulty:
+        qs = qs.filter(difficulty=difficulty)
+
+    if search:
+        qs = qs.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
     # ── Attach progress objects for students ──────────────────────────────
     if (

@@ -1,11 +1,25 @@
 # apps/assessment/signals.py
 
 from django.core.exceptions import ValidationError
-from django.db.models.signals import m2m_changed, post_save
+from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
-from .models import Answer, Choice
+from .models import Answer, Choice, Quiz, QuizQuestion
+
+
+@receiver(post_save, sender=QuizQuestion)
+@receiver(post_delete, sender=QuizQuestion)
+def update_quiz_auto_gradable_snapshot(sender, instance, **kwargs):
+    """
+    Recompute the snapshot on the parent Quiz whenever a question
+    is added or removed.
+    """
+    quiz = instance.quiz
+    # Use update() to avoid triggering Quiz.save() signals recursively
+    Quiz.objects.filter(pk=quiz.pk).update(
+        is_auto_gradable_snapshot=quiz.is_auto_gradable
+    )
 
 
 @receiver(m2m_changed, sender=Answer.selected_choices.through)
