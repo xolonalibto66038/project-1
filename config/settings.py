@@ -291,9 +291,8 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[EduGDZ] "
 ACCOUNT_MAX_EMAIL_ADDRESSES = 2
-ACCOUNT_SESSION_REMEMBER = True  # remember me by default
+ACCOUNT_SESSION_REMEMBER = None  # remember me by default
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 # ACCOUNT_USERNAME_REQUIRED = False
 
@@ -358,15 +357,15 @@ ACCOUNT_RATE_LIMITS = {
 }
 
 # ── email backend (dev) ──
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # ── Email (real SMTP) ──
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False  # must be False when TLS is Tr
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = env("EMAIL_HOST")
+# EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+# EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False  # must be False when TLS is Tr
 
 
 CONTACT_EMAIL = "xolonalibto66038@gmail.com"
@@ -411,3 +410,9 @@ CELERY_TIMEZONE = TIME_ZONE
 
 # Prevent tasks from piling up if the worker was down for a while
 CELERY_BEAT_MAX_LOOP_INTERVAL = 300  # seconds
+
+# Session settings
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days for "remember me"
+SESSION_COOKIE_SECURE = True  # HTTPS only — critical
+SESSION_COOKIE_HTTPONLY = True  # JS can't read the cookie
+SESSION_COOKIE_SAMESITE = "Lax"  # CSRF protection

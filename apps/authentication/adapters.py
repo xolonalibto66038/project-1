@@ -21,6 +21,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if not user.is_authenticated:
             return settings.LOGIN_REDIRECT_URL
         if user.is_staff or user.is_superuser:
+            # Force short session for admin users regardless of remember me
+            request.session.set_expiry(0)  # expires on browser close
             return "/admin/"
         return "/dashboard/"
 

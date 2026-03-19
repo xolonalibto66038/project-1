@@ -65,18 +65,17 @@
 
         <!-- Remember + Submit -->
         <div class="row">
-          {% comment %} <div class="col-7">
-
-            <div class="form-check">
+          {% if form.remember %}
+          <div class="col-7">
+            <div class="form-check mb-3">
               {{ form.remember }}
-              <label class="form-check-label">
+              <label class="form-check-label" for="{{ form.remember.id_for_label }}">
                 {% trans "Remember me" %}
               </label>
             </div>
-
-          </div> {% endcomment %}
-
-          <div class="col-12">
+          </div>
+          {% endif %}
+          <div class="col-5">
             <button type="submit" class="btn btn-primary btn-block">
               {% trans "Sign In" %}
             </button>
