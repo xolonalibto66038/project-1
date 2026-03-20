@@ -44,8 +44,8 @@ class BookmarkResourceView(LoginRequiredMixin, View):
         """
         return (
             Resource.objects.select_related(
-                "course__subject__grade__level",
-                "subject",
+                "course__grade_subject__grade__level",
+                "grade_subject",
             )
             .filter(pk=pk, is_active=True)
             .first()
@@ -53,11 +53,9 @@ class BookmarkResourceView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         resource = self.get_resource(pk)
-
         if not resource:
             return JsonResponse(
-                {"error": _("Resource not found or not accessible.")},
-                status=404,
+                {"error": _("Resource not found or not accessible.")}, status=404
             )
 
         ct = ContentType.objects.get_for_model(Resource)
@@ -65,11 +63,12 @@ class BookmarkResourceView(LoginRequiredMixin, View):
             student=request.user,
             content_type=ct,
             object_id=resource.pk,
+            active=True,
         ).exists()
 
         return JsonResponse(
             {
-                "bookmarked": is_bookmarked,
+                "is_bookmarked": is_bookmarked,
                 "resource_id": str(resource.pk),
                 "resource_type": resource.resource_type,
             }
@@ -77,49 +76,39 @@ class BookmarkResourceView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         resource = self.get_resource(pk)
-
         if not resource:
             return JsonResponse(
-                {"error": _("Resource not found or not accessible.")},
-                status=404,
+                {"error": _("Resource not found or not accessible.")}, status=404
             )
 
         ct = ContentType.objects.get_for_model(Resource)
-        existing = Bookmark.objects.filter(
+
+        bookmark, created = Bookmark.objects.get_or_create(
             student=request.user,
             content_type=ct,
             object_id=resource.pk,
+            defaults={"active": True},
         )
 
-        if existing.exists():
-            existing.delete()
-            return JsonResponse(
-                {
-                    "bookmarked": False,
-                    "message": _("Bookmark removed."),
-                    "resource_id": str(resource.pk),
-                }
-            )
-
-        Bookmark.objects.create(
-            student=request.user,
-            content_type=ct,
-            object_id=resource.pk,
-        )
+        if not created:
+            bookmark.active = not bookmark.active
+            bookmark.save(update_fields=["active", "updated_at"])
 
         return JsonResponse(
             {
-                "bookmarked": True,
-                "message": _("Bookmark added."),
+                "bookmarked": bookmark.active,
+                "message": (
+                    _("Bookmark added.") if bookmark.active else _("Bookmark removed.")
+                ),
                 "resource_id": str(resource.pk),
             },
-            status=201,
+            status=200,
         )
 
 
 class StudentBookmarkListView(LoginRequiredMixin, TemplateView):
     """
-    Display the student's bookmarks grouped by content type
+    Display the student's active bookmarks grouped by content type
     and ordered by most recent first.
     """
 
@@ -129,19 +118,16 @@ class StudentBookmarkListView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # ===================== QUERY =====================
         bookmarks = (
-            Bookmark.objects.filter(student=user)
+            Bookmark.objects.filter(student=user, active=True)
             .select_related("content_type")
-            .order_by("-created_at")
+            .order_by("-updated_at")
         )
 
-        # ===================== GROUPING =====================
         grouped_bookmarks = defaultdict(list)
         for bookmark in bookmarks:
             grouped_bookmarks[bookmark.target_type].append(bookmark)
 
-        # Optional: enforce a stable order of groups
         ordered_types = Bookmark.ALLOWED_MODELS
         grouped_bookmarks = {
             content_type: grouped_bookmarks.get(content_type, [])
@@ -149,13 +135,11 @@ class StudentBookmarkListView(LoginRequiredMixin, TemplateView):
             if grouped_bookmarks.get(content_type)
         }
 
-        # bookmarks = bookmarks.exclude(content_object=None)
-
-        # ===================== CONTEXT =====================
         context.update(
             {
-                "bookmarks": bookmarks,  # flat list (optional)
+                "bookmarks": bookmarks,
                 "grouped_bookmarks": grouped_bookmarks,
+                "total_count": bookmarks.count(),
             }
         )
         return context

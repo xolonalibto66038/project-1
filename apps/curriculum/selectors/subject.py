@@ -171,8 +171,8 @@ def get_course_resource_counts_for_subject(subject):
     }
 
 
-def get_progress_counts_for_student(student, subject_ids):
-    """Completed courses per subject for a given student."""
+def get_progress_counts_for_student(student, grade_subject_ids):
+    """Completed courses per grade_subject for a given student."""
 
     course_ct = ContentType.objects.get_for_model(Course)
 
@@ -182,15 +182,16 @@ def get_progress_counts_for_student(student, subject_ids):
         is_completed=True,
     ).values_list("object_id", flat=True)
 
+    # Cast object_id strings to the same type as Course.pk
     return dict(
         Course.objects.filter(
-            id__in=completed_course_ids,
-            grade_subject__subject_id__in=subject_ids,
+            pk__in=completed_course_ids,
+            grade_subject_id__in=grade_subject_ids,
             is_active=True,
         )
-        .values("grade_subject__subject_id")
+        .values("grade_subject_id")
         .annotate(count=Count("id"))
-        .values_list("grade_subject__subject_id", "count")
+        .values_list("grade_subject_id", "count")
     )
 
 

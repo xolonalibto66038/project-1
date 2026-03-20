@@ -10,46 +10,15 @@
 <section class="content-header">
   <div class="container-fluid">
     <div class="row align-items-center mb-2">
-
       <div class="col-sm-5">
         <h1 class="font-weight-bold mb-0">
-          <i class="fas fa-pencil-ruler mr-2 text-warning"></i>
+          <i class="fas fa-pencil-alt mr-2 text-warning"></i>
           {% trans "Exercise" %}: {{ resource.title }}
         </h1>
       </div>
-
       <div class="col-sm-7">
         {% breadcrumb crumbs %}
-        {% comment %} <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          {% if level %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">{{ level.name }}</a>
-          </li>
-          {% endif %}
-          {% if subject %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'curriculum:subject:subject-detail' pk=subject.pk %}">{{ subject.short_name }}</a>
-          </li>
-          {% endif %}
-          {% if course %}
-          <li class="breadcrumb-item">
-            <a href="{% url 'content:course:course-detail' pk=course.pk %}">{{ course.title }}</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'content:course:course-exercises' pk=course.pk %}">{% trans "Exercises" %}</a>
-          </li>
-          {% endif %}
-          <li class="breadcrumb-item active font-weight-bold">
-            {{ resource.title }}
-          </li>
-        </ol> {% endcomment %}
       </div>
-
     </div>
   </div>
 </section>
@@ -57,144 +26,112 @@
 <section class="content">
   <div class="container-fluid">
 
-    <!-- ===================== RESOURCE INFO CARD ===================== -->
+    {# ── Resource info bar ── #}
     <div class="card card-outline card-primary mb-4">
-      <div class="card-body">
+      <div class="card-body py-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: 12px;">
 
-        <!-- METADATA BADGES -->
-        <div class="d-flex flex-wrap mb-2">
-          <span class="badge badge-info mr-2 mb-1">
-            Type: {{ resource.get_type_display }}
-          </span>
-          <span class="badge badge-warning mr-2 mb-1">
-            Difficulty: {{ resource.get_difficulty_level_display }}
-          </span>
-          {% if resource.rating_avg %}
-          <span class="badge badge-success mr-2 mb-1">
-            ⭐ {{ resource.get_rating_display }} ({{ resource.rating_count }} ratings)
-          </span>
-          {% else %}
-          <span class="badge badge-secondary mr-2 mb-1">No ratings yet</span>
-          {% endif %}
-          <span class="badge badge-light border mr-2 mb-1">
-            👁 Views: {{ resource.view_count }}
-          </span>
-          <span class="badge badge-light border mr-2 mb-1">
-            ⬇ Downloads: {{ resource.download_count }}
-          </span>
-        </div>
+          {# Left: badges #}
+          <div class="d-flex flex-wrap align-items-center" style="gap: 6px;">
 
-        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+            {% with d=resource.difficulty %}
+            <span class="badge px-2 py-1"
+                  style="font-size:11px; font-weight:500;
+                  {% if d == 'easy' %}background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;
+                  {% elif d == 'medium' %}background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;
+                  {% elif d == 'hard' %}background:#FCEBEB; color:#A32D2D; border:0.5px solid #F09595;
+                  {% else %}background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;{% endif %}">
+              <i class="fas fa-signal mr-1" style="font-size:10px;"></i>
+              {{ resource.get_difficulty_display }}
+            </span>
+            {% endwith %}
 
-          {% if user.is_authenticated and user.is_student %}
+            {# Rating display #}
+            <span class="d-flex align-items-center" style="gap: 3px;">
+              {% for star in resource.get_rating_display.stars %}
+              <i class="fas fa-star"
+                 style="font-size:12px; color:{% if star <= resource.get_rating_display.average %}#BA7517{% else %}#B4B2A9{% endif %};"></i>
+              {% endfor %}
+              <small class="text-muted ml-1">({{ resource.get_rating_display.count }})</small>
+            </span>
 
-            <!-- RATING STARS -->
-            <!-- <div class="d-flex align-items-center mr-3">
-              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
-              <div class="rating-stars d-inline-block">
-                {% for i in "12345" %}
-                  <i class="far fa-star star-icon"
-                    data-value="{{ i }}"
-                    style="cursor:pointer; font-size:1.2rem; color:#ffc107;">
-                  </i>
-                {% endfor %}
-              </div>
-            </div> -->
-            <!-- ===================== RATING ===================== -->
-            <div class="d-flex align-items-center mr-3">
-              <span class="text-muted mr-2">{% trans "Rate:" %}</span>
-              <div class="rating-stars d-inline-flex" 
-                  data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
-                  data-user-rating="{{ user_rating.value|default:'0' }}">
-                {% for i in "12345" %}
-                  <button type="button"
-                          class="btn btn-link p-0 border-0 star-btn mx-1"
-                          data-value="{{ forloop.counter }}"
-                          title="{% trans 'Rate' %} {{ forloop.counter }}/5"
-                          style="font-size: 1.3rem; line-height:1;">
-                    <i class="{% if user_rating and forloop.counter <= user_rating.value %}fas{% else %}far{% endif %} fa-star text-warning"></i>
-                  </button>
-                {% endfor %}
-              </div>
-              <span class="ml-2 small text-muted rating-feedback"></span>
-            </div>
+            <span class="badge px-2 py-1"
+                  style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+              <i class="fas fa-eye mr-1" style="font-size:10px;"></i>
+              {{ resource.view_count }}
+            </span>
 
-            <!-- BOOKMARK BUTTON -->
+            <span class="badge px-2 py-1"
+                  style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+              <i class="fas fa-download mr-1" style="font-size:10px;"></i>
+              {{ resource.download_count }}
+            </span>
+
+          </div>
+
+          {# Right: actions #}
+          <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+
+            {% if resource.file %}
+            <a href="{% url 'content:resource:resource-download' resource.pk %}"
+               class="btn btn-danger btn-sm"
+               target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-file-download mr-1"></i>{% trans "Download" %}
+            </a>
+            {% endif %}
+
+            {% if user.is_authenticated and user.is_student %}
             <button
               id="bookmark-btn"
               data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
               data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}"
-              class="btn {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2"
-            >
+              class="btn btn-sm {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
               <i class="fas fa-bookmark mr-1"></i>
               <span>{% if is_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
             </button>
 
-          {% else %}
-
-            <!-- GUEST: STATIC RATING DISPLAY -->
-            <div class="d-flex align-items-center mr-3">
-              <span>⭐ {{ resource.get_rating_display }}</span>
-              <span class="text-muted ml-1">({{ resource.rating_count }})</span>
-            </div>
-
-          {% endif %}
-
-          <!-- DOWNLOAD BUTTON -->
-          {% if resource.file %}
-            <a href="{% url 'content:resource:resource-download' resource.pk %}"
-              class="btn btn-danger"
-              target="_blank"
-              rel="noopener noreferrer">
-              <i class="fas fa-file-download mr-1"></i>
-              {% trans "Download File" %}
-            </a>
-          {% endif %}
-
-          {% if user.is_authenticated and user.is_student %}
             <form method="post"
-                      action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
-                      class="mb-0 d-inline">
-                  {% csrf_token %}
-              {% if not progress.is_completed %}
-                  <button type="submit" class="btn btn-success">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    {% trans "Mark as completed" %}
-                  </button>
+                  action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
+                  class="mb-0 d-inline">
+              {% csrf_token %}
+              {% if progress.is_completed %}
+              <button type="submit" class="btn btn-outline-success btn-sm">
+                <i class="fas fa-check-circle mr-1"></i>{% trans "Completed" %}
+              </button>
               {% else %}
-                <button type="submit" class="btn btn-outline-success">
-                  <i class="fas fa-check-circle mr-1"></i>
-                  {% trans "Completed" %}
-                </button>
+              <button type="submit" class="btn btn-success btn-sm">
+                <i class="fas fa-check-circle mr-1"></i>{% trans "Mark as completed" %}
+              </button>
               {% endif %}
             </form>
-          {% endif %}
+            {% endif %}
 
+          </div>
         </div>
-
       </div>
     </div>
 
+    {# ── Main layout ── #}
     <div class="row">
 
       {# ── Left: exercise content ── #}
-      <div class="col-lg-8">
-        <div class="card card-primary card-outline shadow-sm">
+      <div class="col-lg-8 mb-4">
+        <div class="card card-outline card-primary">
 
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas fa-pencil-ruler mr-2"></i>
-              {% trans "Exercise Statement" %}
+              <i class="fas fa-pencil-alt mr-2"></i>{% trans "Exercise Statement" %}
             </h3>
-
             {% if is_student and progress %}
             <div class="card-tools">
               {% if progress.is_completed %}
-              <span class="badge badge-success px-3 py-2">
+              <span class="badge px-3 py-2"
+                    style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
                 <i class="fas fa-check-circle mr-1"></i>{% trans "Solved" %}
               </span>
               {% else %}
-              <span class="badge badge-warning px-3 py-2">
+              <span class="badge px-3 py-2"
+                    style="font-size:11px; font-weight:500; background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;">
                 <i class="fas fa-hourglass-half mr-1"></i>{% trans "Not solved" %}
               </span>
               {% endif %}
@@ -204,32 +141,29 @@
 
           <div class="card-body">
 
-            {# File attachment #}
             {% if resource.file %}
             <div class="text-center mb-4">
               {% if resource.file.name|lower|slice:"-4:" == ".pdf" %}
               <embed src="{{ resource.file.url }}"
                      type="application/pdf"
-                     width="100%"
-                     height="600px"
-                     class="rounded shadow">
+                     width="100%" height="600px"
+                     class="rounded">
               {% else %}
               <img src="{{ resource.file.url }}"
-                   class="img-fluid rounded shadow"
+                   class="img-fluid rounded"
                    alt="{{ resource.title }}">
               {% endif %}
             </div>
             {% endif %}
 
             {% if resource.content %}
-              <div class="resource-content">
-                {{ resource.content }}
-              </div>
+            <div class="resource-content">
+              {{ resource.content }}
+            </div>
             {% endif %}
 
-            {# Metadata #}
             {% if resource.total_marks or resource.due_days %}
-            <div class="callout callout-info">
+            <div class="callout callout-info mt-3">
               {% if resource.total_marks %}
               <p class="mb-1">
                 <i class="fas fa-star text-warning mr-2"></i>
@@ -249,34 +183,30 @@
         </div>
       </div>
 
-      {# ── Right: actions + meta ── #}
+      {# ── Right column ── #}
       <div class="col-lg-4">
 
         {# Actions card #}
-        <div class="card card-outline card-secondary shadow-sm">
+        <div class="card card-outline card-secondary mb-4">
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas fa-tasks mr-2"></i>
-              {% trans "Your Actions" %}
+              <i class="fas fa-tasks mr-2"></i>{% trans "Your Actions" %}
             </h3>
           </div>
           <div class="card-body">
 
             {% if is_student %}
 
-            {# Mark as solved toggle #}
             <form method="post"
                   action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}">
               {% csrf_token %}
               {% if progress.is_completed %}
               <button type="submit" class="btn btn-outline-success btn-block btn-lg">
-                <i class="fas fa-check mr-2"></i>
-                {% trans "Already Solved" %}
+                <i class="fas fa-check mr-2"></i>{% trans "Already Solved" %}
               </button>
               {% else %}
               <button type="submit" class="btn btn-success btn-block btn-lg">
-                <i class="fas fa-check mr-2"></i>
-                {% trans "Mark as Solved" %}
+                <i class="fas fa-check mr-2"></i>{% trans "Mark as Solved" %}
               </button>
               {% endif %}
             </form>
@@ -285,8 +215,7 @@
 
             {# Star rating #}
             <h6 class="text-muted mb-2">
-              <i class="fas fa-star mr-1 text-warning"></i>
-              {% trans "Rate this exercise" %}
+              <i class="fas fa-star mr-1 text-warning"></i>{% trans "Rate this exercise" %}
             </h6>
             <div class="rating-stars d-flex justify-content-center"
                  data-url="{% url 'feedback:rating:rate' 'content' 'resource' resource.pk %}"
@@ -315,11 +244,9 @@
             {# Solution #}
             {% if resource.has_solution and resource.solution_file %}
             <a href="{{ resource.solution_file.url }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-outline-primary btn-block">
-              <i class="fas fa-lightbulb mr-2"></i>
-              {% trans "View Solution" %}
+               target="_blank" rel="noopener noreferrer"
+               class="btn btn-outline-primary btn-block">
+              <i class="fas fa-lightbulb mr-2"></i>{% trans "View Solution" %}
             </a>
             {% else %}
             <div class="alert alert-secondary text-sm text-center mb-0">
@@ -332,111 +259,116 @@
         </div>
 
         {# Meta card #}
-        <div class="card card-outline card-info shadow-sm">
+        <div class="card card-outline card-info mb-4">
           <div class="card-header">
             <h3 class="card-title">
-              <i class="fas fa-info-circle mr-2"></i>
-              {% trans "Exercise Info" %}
+              <i class="fas fa-info-circle mr-2"></i>{% trans "Exercise Info" %}
             </h3>
           </div>
           <div class="card-body p-0">
             <ul class="list-group list-group-flush">
 
-              <li class="list-group-item d-flex justify-content-between">
-                <strong>{% trans "Difficulty" %}</strong>
-                <span>{{ resource.get_difficulty_display }}</span>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted small">{% trans "Difficulty" %}</span>
+                {% with d=resource.difficulty %}
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500;
+                      {% if d == 'easy' %}background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;
+                      {% elif d == 'medium' %}background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;
+                      {% elif d == 'hard' %}background:#FCEBEB; color:#A32D2D; border:0.5px solid #F09595;
+                      {% else %}background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;{% endif %}">
+                  {{ resource.get_difficulty_display }}
+                </span>
+                {% endwith %}
               </li>
 
-              <li class="list-group-item d-flex justify-content-between">
-                <strong>{% trans "Term" %}</strong>
-                <span>{{ resource.get_term_display }}</span>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted small">{% trans "Term" %}</span>
+                <span class="font-weight-bold small">{{ resource.get_term_display }}</span>
               </li>
 
               {% if resource.total_marks %}
-              <li class="list-group-item d-flex justify-content-between">
-                <strong>{% trans "Marks" %}</strong>
-                <span>{{ resource.total_marks }}</span>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted small">{% trans "Marks" %}</span>
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500; background:#EEEDFE; color:#3C3489; border:0.5px solid #AFA9EC;">
+                  {{ resource.total_marks }} {% trans "pts" %}
+                </span>
+              </li>
+              {% endif %}
+
+              {% if resource.created_by %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="text-muted small">{% trans "Author" %}</span>
+                <span class="font-weight-bold small">{{ resource.created_by.get_full_name }}</span>
               </li>
               {% endif %}
 
               <li class="list-group-item">
-                <strong>{% trans "Tags" %}</strong>
-                <div class="mt-2">
+                <span class="text-muted small d-block mb-2">{% trans "Tags" %}</span>
+                <div class="d-flex flex-wrap" style="gap: 4px;">
                   {% for tag in resource.tags.all %}
-                  <span class="badge badge-light mr-1">{{ tag.name }}</span>
+                  <span class="badge px-2 py-1"
+                        style="font-size:11px; font-weight:500; background:#EEEDFE; color:#3C3489; border:0.5px solid #AFA9EC;">
+                    <i class="fas fa-tag mr-1" style="font-size:10px;"></i>{{ tag.name }}
+                  </span>
                   {% empty %}
-                  <span class="text-muted small">{% trans "No tags" %}</span>
+                  <small class="text-muted">{% trans "No tags" %}</small>
                   {% endfor %}
                 </div>
               </li>
-
-              {% if resource.created_by %}
-              <li class="list-group-item d-flex justify-content-between">
-                <strong>{% trans "Author" %}</strong>
-                <span>{{ resource.created_by.get_full_name }}</span>
-              </li>
-              {% endif %}
 
             </ul>
           </div>
         </div>
 
-      </div>
-
-      <!-- ===================== RECOMMENDED RESOURCES ===================== -->
-      <div class="col-lg-12 col-md-4">
-        <div class="card card-outline card-info h-100">
+        {# Recommended resources #}
+        <div class="card card-outline card-secondary">
           <div class="card-header">
-            <h3 class="card-title font-weight-bold">
-              <i class="fas fa-lightbulb mr-1"></i>
-              {% trans "Recommended" %}
+            <h3 class="card-title">
+              <i class="fas fa-lightbulb mr-2 text-warning"></i>{% trans "Recommended" %}
             </h3>
           </div>
-
-          <div class="card-body p-2" style="overflow-y:auto; max-height:800px;">
-
+          <div class="card-body p-0">
             {% if recommended_resources %}
-              <ul class="list-group list-group-flush">
-                {% for rec in recommended_resources %}
-                  <li class="list-group-item px-2 py-2">
-                    <a href="{% url 'content:resource:resource-detail' rec.pk %}"
-                      class="d-block text-decoration-none">
-
-                      <strong class="text-primary">
-                        {{ rec.title|truncatechars:50 }}
-                      </strong>
-
-                      <div class="small text-muted mt-1">
-                        <span class="badge badge-light border">
-                          {{ rec.get_type_display }}
-                        </span>
-
-                        {% if rec.rating_avg %}
-                          <span class="ml-1 text-warning">
-                            ⭐ {{ rec.get_rating_display }}
-                          </span>
-                        {% endif %}
-                        <!-- {% if rec.difficulty_level == resource.difficulty_level %}
-                          <span class="badge badge-success ml-1">
-                            {% trans "Same level" %}
-                          </span>
-                        {% endif %} -->
-                      </div>
-                    </a>
-                  </li>
-                {% endfor %}
-              </ul>
+            <div class="list-group list-group-flush">
+              {% for rec in recommended_resources %}
+              <a href="{% url 'content:resource:resource-detail' rec.pk %}"
+                 class="list-group-item list-group-item-action px-3 py-2">
+                <div class="d-flex justify-content-between align-items-start" style="gap: 8px;">
+                  <span class="font-weight-bold small text-truncate">
+                    {{ rec.title|truncatechars:45 }}
+                  </span>
+                  {% with t=rec.get_type_display %}
+                  <span class="badge px-2 py-1 flex-shrink-0"
+                        style="font-size:11px; font-weight:500;
+                               background:{{ t.bg }}; color:{{ t.text }}; border:0.5px solid {{ t.border }};">
+                    <i class="{{ t.icon }} mr-1" style="font-size:10px;"></i>{{ t.label }}
+                  </span>
+                  {% endwith %}
+                </div>
+                {% if rec.rating_avg %}
+                <div class="mt-1">
+                  {% for star in rec.get_rating_display.stars %}
+                  <i class="fas fa-star"
+                     style="font-size:10px; color:{% if star <= rec.get_rating_display.average %}#BA7517{% else %}#B4B2A9{% endif %};"></i>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </a>
+              {% endfor %}
+            </div>
             {% else %}
-              <div class="text-muted text-center p-3">
-                <i class="fas fa-info-circle mr-1"></i>
-                {% trans "No recommendations available." %}
-              </div>
+            <div class="text-muted text-center p-3 small">
+              <i class="fas fa-info-circle mr-1"></i>{% trans "No recommendations available." %}
+            </div>
             {% endif %}
-
           </div>
         </div>
+
       </div>
     </div>
+
   </div>
 </section>
 
@@ -476,37 +408,27 @@
   renderStars(userRating);
 
   stars.forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      if (!isLoading) renderStars(parseInt(btn.dataset.value));
-    });
-    btn.addEventListener('mouseleave', () => {
-      if (!isLoading) renderStars(userRating);
-    });
+    btn.addEventListener('mouseenter', () => { if (!isLoading) renderStars(parseInt(btn.dataset.value)); });
+    btn.addEventListener('mouseleave', () => { if (!isLoading) renderStars(userRating); });
     btn.addEventListener('click', async () => {
       if (isLoading) return;
-
       const value = parseInt(btn.dataset.value);
       userRating  = value;
       renderStars(userRating);
       isLoading   = true;
       setFeedback('{% trans "Saving…" %}');
       stars.forEach(b => b.disabled = true);
-
       try {
         const res = await fetch(rateUrl, {
-          method:   'POST',
-          headers:  {
-            'X-CSRFToken':  '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body:     new URLSearchParams({ value }),
+          method:  'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
+          body:    new URLSearchParams({ value }),
           redirect: 'follow',
         });
         if (!res.ok) throw new Error(`Server error: ${res.status}`);
         container.dataset.userRating = value;
         setFeedback(`{% trans "You rated this" %} ${value}/5 ✓`);
       } catch (err) {
-        console.error('Rating error:', err);
         userRating = parseInt(container.dataset.userRating) || 0;
         renderStars(userRating);
         setFeedback('{% trans "Failed to save. Try again." %}');
@@ -515,6 +437,43 @@
         stars.forEach(b => b.disabled = false);
       }
     });
+  });
+})();
+
+(function () {
+  const btn = document.getElementById('bookmark-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const url = btn.dataset.url;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+      const data = await res.json();
+      const nowBookmarked = data.bookmarked;
+
+      btn.dataset.bookmarked = nowBookmarked ? 'true' : 'false';
+      btn.querySelector('span').textContent = nowBookmarked
+        ? '{% trans "Bookmarked" %}'
+        : '{% trans "Bookmark" %}';
+      btn.classList.toggle('btn-warning', nowBookmarked);
+      btn.classList.toggle('btn-outline-warning', !nowBookmarked);
+
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    } finally {
+      btn.disabled = false;
+    }
   });
 })();
 </script>

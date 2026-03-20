@@ -173,15 +173,15 @@
               </h6>
               <div class="progress" style="height:8px; border-radius:4px;">
                 <div class="progress-bar bg-primary"
-                     style="width:{{ progress }}%"
+                     style="width:{{ progress_pct }}%"
                      role="progressbar"
-                     aria-valuenow="{{ progress }}"
+                     aria-valuenow="{{ progress_pct }}"
                      aria-valuemin="0"
                      aria-valuemax="100">
                 </div>
               </div>
               <small class="text-muted mt-1 d-block">
-                {{ completed_courses }}/{{ total_courses }}
+                {{ completed_courses }}/{{ course_count }}
                 {% trans "courses completed" %}
               </small>
             </div>

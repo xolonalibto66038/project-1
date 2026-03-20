@@ -1,0 +1,101 @@
+{% extends "layouts/base.html" %} 
+
+{% load static %} 
+
+{% block extra_css %}
+{% endblock %} 
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-12">
+
+        <div class="card card-outline card-primary">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-bookmark mr-1"></i>
+              My Bookmarks
+            </h3>
+          </div>
+
+          <div class="card-body">
+
+            {% if grouped_bookmarks %}
+              <div class="row">
+
+                {% for type, items in grouped_bookmarks.items %}
+                  <div class="col-12 col-md-6 col-xl-4">
+
+                    <div class="card card-outline card-info mb-3 h-100">
+                      <div class="card-header py-2">
+                        <h3 class="card-title text-capitalize text-sm">
+                          <i class="fas fa-layer-group mr-1"></i>
+                          {{ type }}
+                        </h3>
+                      </div>
+
+                      <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+
+                          {% for bookmark in items %}
+                            <li class="list-group-item">
+                              <div class="d-flex align-items-start">
+
+                                <i class="fas fa-link text-muted mr-2 mt-1"></i>
+
+                                <div class="flex-grow-1">
+                                  <a
+                                    href="{{ bookmark.target_url }}"
+                                    class="font-weight-bold text-dark d-block"
+                                  >
+                                    {{ bookmark.target_name }}
+                                  </a>
+
+                                  <small class="text-muted">
+                                    <i class="far fa-clock mr-1"></i>
+                                    {{ bookmark.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                                  </small>
+                                </div>
+
+                              </div>
+                            </li>
+                          {% endfor %}
+
+                        </ul>
+                      </div>
+
+                      <div class="card-footer text-center py-2 bg-light">
+                        <small class="text-muted">
+                          {{ items|length }} item{{ items|length|pluralize }}
+                        </small>
+                      </div>
+
+                    </div>
+                  </div>
+                {% endfor %}
+
+              </div>
+            {% else %}
+              <div class="empty-state text-center py-5">
+                <i class="far fa-bookmark fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No bookmarks yet</h5>
+                <p class="text-sm text-muted mb-0">
+                  Save resources to access them quickly later.
+                </p>
+              </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %} 

@@ -15,14 +15,14 @@ urlpatterns = [
     # path("", CourseListView.as_view(), name="course-list"),
     # path("create/", CourseCreateView.as_view(), name="course-create"),
     path("<uuid:pk>/", CourseDetailView.as_view(), name="course-detail"),
-    path(
-        "<uuid:pk>/exercises/", CourseExercisesView.as_view(), name="course-exercises"
-    ),
+    # path(
+    #     "<uuid:pk>/exercises/", CourseExercisesView.as_view(), name="course-exercises"
+    # ),
     # path(
     #     "<uuid:pk>/resources/", CourseResourcesView.as_view(), name="course-resources"
     # ),
     path(
-        "courses/<uuid:pk>/resources/<str:resource_slug>/",
+        "courses/<uuid:pk>/<str:resource_slug>/",
         CourseResourceListView.as_view(),
         name="course-resources",
     ),

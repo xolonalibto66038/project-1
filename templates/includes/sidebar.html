@@ -95,6 +95,14 @@
             <p>My sessions</p>
           </a>
         </li>
+
+        <li class="nav-item">
+          <a href="{% url 'feedback:bookmark:student-bookmarks' %}"
+             class="nav-link {% if current_view == 'feedback:bookmark:student-bookmarks' %}active{% endif %}">
+            <i class="nav-icon fas fa-bookmark"></i>
+            <p>My Bookmarks</p>
+          </a>
+        </li>
       </ul>
     </nav>
     {% endwith %}

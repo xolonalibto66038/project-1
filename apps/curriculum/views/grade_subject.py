@@ -10,6 +10,9 @@ from apps.assessment.choices import QuestionType
 from apps.assessment.models import Quiz
 from apps.content.choices import DifficultyLevel, ResourceStatus, ResourceType, Term
 from apps.content.models import Course, Resource
+from apps.curriculum.selectors.grade_subject import (
+    get_grade_subject_progress_for_student,
+)
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
@@ -81,6 +84,13 @@ class GradeSubjectDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
+        is_student = (
+            (
+                self.request.user.is_authenticated
+                and getattr(self.request.user, "is_student", False)
+            ),
+        )
         gs = self.get_object()
 
         grade = gs.grade
@@ -91,6 +101,15 @@ class GradeSubjectDetailView(DetailView):
         # One DB hit per term (3 total) — returns counts for all quarters
         counts_by_quarter = get_grade_subject_counts_by_quarter(pk=self.kwargs["pk"])
         counts = get_grade_subject_counts(pk=self.kwargs["pk"])
+        progress = (
+            get_grade_subject_progress_for_student(user, gs.pk)
+            if is_student
+            else {
+                "completed_courses": 0,
+                "total_courses": counts["course_count"],
+                "progress_pct": 0,
+            }
+        )
 
         context.update(
             {
@@ -104,10 +123,9 @@ class GradeSubjectDetailView(DetailView):
                 "resource_count": counts["resource_count"],
                 "quiz_count": counts["quiz_count"],
                 "counts_by_quarter": counts_by_quarter,
-                "is_student": (
-                    self.request.user.is_authenticated
-                    and getattr(self.request.user, "is_student", False)
-                ),
+                "is_student": is_student,
+                "completed_courses": progress["completed_courses"],
+                "progress_pct": progress["progress_pct"],
                 # Subject resource tab config — slugs + icons only, counts come from counts_by_quarter
                 "subject_resource_tabs": [
                     ("test", "Tests", "fas fa-clipboard-check"),

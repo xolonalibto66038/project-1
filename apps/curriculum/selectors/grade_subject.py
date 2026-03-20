@@ -403,3 +403,47 @@ def get_course_resource_counts_for_grade_subjects(grade_subject_ids):
         .annotate(count=Count("id"))
         .values_list("course__grade_subject_id", "count")
     )
+
+
+def get_grade_subject_progress_for_student(student, grade_subject_pk):
+    """
+    Returns completed/total course counts and progress percentage
+    for a student within a single GradeSubject.
+
+    Returns:
+        dict: {
+            'completed_courses': int,
+            'total_courses': int,
+            'progress_pct': int,  # 0-100
+        }
+    """
+    from django.contrib.contenttypes.models import ContentType
+
+    from apps.content.models import Course
+    from apps.progress.models import ContentProgress
+
+    total_courses = Course.objects.filter(
+        grade_subject_id=grade_subject_pk,
+        is_active=True,
+    ).count()
+
+    if total_courses == 0:
+        return {"completed_courses": 0, "total_courses": 0, "progress_pct": 0}
+
+    course_ct = ContentType.objects.get_for_model(Course)
+
+    completed_courses = ContentProgress.objects.filter(
+        student=student,
+        content_type=course_ct,
+        is_completed=True,
+        object_id__in=Course.objects.filter(
+            grade_subject_id=grade_subject_pk,
+            is_active=True,
+        ).values_list("pk", flat=True),
+    ).count()
+
+    return {
+        "completed_courses": completed_courses,
+        "total_courses": total_courses,
+        "progress_pct": round(completed_courses / total_courses * 100),
+    }

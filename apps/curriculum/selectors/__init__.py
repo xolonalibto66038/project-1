@@ -12,6 +12,7 @@ from .grade_subject import (
     get_grade_subject_counts,
     get_grade_subject_counts_by_quarter,
     get_grade_subject_courses_by_quarter,
+    get_grade_subject_progress_for_student,
     get_grade_subject_resources,
     get_grade_subjects_for_grade,
     get_resource_counts_for_grade_subjects,

@@ -4,6 +4,244 @@
 {% block title %}{{ course.title }} — {{ resource_type_title }}{% endblock %}
 
 {% block content %}
+
+{# ── Header ── #}
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="{{ resource_type_icon }} mr-2 text-primary"></i>
+          {{ course.title }}
+          <small class="text-muted font-weight-normal ml-2">— {{ resource_type_title }}</small>
+        </h1>
+        <small class="text-muted">
+          {% blocktrans with count=page_obj.paginator.count %}{{ count }} resource(s) found{% endblocktrans %}
+        </small>
+      </div>
+
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}"><i class="fas fa-home mr-1"></i>{% trans "Home" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-list' %}">{% trans "Levels" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'curriculum:level:level-detail' pk=level.pk %}">{{ level.name }}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'content:course:course-detail' pk=course.pk %}">{{ course.title }}</a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">{{ resource_type_title }}</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── Filters ── #}
+    <div class="card card-outline card-secondary mb-3">
+      <div class="card-body py-2">
+        <form method="get">
+          <div class="d-flex align-items-center flex-nowrap" style="gap: 6px; overflow-x: auto;">
+
+            <div class="input-group input-group-sm flex-shrink-0" style="width: 200px;">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+              <input type="text" name="q" value="{{ filter_q }}"
+                     class="form-control" placeholder="{% trans 'Search…' %}">
+            </div>
+
+            <select name="difficulty" class="form-control form-control-sm flex-shrink-0" style="width: 130px;">
+              <option value="">{% trans "All difficulties" %}</option>
+              {% for val, label in difficulty_choices %}
+              <option value="{{ val }}" {% if filter_difficulty == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+
+            <select name="term" class="form-control form-control-sm flex-shrink-0" style="width: 120px;">
+              <option value="">{% trans "All terms" %}</option>
+              {% for val, label in term_choices %}
+              <option value="{{ val }}" {% if filter_term == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+
+            <div class="d-flex flex-shrink-0 ml-auto" style="gap: 4px;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+              </button>
+              {% if filter_q or filter_difficulty or filter_term %}
+              <a href="?" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+              </a>
+              {% endif %}
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {# ── Resource grid ── #}
+    {% if resources %}
+    <div class="row">
+      {% for resource in resources %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card card-outline card-primary h-100">
+
+          <div class="card-header">
+            <h3 class="card-title font-weight-bold text-truncate">
+              <i class="{{ resource_type_icon }} text-primary mr-2"></i>
+              {{ resource.title }}
+            </h3>
+            <div class="card-tools">
+              {% if resource.progress_obj %}
+                {% if resource.progress_obj.is_completed %}
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
+                  <i class="fas fa-check-circle mr-1"></i>{% trans "Done" %}
+                </span>
+                {% else %}
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500; background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;">
+                  <i class="fas fa-spinner mr-1"></i>{% trans "In progress" %}
+                </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            {# Meta row: term + file info #}
+            <div class="d-flex flex-wrap mb-3" style="gap: 6px;">
+              <small class="text-muted">
+                <i class="fas fa-calendar-alt mr-1"></i>{{ resource.get_term_display }}
+              </small>
+              {% if resource.file_size %}
+              <small class="text-muted">
+                <i class="fas fa-file mr-1"></i>{{ resource.file_size|filesizeformat }}
+              </small>
+              {% endif %}
+              {% if resource.file_extension %}
+              <small class="text-muted text-uppercase">
+                <i class="fas fa-paperclip mr-1"></i>{{ resource.file_extension }}
+              </small>
+              {% endif %}
+              {% if resource.duration_minutes %}
+              <small class="text-muted">
+                <i class="far fa-clock mr-1"></i>{{ resource.duration_minutes }} {% trans "min" %}
+              </small>
+              {% endif %}
+            </div>
+
+            {# Badges #}
+            <div class="d-flex flex-wrap" style="gap: 5px;">
+
+              {# Difficulty #}
+              {% with d=resource.difficulty %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500;
+                    {% if d == 'easy' %}background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;
+                    {% elif d == 'medium' %}background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;
+                    {% elif d == 'hard' %}background:#FCEBEB; color:#A32D2D; border:0.5px solid #F09595;
+                    {% else %}background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;{% endif %}">
+                <i class="fas fa-signal mr-1" style="font-size:10px;"></i>
+                {{ resource.get_difficulty_display }}
+              </span>
+              {% endwith %}
+
+              {# Free / Premium #}
+              {% if resource.is_free %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
+                <i class="fas fa-unlock mr-1" style="font-size:10px;"></i>{% trans "Free" %}
+              </span>
+              {% else %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+                <i class="fas fa-lock mr-1" style="font-size:10px;"></i>{% trans "Premium" %}
+              </span>
+              {% endif %}
+
+              {# Solution #}
+              {% if resource.has_solution %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500; background:#E6F1FB; color:#0C447C; border:0.5px solid #85B7EB;">
+                <i class="fas fa-lightbulb mr-1" style="font-size:10px;"></i>{% trans "Solution" %}
+              </span>
+              {% endif %}
+
+              {# Marks #}
+              {% if resource.total_marks %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500; background:#EEEDFE; color:#3C3489; border:0.5px solid #AFA9EC;">
+                <i class="fas fa-star mr-1" style="font-size:10px;"></i>
+                {{ resource.total_marks }} {% trans "pts" %}
+              </span>
+              {% endif %}
+
+              {# Not started #}
+              {% if user.is_authenticated and user.is_student and not resource.progress_obj %}
+              <span class="badge px-2 py-1"
+                    style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+                <i class="fas fa-circle-notch mr-1" style="font-size:10px;"></i>{% trans "Not started" %}
+              </span>
+              {% endif %}
+
+            </div>
+          </div>
+
+          <div class="card-footer text-right">
+            <a href="{% url 'content:resource:resource-detail' pk=resource.pk %}"
+               class="btn btn-primary btn-sm">
+              <i class="fas fa-eye mr-1"></i>{% trans "View" %}
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if is_paginated %}
+    <div class="d-flex justify-content-center mt-3">
+      {% include "includes/pagination.html" with querystring=querystring %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="card">
+      <div class="card-body text-center py-5 text-muted">
+        <i class="{{ resource_type_icon }} fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+        <h5 class="font-weight-bold">
+          {% blocktrans with title=resource_type_title %}No {{ title }} available yet{% endblocktrans %}
+        </h5>
+        <p class="small mb-0">{% trans "Resources will appear here once added." %}</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% comment %} {% extends "layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ course.title }} — {{ resource_type_title }}{% endblock %}
+
+{% block content %}
 {% include "apps/content/courses/_header.html" with active_tab=active_tab %}
 
 <section class="content">
@@ -152,4 +390,4 @@
 
 </div>
 </section>
-{% endblock %}
+{% endblock %} {% endcomment %}
