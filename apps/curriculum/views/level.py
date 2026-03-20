@@ -49,6 +49,13 @@ class LevelListView(LevelQuerySetMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
+        student_level = None
+
+        if user.is_authenticated and getattr(user, "is_student", False):
+            profile = getattr(user, "student_profile", None)
+            if profile and profile.grade:
+                student_level = profile.grade.level
 
         # ── Annotate each level with its presentation config ──
         enriched = []
@@ -61,6 +68,8 @@ class LevelListView(LevelQuerySetMixin, ListView):
                     "image": config.get("image", "dist/img/levels/default.png"),
                     "title": config.get("title", level.get_name_display()),
                     "description": config.get("description", ""),
+                    "is_student_level": student_level is not None
+                    and level.pk == student_level.pk,
                 }
             )
 
@@ -82,9 +91,18 @@ class LevelDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
+        student_grade = None
+
+        if user.is_authenticated and getattr(user, "is_student", False):
+            profile = getattr(user, "student_profile", None)
+            student_grade = profile.grade
+
         level = self.object
 
-        context["grade_groups"] = get_grade_groups_with_specialties(level)
+        context["grade_groups"] = get_grade_groups_with_specialties(
+            level, student_grade=student_grade
+        )
         context["stats"] = get_level_stats(level)
 
         context["crumbs"] = [

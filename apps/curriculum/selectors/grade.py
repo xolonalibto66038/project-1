@@ -76,33 +76,89 @@ def get_level_stats(level):
     }
 
 
-def get_grade_groups_with_specialties(level):
-    """
-    Returns grades for a level grouped by order.
-    Grades with specialties are expanded — one entry per specialty.
-    Grades without specialties appear once with specialty=None.
+# def get_grade_groups_with_specialties(level):
+#     """
+#     Returns grades for a level grouped by order.
+#     Grades with specialties are expanded — one entry per specialty.
+#     Grades without specialties appear once with specialty=None.
 
-    Returns:
-        [
-            {
-                'order': 1,
-                'grade': <Grade>,
-                'entries': [
-                    {'grade': <Grade>, 'specialty': None},        # no-specialty grade
-                    # OR
-                    {'grade': <Grade>, 'specialty': <Specialty>}, # one per specialty
-                ]
-            },
-            ...
-        ]
-    """
+#     Returns:
+#         [
+#             {
+#                 'order': 1,
+#                 'grade': <Grade>,
+#                 'entries': [
+#                     {'grade': <Grade>, 'specialty': None},        # no-specialty grade
+#                     # OR
+#                     {'grade': <Grade>, 'specialty': <Specialty>}, # one per specialty
+#                 ]
+#             },
+#             ...
+#         ]
+#     """
+#     grades = (
+#         Grade.objects.filter(level=level)
+#         .prefetch_related(
+#             Prefetch(
+#                 "specialties",
+#                 queryset=Specialty.objects.order_by("name"),
+#             )
+#         )
+#         .select_related("level")
+#         .order_by("order", "name")
+#     )
+
+#     grouped = defaultdict(lambda: {"grade": None, "entries": []})
+
+#     for grade in grades:
+#         specialties = list(grade.specialties.all())
+
+#         group = grouped[grade.order]
+#         group["grade"] = grade  # representative grade for the group header
+
+#         if specialties:
+#             for specialty in specialties:
+#                 group["entries"].append(
+#                     {
+#                         "grade": grade,
+#                         "specialty": specialty,
+#                         "label": f"{grade.short_name} – {specialty.short_name}",
+#                         "url_kwargs": {
+#                             "grade_pk": grade.pk,
+#                             "specialty_pk": specialty.pk,
+#                         },
+#                     }
+#                 )
+#         else:
+#             group["entries"].append(
+#                 {
+#                     "grade": grade,
+#                     "specialty": None,
+#                     "label": grade.name,
+#                     "url_kwargs": {
+#                         "grade_pk": grade.pk,
+#                         "specialty_pk": None,
+#                     },
+#                 }
+#             )
+
+#     return [
+#         {
+#             "order": order,
+#             "grade": data["grade"],
+#             "entries": data["entries"],
+#             "single": len(data["entries"])
+#             == 1,  # hint for template (no accordion needed)
+#         }
+#         for order, data in sorted(grouped.items())
+#     ]
+
+
+def get_grade_groups_with_specialties(level, student_grade=None):
     grades = (
         Grade.objects.filter(level=level)
         .prefetch_related(
-            Prefetch(
-                "specialties",
-                queryset=Specialty.objects.order_by("name"),
-            )
+            Prefetch("specialties", queryset=Specialty.objects.order_by("name"))
         )
         .select_related("level")
         .order_by("order", "name")
@@ -112,9 +168,13 @@ def get_grade_groups_with_specialties(level):
 
     for grade in grades:
         specialties = list(grade.specialties.all())
+        is_student_grade = student_grade is not None and str(grade.pk) == str(
+            student_grade.pk
+        )
 
         group = grouped[grade.order]
-        group["grade"] = grade  # representative grade for the group header
+        group["grade"] = grade
+        group["is_student_grade"] = is_student_grade  # ← for group header highlight
 
         if specialties:
             for specialty in specialties:
@@ -123,6 +183,7 @@ def get_grade_groups_with_specialties(level):
                         "grade": grade,
                         "specialty": specialty,
                         "label": f"{grade.short_name} – {specialty.short_name}",
+                        "is_student_grade": is_student_grade,
                         "url_kwargs": {
                             "grade_pk": grade.pk,
                             "specialty_pk": specialty.pk,
@@ -135,6 +196,7 @@ def get_grade_groups_with_specialties(level):
                     "grade": grade,
                     "specialty": None,
                     "label": grade.name,
+                    "is_student_grade": is_student_grade,
                     "url_kwargs": {
                         "grade_pk": grade.pk,
                         "specialty_pk": None,
@@ -147,8 +209,8 @@ def get_grade_groups_with_specialties(level):
             "order": order,
             "grade": data["grade"],
             "entries": data["entries"],
-            "single": len(data["entries"])
-            == 1,  # hint for template (no accordion needed)
+            "single": len(data["entries"]) == 1,
+            "is_student_grade": data.get("is_student_grade", False),
         }
         for order, data in sorted(grouped.items())
     ]

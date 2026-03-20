@@ -117,11 +117,18 @@
     <div class="row">
       {% for item in enriched_levels %}
       <div class="col-12 col-sm-6 col-md-3 d-flex mb-4">
+        
         <a href="{% url 'curriculum:level:level-detail' item.level.id %}"
            class="level-card-link w-100">
-
+          
           <div class="card card-outline card-{{ item.color }} shadow-sm h-100 w-100 level-card">
-
+            {% if item.is_student_level %}
+            <div class="ribbon-wrapper ribbon-lg">
+              <div class="ribbon bg-info">
+                <i class="fas fa-graduation-cap mr-1"></i>{% trans "My Level" %}
+              </div>
+            </div>
+            {% endif %}
             <div class="level-image-wrapper">
               <img src="{% static item.image %}"
                    alt="{{ item.title }}"
