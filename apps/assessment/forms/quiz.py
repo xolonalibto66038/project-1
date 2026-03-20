@@ -22,6 +22,7 @@ class QuizForm(forms.ModelForm):
             "allow_review",
             "grade_subject",  # NEW
             "course",  # NEW
+            "is_free",
         ]
 
         widgets = {

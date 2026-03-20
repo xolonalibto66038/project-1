@@ -52,7 +52,7 @@
             <div class="col-12 col-md-10 col-lg-12 mx-auto">
 
               {# -------- Slim Profile Alert -------- #}
-              {% if not request.user.is_profile_complete %}
+              {% comment %} {% if not request.user.is_profile_complete %}
                 <div class="alert alert-warning alert-dismissible py-2 px-3 mb-2 shadow-sm border-0">
                   <button type="button" class="close pt-2" data-dismiss="alert" aria-hidden="true">&times;</button>
                   
@@ -67,7 +67,7 @@
                     </a>
                   </div>
                 </div>
-              {% endif %}
+              {% endif %} {% endcomment %}
 
               {# -------- Slim Email Alert -------- #}
               {% comment %} {% if not request.user.is_email_verified %}

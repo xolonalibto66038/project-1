@@ -640,4 +640,6 @@ class CourseQuizzesView(LoginRequiredMixin, CourseMixin, DetailView):
             }
         )
 
+        context["active_tab"] = "quizzes"
+
         return context

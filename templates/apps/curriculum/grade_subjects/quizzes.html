@@ -35,53 +35,67 @@
     {# ── Filters ── #}
     <div class="card card-outline card-secondary mb-3">
       <div class="card-body py-2">
-        <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
+        <form method="get" class="d-flex flex-wrap align-items-end" style="gap: 8px;">
 
           {# Search #}
-          <div class="input-group input-group-sm" style="width:220px;">
-            <div class="input-group-prepend">
-              <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <div class="form-group mb-0 flex-grow-1" style="min-width: 200px;">
+            <label class="small text-muted mb-1">{% trans "Search" %}</label>
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+              <input type="text" name="q" value="{{ filter_q }}"
+                    class="form-control" placeholder="{% trans 'Title or description…' %}">
             </div>
-            <input type="text" name="q" value="{{ filter_q }}"
-                  class="form-control" placeholder="{% trans 'Title or description…' %}">
           </div>
 
           {# Course #}
-          <select name="course" class="form-control form-control-sm" style="width:180px;">
-            <option value="">{% trans "All courses" %}</option>
-            {% for c in courses %}
-              <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
-                {{ c.title }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
+            <label class="small text-muted mb-1">{% trans "Course" %}</label>
+            <select name="course" class="form-control form-control-sm w-100">
+              <option value="">{% trans "All courses" %}</option>
+              {% for c in courses %}
+                <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ c.title }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
 
           {# Teacher #}
-          <select name="teacher" class="form-control form-control-sm" style="width:180px;">
-            <option value="">{% trans "All teachers" %}</option>
-            {% for t in teachers %}
-              <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
-                {{ t.get_full_name }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
+            <label class="small text-muted mb-1">{% trans "Teacher" %}</label>
+            <select name="teacher" class="form-control form-control-sm w-100">
+              <option value="">{% trans "All teachers" %}</option>
+              {% for t in teachers %}
+                <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ t.get_full_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
 
           {# Auto-gradable #}
-          <select name="auto_gradable" class="form-control form-control-sm" style="width:160px;">
-            <option value="">{% trans "Any type" %}</option>
-            <option value="1" {% if filter_auto_grade == "1" %}selected{% endif %}>{% trans "Auto-gradable" %}</option>
-            <option value="0" {% if filter_auto_grade == "0" %}selected{% endif %}>{% trans "Manual grading" %}</option>
-          </select>
+          <div class="form-group mb-0 flex-grow-1" style="min-width: 140px;">
+            <label class="small text-muted mb-1">{% trans "Gradable" %}</label>
+            <select name="auto_gradable" class="form-control form-control-sm w-100">
+              <option value="">{% trans "Any type" %}</option>
+              <option value="1" {% if filter_auto_grade == "1" %}selected{% endif %}>{% trans "Auto-gradable" %}</option>
+              <option value="0" {% if filter_auto_grade == "0" %}selected{% endif %}>{% trans "Manual grading" %}</option>
+            </select>
+          </div>
 
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
-          </button>
-
-          {% if filter_q or filter_course or filter_teacher or filter_auto_grade %}
-          <a href="?" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
-          </a>
-          {% endif %}
+          {# Actions — pinned to the right, never grow #}
+          <div class="form-group mb-0 d-flex" style="gap: 4px; flex-shrink: 0;">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+            </button>
+            {% if filter_q or filter_course or filter_teacher or filter_auto_grade %}
+            <a href="?" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+            </a>
+            {% endif %}
+          </div>
 
         </form>
       </div>

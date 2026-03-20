@@ -208,6 +208,11 @@ class Resource(TimeStampModel):
         ),
     )
 
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("Description"),
+    )
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -519,3 +524,127 @@ class Resource(TimeStampModel):
         )
         # Refresh from database to get updated value
         # self.refresh_from_db(fields=["view_count"])
+
+    def get_type_display(self):
+        """
+        Returns a rich display dict for the resource type.
+
+        Returns:
+            dict: {
+                'label': str,       # human-readable label
+                'icon': str,        # FontAwesome class
+                'color': str,       # hex color
+                'bg': str,          # light background hex
+                'border': str,      # border hex
+                'text': str,        # dark text hex (for badges)
+            }
+        """
+        meta = {
+            ResourceType.LESSON: {
+                "icon": "fas fa-book-open",
+                "color": "#185FA5",
+                "bg": "#E6F1FB",
+                "border": "#85B7EB",
+                "text": "#0C447C",
+            },
+            ResourceType.EXERCISE: {
+                "icon": "fas fa-pencil-alt",
+                "color": "#534AB7",
+                "bg": "#EEEDFE",
+                "border": "#AFA9EC",
+                "text": "#3C3489",
+            },
+            ResourceType.HOMEWORK: {
+                "icon": "fas fa-house-user",
+                "color": "#0F6E56",
+                "bg": "#E1F5EE",
+                "border": "#5DCAA5",
+                "text": "#085041",
+            },
+            ResourceType.SUMMARY: {
+                "icon": "fas fa-compress-alt",
+                "color": "#854F0B",
+                "bg": "#FAEEDA",
+                "border": "#EF9F27",
+                "text": "#633806",
+            },
+            ResourceType.NOTES: {
+                "icon": "fas fa-sticky-note",
+                "color": "#5F5E5A",
+                "bg": "#F1EFE8",
+                "border": "#B4B2A9",
+                "text": "#444441",
+            },
+            ResourceType.SERIES: {
+                "icon": "fas fa-layer-group",
+                "color": "#993556",
+                "bg": "#FBEAF0",
+                "border": "#ED93B1",
+                "text": "#72243E",
+            },
+            ResourceType.TEST: {
+                "icon": "fas fa-pencil-ruler",
+                "color": "#854F0B",
+                "bg": "#FAEEDA",
+                "border": "#EF9F27",
+                "text": "#633806",
+            },
+            ResourceType.EXAM: {
+                "icon": "fas fa-file-alt",
+                "color": "#A32D2D",
+                "bg": "#FCEBEB",
+                "border": "#F09595",
+                "text": "#791F1F",
+            },
+            ResourceType.PAST_PAPER: {
+                "icon": "fas fa-history",
+                "color": "#5F5E5A",
+                "bg": "#F1EFE8",
+                "border": "#B4B2A9",
+                "text": "#444441",
+            },
+            ResourceType.MOCK_EXAM: {
+                "icon": "fas fa-clipboard-list",
+                "color": "#993C1D",
+                "bg": "#FAECE7",
+                "border": "#F0997B",
+                "text": "#712B13",
+            },
+            ResourceType.TEXTBOOK: {
+                "icon": "fas fa-book",
+                "color": "#185FA5",
+                "bg": "#E6F1FB",
+                "border": "#85B7EB",
+                "text": "#0C447C",
+            },
+            ResourceType.FOREIGN_BOOK: {
+                "icon": "fas fa-globe",
+                "color": "#3B6D11",
+                "bg": "#EAF3DE",
+                "border": "#97C459",
+                "text": "#27500A",
+            },
+            ResourceType.STUDY_GUIDE: {
+                "icon": "fas fa-map-signs",
+                "color": "#534AB7",
+                "bg": "#EEEDFE",
+                "border": "#AFA9EC",
+                "text": "#3C3489",
+            },
+        }
+
+        entry = meta.get(
+            self.resource_type,
+            {
+                "icon": "fas fa-file",
+                "color": "#5F5E5A",
+                "bg": "#F1EFE8",
+                "border": "#B4B2A9",
+                "text": "#444441",
+            },
+        )
+
+        return {
+            "label": self.get_resource_type_display(),
+            **entry,
+        }

@@ -86,7 +86,7 @@
           </select>
 
           {# Course #}
-          <select name="course" class="form-control form-control-sm" style="width:170px;">
+          <select name="course" class="form-control form-control-sm select2" style="width:170px;">
             <option value="">{% trans "All courses" %}</option>
             {% for c in courses %}
               <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
@@ -133,51 +133,6 @@
       </div>
     </div>
 
-    {# ── Filters ── #}
-    {% comment %} <div class="card card-outline card-secondary mb-3">
-      <div class="card-body py-2">
-        <form method="get" class="form-inline flex-wrap" style="gap:8px;">
-
-          <input type="text"
-                 name="q"
-                 value="{{ filter_q }}"
-                 placeholder="{% trans 'Search...' %}"
-                 class="form-control form-control-sm">
-
-          <select name="difficulty" class="form-control form-control-sm">
-            <option value="">{% trans "All difficulties" %}</option>
-            {% for val, label in difficulty_choices %}
-            <option value="{{ val }}"
-                    {% if filter_difficulty == val %}selected{% endif %}>
-              {{ label }}
-            </option>
-            {% endfor %}
-          </select>
-
-          <select name="term" class="form-control form-control-sm">
-            <option value="">{% trans "All terms" %}</option>
-            {% for val, label in term_choices %}
-            <option value="{{ val }}"
-                    {% if filter_term == val %}selected{% endif %}>
-              {{ label }}
-            </option>
-            {% endfor %}
-          </select>
-
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fas fa-search mr-1"></i>{% trans "Filter" %}
-          </button>
-
-          {% if filter_q or filter_difficulty or filter_term %}
-          <a href="?" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
-          </a>
-          {% endif %}
-
-        </form>
-      </div>
-    </div> {% endcomment %}
-
     {# ── Resource list ── #}
     <div class="card card-primary card-outline">
 
@@ -194,151 +149,152 @@
       </div>
 
       <div class="card-body p-0">
-
         {% if resources %}
         <div class="list-group list-group-flush">
-
           {% for resource in resources %}
-          <a href="{% url 'content:resource:resource-detail' pk=resource.pk %}"
-             class="list-group-item list-group-item-action px-4 py-3">
+          <a href="{% if resource.is_free %}{% url 'content:resource:resource-detail' pk=resource.pk %}{% else %}{% url 'billing:pricing' %}{% endif %}"
+            class="list-group-item list-group-item-action px-4 py-3">
 
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 12px;">
 
-              {# ── Left: icon + title ── #}
-              <div class="d-flex align-items-center flex-grow-1 mr-3">
-                <i class="{{ resource_type_icon }} text-primary mr-3"></i>
-                <div>
-                  <div class="font-weight-bold">{{ resource.title }}</div>
-                  <small class="text-muted d-flex flex-wrap mt-1" style="gap:8px;">
+              {# ── Left: icon + title + meta ── #}
+              <div class="d-flex align-items-start flex-grow-1" style="min-width: 0; gap: 12px;">
 
-                    {# Term #}
-                    <span>
-                      <i class="fas fa-calendar-alt mr-1"></i>
-                      {{ resource.get_term_display }}
-                    </span>
+                {# Icon bubble #}
+                <div class="flex-shrink-0 d-flex align-items-center justify-content-center"
+                    style="width:38px; height:38px; border-radius:8px; background:var(--color-background-info);">
+                  <i class="{{ resource_type_icon }} fa-2x text-primary"></i>
+                </div>
 
-                    {# File size #}
+                <div style="min-width: 0;">
+
+                  {# Title #}
+                  <div class="font-weight-bold text-truncate">
+                    {{ resource.title }}&nbsp;&nbsp;&nbsp;
+                    <small class="text-muted">
+                      <i class="fas fa-calendar-alt mr-1"></i>{{ resource.get_term_display }}
+                    </small>
+                  </div>
+
+                  {# Meta row #}
+                  <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 10px;">
+
                     {% if resource.file_size %}
-                    <span>
-                      <i class="fas fa-file mr-1"></i>
-                      {% if resource.file_size < 1048576 %}
-                        {{ resource.file_size|filesizeformat }}
-                      {% else %}
-                        {{ resource.file_size|filesizeformat }}
-                      {% endif %}
-                    </span>
+                    <small class="text-muted">
+                      <i class="fas fa-file mr-1"></i>{{ resource.file_size|filesizeformat }}
+                    </small>
                     {% endif %}
 
-                    {# Extension #}
                     {% if resource.file_extension %}
-                    <span class="text-uppercase">
-                      <i class="fas fa-paperclip mr-1"></i>
-                      {{ resource.file_extension }}
-                    </span>
+                    <small class="text-muted text-uppercase">
+                      <i class="fas fa-paperclip mr-1"></i>{{ resource.file_extension }}
+                    </small>
                     {% endif %}
 
-                    {# Duration #}
                     {% if resource.duration_minutes %}
-                    <span>
-                      <i class="far fa-clock mr-1"></i>
-                      {{ resource.duration_minutes }} {% trans "min" %}
-                    </span>
+                    <small class="text-muted">
+                      <i class="far fa-clock mr-1"></i>{{ resource.duration_minutes }} {% trans "min" %}
+                    </small>
                     {% endif %}
 
-                    {# Total marks #}
                     {% if resource.total_marks %}
-                    <span>
-                      <i class="fas fa-star mr-1"></i>
-                      {{ resource.total_marks }} {% trans "pts" %}
-                    </span>
+                    <small class="text-muted">
+                      <i class="fas fa-star mr-1"></i>{{ resource.total_marks }} {% trans "pts" %}
+                    </small>
                     {% endif %}
 
-                    
-                    <div class="mb-3">
-                      <strong>{% trans "Tags" %}:</strong>
-                      {% for tag in resource.tags.all %}
-                        <span class="badge badge-light border mr-1">
-                          <i class="fas fa-tag mr-1"></i>{{ tag.name }}
-                        </span>
-                      {% empty %}
-                        <small class="text-muted"><strong>{% trans "No tags" %}</strong></small>
-                      {% endfor %}
-                    </div>
+                  </div>
 
-                  </small>
+                  {# Tags row #}
+                  <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 4px;">
+                    {% for tag in resource.tags.all %}
+                      <span class="badge px-2 py-1"
+                            style="font-size:11px; font-weight:500; background:#EEEDFE; color:#3C3489; border:0.5px solid #AFA9EC;">
+                        <i class="fas fa-tag mr-1" style="font-size:10px;"></i>{{ tag.name }}
+                      </span>
+                    {% empty %}
+                      <small class="text-muted">{% trans "No tags" %}</small>
+                    {% endfor %}
+                  </div>
+
                 </div>
               </div>
 
-              {# ── Right: badges ── #}
-              <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
+              {# ── Right: badges + rating ── #}
+              <div class="d-flex flex-column align-items-end flex-shrink-0" style="gap: 6px;">
+
                 {# Rating #}
-                <span class="float-right text-muted">
-                    {% comment %} <i class="fas fa-star mr-1"></i>
-                    {{ resource.get_rating_display|default:"N/A" }} {% endcomment %}
-                    {% for star in resource.get_rating_display.stars %}
-                      <i class="fas fa-star {% if star <= resource.get_rating_display.average %}text-warning{% else %}text-muted{% endif %}"></i>
-                    {% endfor %}
-                    <small>({{ resource.get_rating_display.count }} ratings)</small>
+                <div class="d-flex align-items-center" style="gap: 4px;">
+                  {% for star in resource.get_rating_display.stars %}
+                    <i class="fas fa-star"
+                      style="font-size:11px; color: {% if star <= resource.get_rating_display.average %}#BA7517{% else %}#B4B2A9{% endif %};"></i>
+                  {% endfor %}
+                  <small class="text-muted ml-1">({{ resource.get_rating_display.count }})</small>
+                </div>
 
-                    {% comment %} {% if rating_display.user_has_rated %}
-                      <small>Your rating: {{ rating_display.user_rating }}/5</small>
-                    {% endif %} {% endcomment %}
-                </span>
+                {# Badge row #}
+                <div class="d-flex flex-wrap align-items-center justify-content-end" style="gap: 5px;">
 
-                {# Difficulty #}
-                <span class="badge badge-warning">
-                  <i class="fas fa-signal mr-1 small"></i>
-                  {{ resource.get_difficulty_display }}
-                </span>
+                  {# Difficulty #}
+                  <span class="badge px-2 py-1"
+                        style="font-size:11px; font-weight:500;
+                          {% with d=resource.difficulty %}
+                          {% if d == 'easy' %}background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;
+                          {% elif d == 'medium' %}background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;
+                          {% elif d == 'hard' %}background:#FCEBEB; color:#A32D2D; border:0.5px solid #F09595;
+                          {% else %}background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;
+                          {% endif %}{% endwith %}">
+                    <i class="fas fa-signal mr-1" style="font-size:10px;"></i>
+                    {{ resource.get_difficulty_display }}
+                  </span>
 
-                {# Free/Premium #}
-                {% if resource.is_free %}
-                <span class="badge badge-success">
-                  <i class="fas fa-unlock mr-1"></i>{% trans "Free" %}
-                </span>
-                {% else %}
-                <span class="badge badge-secondary">
-                  <i class="fas fa-lock mr-1"></i>{% trans "Premium" %}
-                </span>
-                {% endif %}
+                  {# Free / Premium #}
+                  {% if resource.is_free %}
+                  <span class="badge px-2 py-1"
+                        style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
+                    <i class="fas fa-unlock mr-1" style="font-size:10px;"></i>{% trans "Free" %}
+                  </span>
+                  {% else %}
+                  <span class="badge px-2 py-1"
+                        style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+                    <i class="fas fa-lock mr-1" style="font-size:10px;"></i>{% trans "Premium" %}
+                  </span>
+                  {% endif %}
 
-                {# Solution #}
-                {% if resource.has_solution %}
-                <span class="badge badge-info">
-                  <i class="fas fa-check mr-1"></i>{% trans "Solution" %}
-                </span>
-                {% endif %}
+                  {# Solution #}
+                  {% if resource.has_solution %}
+                  <span class="badge px-2 py-1"
+                        style="font-size:11px; font-weight:500; background:#E6F1FB; color:#0C447C; border:0.5px solid #85B7EB;">
+                    <i class="fas fa-check mr-1" style="font-size:10px;"></i>{% trans "Solution" %}
+                  </span>
+                  {% endif %}
 
-                {# -------- Completion Badge (Student only) -------- #}
-                {% if request.user.is_authenticated and request.user.is_student %}
-                  {% if resource.progress_obj %}
-                    {% if resource.progress_obj.is_completed %}
-                      <span class="badge badge-success ml-2 px-2 py-1">
-                          <i class="fas fa-check-circle mr-1"></i>
-                          {% trans "Completed" %}
+                  {# Progress (student only) #}
+                  {% if request.user.is_authenticated and request.user.is_student %}
+                    {% if resource.progress_obj %}
+                      {% if resource.progress_obj.is_completed %}
+                      <span class="badge badge-success px-2 py-1">
+                        <i class="fas fa-check-circle mr-1"></i>{% trans "Resolved" %}
                       </span>
-                    {% else %}
-                      <span class="badge badge-warning ml-2 px-2 py-1">
+                      {% else %}
+                      <span class="badge badge-warning px-2 py-1">
                         <i class="fas fa-spinner mr-1"></i>{% trans "In progress" %}
                       </span>
-                    {% endif %}
-                  {% else %}
-                    <span class="badge badge-secondary ml-2 px-2 py-1">
-                        <i class="fas fa-circle-notch mr-1"></i>{% trans "Not started" %}
+                      {% endif %}
+                    {% else %}
+                    <span class="badge badge-secondary px-2 py-1">
+                      <i class="fas fa-circle-notch mr-1"></i>{% trans "Not resolved" %}
                     </span>
+                    {% endif %}
                   {% endif %}
-                {% endif %}
 
-                {# Arrow #}
-                <i class="fas fa-chevron-right text-muted ml-2"></i>
-
+                </div>
               </div>
 
             </div>
 
           </a>
           {% endfor %}
-
         </div>
 
         {% else %}
@@ -368,4 +324,18 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block etxra_js %}
+<script>
+  $(function () {
+    //Initialize Select2 Elements
+    $('.select2').select2()
+
+    //Initialize Select2 Elements
+    $('.select2bs4').select2({
+      theme: 'bootstrap4'
+    })
+  })
+</script>
 {% endblock %}

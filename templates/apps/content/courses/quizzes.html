@@ -2,10 +2,10 @@
 {% load i18n %}
 {% load breadcrumbs %}
 
-{% block title %}{{ course.name }} — {% trans "Quizzes" %}{% endblock %}
+{% block title %}{% trans "Quizzes" %}{% endblock %}
 
 {% block content %}
-{% include "apps/content/courses/_header.html" with active_tab=active_tab %}
+{% include "apps/content/courses/_header.html" with active_tab="quizzes"  %}
 {# ── Header ── #}
 {% comment %} <section class="content-header">
   <div class="container-fluid">
@@ -108,7 +108,7 @@
         <div class="list-group list-group-flush">
 
           {% for quiz in quizzes %}
-          <a href="{% url 'assessment:quiz:quiz-take' grade_subject_pk=course.grade_subject.pk pk=quiz.pk %}"
+          <a href="{% if resource.is_free %}{% url 'assessment:quiz:quiz-take' grade_subject_pk=course.grade_subject.pk pk=quiz.pk %}{% else %}{% url 'billing:pricing' %}{% endif %}"
              class="list-group-item list-group-item-action px-4 py-3">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -167,6 +167,18 @@
 
               {# ── Right: badges ── #}
               <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
+                {# Free / Premium #}
+                {% if quiz.is_free %}
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
+                  <i class="fas fa-unlock mr-1" style="font-size:10px;"></i>{% trans "Free" %}
+                </span>
+                {% else %}
+                <span class="badge px-2 py-1"
+                      style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
+                  <i class="fas fa-lock mr-1" style="font-size:10px;"></i>{% trans "Premium" %}
+                </span>
+                {% endif %}
 
                 {# Available / Closed #}
                 {% if quiz.is_available %}

@@ -182,9 +182,14 @@
           <!-- ================= BEHAVIOR ================= -->
           <h5 class="mb-3">Quiz Behavior</h5>
           <div class="form-check mb-2">
-              {{ form.is_published }}
-              <label class="form-check-label">Publish it</label>
-            </div>
+            {{ form.is_free }}
+            <label class="form-check-label">Free</label>
+          </div>
+
+          <div class="form-check mb-2">
+            {{ form.is_published }}
+            <label class="form-check-label">Publish it</label>
+          </div>
 
           <div class="form-check mb-2">
             {{ form.randomize_questions }}

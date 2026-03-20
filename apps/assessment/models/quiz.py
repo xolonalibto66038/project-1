@@ -100,6 +100,12 @@ class Quiz(TimeStampModel):
         default=False, editable=False, help_text="Cached at attempt submission time."
     )
 
+    is_free = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Free"),
+        help_text=_("Free resources are accessible to guest users."),
+    )
+
     class Meta:
         db_table = "quizzes"
         ordering = ["-created_at"]
