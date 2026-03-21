@@ -154,6 +154,15 @@
           {% endif %}
 
           {% if user.is_authenticated and user.is_student %}
+            <button
+              id="bookmark-btn"
+              data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
+              data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}"
+              class="btn btn-sm {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              <i class="fas fa-bookmark mr-1"></i>
+              <span>{% if is_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
+            </button>
+
             <form method="post"
                       action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
                       class="mb-0 d-inline">
@@ -505,6 +514,43 @@
         stars.forEach(b => b.disabled = false);
       }
     });
+  });
+})();
+
+(function () {
+  const btn = document.getElementById('bookmark-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const url = btn.dataset.url;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+      const data = await res.json();
+      const nowBookmarked = data.bookmarked;
+
+      btn.dataset.bookmarked = nowBookmarked ? 'true' : 'false';
+      btn.querySelector('span').textContent = nowBookmarked
+        ? '{% trans "Bookmarked" %}'
+        : '{% trans "Bookmark" %}';
+      btn.classList.toggle('btn-warning', nowBookmarked);
+      btn.classList.toggle('btn-outline-warning', !nowBookmarked);
+
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    } finally {
+      btn.disabled = false;
+    }
   });
 })();
 </script>

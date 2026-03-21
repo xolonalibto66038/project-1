@@ -86,21 +86,21 @@
               id="bookmark-btn"
               data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
               data-bookmarked="{{ is_bookmarked|yesno:'true,false' }}"
-              class="btn btn-sm {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %} mr-2"
-            >
+              class="btn btn-sm {% if is_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
               <i class="fas fa-bookmark mr-1"></i>
               <span>{% if is_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
             </button>
+            
             <form method="post"
                   action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}"
                   class="mb-0 d-inline">
               {% csrf_token %}
               {% if progress.is_completed %}
-              <button type="submit" class="btn btn-outline-success btn-sm">
+              <button type="submit" class="btn btn-success btn-sm">
                 <i class="fas fa-check-circle mr-1"></i>{% trans "Completed" %}
               </button>
               {% else %}
-              <button type="submit" class="btn btn-success btn-sm">
+              <button type="submit" class="btn btn-outline-success btn-sm">
                 <i class="fas fa-check-circle mr-1"></i>{% trans "Mark as completed" %}
               </button>
               {% endif %}
@@ -196,11 +196,11 @@
                   action="{% url 'progress:toggle-completed' 'content' 'resource' resource.pk %}">
               {% csrf_token %}
               {% if progress.is_completed %}
-              <button type="submit" class="btn btn-outline-success btn-block btn-lg">
+              <button type="submit" class="btn btn-success btn-block btn-lg">
                 <i class="fas fa-check mr-2"></i>{% trans "Already Solved" %}
               </button>
               {% else %}
-              <button type="submit" class="btn btn-success btn-block btn-lg">
+              <button type="submit" class="btn btn-outline-success btn-block btn-lg">
                 <i class="fas fa-check mr-2"></i>{% trans "Mark as Solved" %}
               </button>
               {% endif %}

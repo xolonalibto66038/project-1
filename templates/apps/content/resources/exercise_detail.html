@@ -81,6 +81,7 @@
             {% endif %}
 
             {% if user.is_authenticated and user.is_student %}
+            <!-- BOOKMARK BUTTON -->
             <button
               id="bookmark-btn"
               data-url="{% url 'feedback:bookmark:bookmark-resource' pk=resource.pk %}"
