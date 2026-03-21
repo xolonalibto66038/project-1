@@ -18,7 +18,7 @@ from apps.progress.models import ContentProgress
 
 from ..choices import DifficultyLevel, ResourceType, Term
 from ..mixins.course import CourseMixin
-from ..models import Course
+from ..models import Course, VideoResource
 from ..selectors import (
     get_course_by_pk,
     get_course_exercises,
@@ -232,6 +232,7 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
         qp.pop("video", None)  # ← strip video so it doesn't duplicate
 
         course = self.object
+        user = self.request.user
 
         # ── Filters ──────────────────────────────────────────────────
         q = self.request.GET.get("q", "").strip()
@@ -246,6 +247,36 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
 
         if teacher_id:
             videos = videos.filter(created_by_id=teacher_id)
+
+        # ── Annotate is_seen ─────────────────────────────────────────
+        is_student = user.is_authenticated and getattr(user, "is_student", False)
+
+        if is_student:
+            from django.contrib.contenttypes.models import ContentType
+            from django.db.models import Exists, OuterRef
+
+            from apps.feedback.models import Bookmark
+            from apps.progress.models import ContentProgress
+
+            ct = ContentType.objects.get_for_model(VideoResource)
+            videos = videos.annotate(
+                is_seen=Exists(
+                    ContentProgress.objects.filter(
+                        student=user,
+                        content_type=ct,
+                        object_id=OuterRef("pk"),
+                        is_completed=True,
+                    )
+                ),
+                is_bookmarked=Exists(
+                    Bookmark.objects.filter(
+                        student=user,
+                        content_type=ct,
+                        object_id=OuterRef("pk"),
+                        active=True,
+                    )
+                ),
+            )
 
         video_pk = self.request.GET.get("video")
         current_video = (
@@ -334,6 +365,11 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
                 "current_video": current_video,
                 "is_student": is_student,
                 "videos_count": videos.count(),
+                "current_video_bookmarked": (
+                    current_video.is_bookmarked
+                    if is_student and current_video
+                    else False
+                ),
                 "teachers": teachers,
                 "filter_q": q,
                 "filter_teacher": teacher_id,

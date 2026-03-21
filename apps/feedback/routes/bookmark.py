@@ -1,6 +1,10 @@
 from django.urls import path
 
-from ..views.bookmark import BookmarkResourceView, StudentBookmarkListView
+from ..views.bookmark import (
+    BookmarkResourceView,
+    BookmarkVideoView,
+    StudentBookmarkListView,
+)
 
 app_name = "bookmark"
 
@@ -11,6 +15,11 @@ urlpatterns = [
         "<uuid:pk>/resource/",
         BookmarkResourceView.as_view(),
         name="bookmark-resource",
+    ),
+    path(
+        "<uuid:pk>/bookmark/",
+        BookmarkVideoView.as_view(),
+        name="video-bookmark",
     ),
     path(
         "my-bookmarks/",

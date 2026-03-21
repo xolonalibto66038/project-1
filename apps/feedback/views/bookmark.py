@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import TemplateView
 
-from apps.content.models import Resource
+from apps.content.models import Resource, VideoResource
 
 from ..models import Bookmark
 
@@ -103,6 +103,73 @@ class BookmarkResourceView(LoginRequiredMixin, View):
                 "resource_id": str(resource.pk),
             },
             status=200,
+        )
+
+
+class BookmarkVideoView(LoginRequiredMixin, View):
+
+    http_method_names = ["get", "post"]
+
+    def dispatch(self, request, *args, **kwargs):
+        if (
+            request.user.is_authenticated
+            and getattr(request.user, "role", None) != "student"
+        ):
+            return JsonResponse(
+                {"error": _("Only students can manage bookmarks.")},
+                status=403,
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_video(self, pk):
+        return VideoResource.objects.filter(pk=pk, is_active=True).first()
+
+    def get(self, request, pk):
+        video = self.get_video(pk)
+        if not video:
+            return JsonResponse({"error": _("Video not found.")}, status=404)
+
+        ct = ContentType.objects.get_for_model(VideoResource)
+        is_bookmarked = Bookmark.objects.filter(
+            student=request.user,
+            content_type=ct,
+            object_id=video.pk,
+            active=True,
+        ).exists()
+
+        return JsonResponse(
+            {
+                "is_bookmarked": is_bookmarked,
+                "video_id": str(video.pk),
+            }
+        )
+
+    def post(self, request, pk):
+        video = self.get_video(pk)
+        if not video:
+            return JsonResponse({"error": _("Video not found.")}, status=404)
+
+        ct = ContentType.objects.get_for_model(VideoResource)
+
+        bookmark, created = Bookmark.objects.get_or_create(
+            student=request.user,
+            content_type=ct,
+            object_id=video.pk,
+            defaults={"active": True},
+        )
+
+        if not created:
+            bookmark.active = not bookmark.active
+            bookmark.save(update_fields=["active", "updated_at"])
+
+        return JsonResponse(
+            {
+                "bookmarked": bookmark.active,
+                "message": (
+                    _("Bookmark added.") if bookmark.active else _("Bookmark removed.")
+                ),
+                "video_id": str(video.pk),
+            }
         )
 
 

@@ -16,7 +16,8 @@ class ContentProgress(TimeStampModel):
     Generic progress tracking for Course and Resource.
     """
 
-    ALLOWED_MODELS = ("course", "resource")
+    # ALLOWED_MODELS = ("course", "resource")
+    ALLOWED_MODELS = ("course", "resource", "videoresource", "video")
 
     student = models.ForeignKey(
         User,

@@ -12,7 +12,7 @@ User = get_user_model()
 
 class Bookmark(TimeStampModel):
 
-    ALLOWED_MODELS = ("resource",)
+    ALLOWED_MODELS = ("resource", "videoresource")
 
     student = models.ForeignKey(
         User,

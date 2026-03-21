@@ -207,21 +207,14 @@
 
             </div>
 
-            {# Info #}
-            {% comment %} <div class="flex-grow-1 min-width-0">
-              <div class="video-title">{{ video.title }}</div>
-              {% if video.duration %}
-              <div class="video-duration">
-                <i class="far fa-clock mr-1"></i>{{ video.duration }}
-              </div>
-              {% endif %}
-            </div> {% endcomment %}
-
             {# Completed check #}
-            {% if video.is_completed %}
+            {% if video.is_seen %}
             <i class="fas fa-check-circle text-success ml-2 mt-1" style="flex-shrink:0;"></i>
             {% elif video.pk == current_video.pk %}
             <i class="fas fa-circle text-primary ml-2 mt-1" style="flex-shrink:0; font-size:.5rem;"></i>
+            {% endif %}
+            {% if is_student and video.is_bookmarked %}
+            <i class="fas fa-bookmark text-warning" style="font-size:12px;"></i>
             {% endif %}
 
           </a>
@@ -263,22 +256,29 @@
             </iframe>
           </div>
 
-          {# Prev / Next navigation #}
-          {% comment %} {% with vlist=videos|list %}
-          <div class="d-flex justify-content-between align-items-center mt-3">
-
-            {# Previous #}
-            {% for v in videos %}
-              {% if v.pk == current_video.pk and not forloop.first %}
-                {# Can't do prev easily in Django template — handled via JS below #}
-              {% endif %}
-            {% endfor %}
-
-            <div id="nav-prev"></div>
-            <div id="nav-next"></div>
-
+          
+          {% if user.is_authenticated and user.is_student %}
+          <div class="d-flex align-items-center mt-2 mb-1" style="gap: 8px;">
+            {# ── Mark as seen ── #}
+            <button id="seen-btn"
+                    data-url="{% url 'content:video:video-toggle-seen' pk=current_video.pk %}"
+                    data-seen="{{ current_video.is_seen|yesno:'true,false' }}"
+                    class="btn btn-sm {% if current_video.is_seen %}btn-success{% else %}btn-outline-secondary{% endif %}">
+              <i class="fas fa-check-circle mr-1"></i>
+              <span>{% if current_video.is_seen %}{% trans "Seen" %}{% else %}{% trans "Mark as seen" %}{% endif %}</span>
+            </button>
+            {# Bookmark #}
+            <button id="bookmark-video-btn"
+                    data-url="{% url 'feedback:bookmark:video-bookmark' pk=current_video.pk %}"
+                    data-bookmarked="{{ current_video_bookmarked|yesno:'true,false' }}"
+                    class="btn btn-sm {% if current_video_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              <i class="fas fa-bookmark mr-1"></i>
+              <span>{% if current_video_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
+            </button>
           </div>
-          {% endwith %} {% endcomment %}
+          {% endif %}
+
+          {# Prev / Next navigation #}
           <div class="d-flex justify-content-between align-items-center mt-3">
             <div id="nav-prev"></div>
             <div id="nav-next"></div>
@@ -324,7 +324,7 @@
             return false;
         }
     }
-);
+  );
 
   // ── Prev / Next buttons ───────────────────────────────────────
   const prevWrap = document.getElementById('nav-prev');
@@ -353,6 +353,88 @@
   const activeItem = document.querySelector('.playlist-item.active');
   if (activeItem) {
     activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // ── Mark as seen toggle ───────────────────────────────────────
+  const seenBtn = document.getElementById('seen-btn');
+  if (seenBtn) {
+    seenBtn.addEventListener('click', async () => {
+      seenBtn.disabled = true;
+      try {
+        const res = await fetch(seenBtn.dataset.url, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+
+        // Update button
+        seenBtn.dataset.seen = data.seen ? 'true' : 'false';
+        seenBtn.querySelector('span').textContent = data.seen ? '{% trans "Seen" %}' : '{% trans "Mark as seen" %}';
+        seenBtn.classList.toggle('btn-success', data.seen);
+        seenBtn.classList.toggle('btn-outline-secondary', !data.seen);
+
+        // Update playlist checkmark for current video
+        const activeItem = document.querySelector('.playlist-item.active');
+        if (activeItem) {
+          const existing = activeItem.querySelector('.fa-check-circle');
+          if (data.seen && !existing) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-check-circle text-success ml-2 mt-1';
+            icon.style.flexShrink = '0';
+            activeItem.appendChild(icon);
+          } else if (!data.seen && existing) {
+            existing.remove();
+          }
+        }
+      } catch (err) {
+        console.error('Toggle seen error:', err);
+      } finally {
+        seenBtn.disabled = false;
+      }
+    });
+  }
+
+  // ── Bookmark video toggle ─────────────────────────────────────
+  const bookmarkBtn = document.getElementById('bookmark-video-btn');
+  if (bookmarkBtn) {
+    bookmarkBtn.addEventListener('click', async () => {
+      bookmarkBtn.disabled = true;
+      try {
+        const res = await fetch(bookmarkBtn.dataset.url, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+
+        // Update button
+        bookmarkBtn.dataset.bookmarked = data.bookmarked ? 'true' : 'false';
+        bookmarkBtn.querySelector('span').textContent = data.bookmarked
+          ? '{% trans "Bookmarked" %}'
+          : '{% trans "Bookmark" %}';
+        bookmarkBtn.classList.toggle('btn-warning', data.bookmarked);
+        bookmarkBtn.classList.toggle('btn-outline-warning', !data.bookmarked);
+
+        // Update playlist bookmark icon for current video
+        const activeItem = document.querySelector('.playlist-item.active');
+        if (activeItem) {
+          const existingIcon = activeItem.querySelector('.fa-bookmark');
+          if (data.bookmarked && !existingIcon) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-bookmark text-warning';
+            icon.style.fontSize = '12px';
+            activeItem.querySelector('.d-flex.flex-column')?.appendChild(icon);
+          } else if (!data.bookmarked && existingIcon) {
+            existingIcon.remove();
+          }
+        }
+      } catch (err) {
+        console.error('Bookmark error:', err);
+      } finally {
+        bookmarkBtn.disabled = false;
+      }
+    });
   }
 
 })();
