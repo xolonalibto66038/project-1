@@ -203,6 +203,20 @@
               <div class="video-duration">
                 <i class="far fa-clock mr-1"></i>{% if video.duration %}{{ video.duration }}{% else %}{% trans "-" %}{% endif %}
               </div>
+
+              {# Watch progress bar #}
+              {% if is_student and video.duration_seconds %}
+                {% with pct=video.watched_seconds|default:0 %}
+                <div class="mt-1" style="height: 3px; background: #e9ecef; border-radius: 2px; overflow: hidden;">
+                  <div style="
+                    height: 100%;
+                    border-radius: 2px;
+                    background: {% if video.is_seen %}#28a745{% else %}#007bff{% endif %};
+                    width: {% widthratio video.watched_seconds|default:0 video.duration_seconds 100 %}%;
+                  " data-progress-bar></div>
+                </div>
+                {% endwith %}
+              {% endif %}
               
 
             </div>
@@ -248,8 +262,17 @@
 
           {# 16:9 responsive iframe #}
           <div class="player-wrapper mb-3">
-            <iframe
+            {% comment %} <iframe
+              id="yt-player"
               src="https://www.youtube.com/embed/{{ current_video.youtube_id }}?rel=0&modestbranding=1&enablejsapi=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen>
+            </iframe> {% endcomment %}
+            <iframe
+              id="yt-player"
+              data-start="{{ current_video.watched_seconds|default:0 }}"
+              src="https://www.youtube.com/embed/{{ current_video.youtube_id }}?rel=0&modestbranding=1&enablejsapi=1&start={{ current_video.watched_seconds|default:0 }}"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerpolicy="strict-origin-when-cross-origin"
               allowfullscreen>
@@ -303,6 +326,13 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if current_video and is_student %}
+<script>
+  window.VIDEO_PROGRESS_URL = "{% url 'progress:video-save-progress' pk=current_video.pk %}";
+  window.CSRF_TOKEN         = "{{ csrf_token }}";
+</script>
+<script src="{% static 'dist/js/youtube_player.js' %}"></script>
+{% endif %}
 <script>
 (function () {
 

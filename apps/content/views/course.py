@@ -253,10 +253,10 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
 
         if is_student:
             from django.contrib.contenttypes.models import ContentType
-            from django.db.models import Exists, OuterRef
+            from django.db.models import Exists, IntegerField, OuterRef, Subquery
 
             from apps.feedback.models import Bookmark
-            from apps.progress.models import ContentProgress
+            from apps.progress.models import ContentProgress, VideoWatchProgress
 
             ct = ContentType.objects.get_for_model(VideoResource)
             videos = videos.annotate(
@@ -275,6 +275,20 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
                         object_id=OuterRef("pk"),
                         active=True,
                     )
+                ),
+                watched_seconds=Subquery(
+                    VideoWatchProgress.objects.filter(
+                        student=user,
+                        video=OuterRef("pk"),
+                    ).values("watched_seconds")[:1],
+                    output_field=IntegerField(),
+                ),
+                duration_seconds=Subquery(
+                    VideoWatchProgress.objects.filter(
+                        student=user,
+                        video=OuterRef("pk"),
+                    ).values("duration_seconds")[:1],
+                    output_field=IntegerField(),
                 ),
             )
 
