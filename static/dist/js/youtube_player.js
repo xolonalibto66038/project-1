@@ -136,17 +136,27 @@ function markAsSeen() {
 // ── Save on tab close / navigation ───────────────────────────────────
 window.addEventListener('beforeunload', () => {
   if (!player || typeof player.getCurrentTime !== 'function') return;
-  if (!window.VIDEO_PROGRESS_URL) return;
+  if (!window.VIDEO_PROGRESS_URL || !window.CSRF_TOKEN) return;
 
   const watched_seconds  = Math.floor(player.getCurrentTime());
   const duration_seconds = Math.floor(player.getDuration());
   if (!duration_seconds) return;
 
-  navigator.sendBeacon(
-    window.VIDEO_PROGRESS_URL,
-    new Blob(
-      [JSON.stringify({ watched_seconds, duration_seconds })],
-      { type: 'application/json' }
-    )
-  );
+  // // sendBeacon can't set headers — use a form-encoded body
+  // // and pass CSRF as a query param instead
+  // const url = window.VIDEO_PROGRESS_URL + '?csrfmiddlewaretoken=' + window.CSRF_TOKEN;
+
+  // navigator.sendBeacon(
+  //   url,
+  //   new Blob(
+  //     [JSON.stringify({ watched_seconds, duration_seconds })],
+  //     { type: 'application/json' }
+  //   )
+  // );
+  const formData = new FormData();
+  formData.append('csrfmiddlewaretoken', window.CSRF_TOKEN);
+  formData.append('watched_seconds', watched_seconds);
+  formData.append('duration_seconds', duration_seconds);
+
+  navigator.sendBeacon(window.VIDEO_PROGRESS_URL, formData);
 });

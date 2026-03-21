@@ -94,14 +94,20 @@ class SaveVideoProgressView(LoginRequiredMixin, View):
         if not video:
             return JsonResponse({"error": "Video not found."}, status=404)
 
-        try:
-            body = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON."}, status=400)
+        # Handle both JSON (fetch) and FormData (sendBeacon)
+        content_type = request.content_type or ""
+        if "application/json" in content_type:
+            try:
+                body = json.loads(request.body)
+            except json.JSONDecodeError:
+                return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-        watched_seconds = int(body.get("watched_seconds", 0))
-        duration_seconds = int(body.get("duration_seconds", 0))
-
+            watched_seconds = int(body.get("watched_seconds", 0))
+            duration_seconds = int(body.get("duration_seconds", 0))
+        else:
+            # FormData from sendBeacon
+            watched_seconds = max(0, int(request.POST.get("watched_seconds", 0)))
+            duration_seconds = max(0, int(request.POST.get("duration_seconds", 0)))
         obj, _ = VideoWatchProgress.objects.update_or_create(
             student=request.user,
             video=video,

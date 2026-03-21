@@ -19,6 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 admin.site.site_header = "Educational Management Admin"
 admin.site.site_title = "EMS Admin Portal"
@@ -27,6 +28,10 @@ admin.site.index_title = "Welcome to the Educational Management System"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("apps.urls")),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url="/static/dist/img/favicon.ico", permanent=True),
+    ),
 ]
 
 if settings.DEBUG:
