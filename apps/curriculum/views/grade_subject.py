@@ -85,11 +85,8 @@ class GradeSubjectDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        is_student = (
-            (
-                self.request.user.is_authenticated
-                and getattr(self.request.user, "is_student", False)
-            ),
+        is_student = self.request.user.is_authenticated and getattr(
+            self.request.user, "is_student", False
         )
         gs = self.get_object()
 
