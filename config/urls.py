@@ -23,7 +23,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 admin.site.site_header = "Educational Management Admin"
-admin.site.site_title = "EMS Admin Portal"
+admin.site.site_title = "WN Admin Portal"
 admin.site.index_title = "Welcome to the Educational Management System"
 
 urlpatterns = [

@@ -6,14 +6,9 @@
 
   <div class="row">
     
-    <!-- LEFT: Profile Summary -->
     <div class="col-md-3">
       <div class="card card-primary card-outline">
         <div class="card-body box-profile text-center">
-
-          {% comment %} <img class="profile-user-img img-fluid img-circle"
-               src="{{ request.user.avatar.url }}"
-               alt="User profile picture"> {% endcomment %}
 
           <h3 class="profile-username text-center">
             {{ request.user.get_full_name }}
@@ -25,45 +20,42 @@
 
           {% if profile.is_verified_teacher %}
             <span class="badge badge-success">
-              <i class="fas fa-check-circle"></i> Verified
+              <i class="fas fa-check-circle"></i> {% trans "Verified" %}
             </span>
           {% else %}
             <span class="badge badge-warning">
-              Pending Verification
+              {% trans "Pending Verification" %}
             </span>
           {% endif %}
 
           <hr>
 
-          <strong><i class="fas fa-money-bill-wave mr-1"></i> Hour Price</strong>
+          <strong><i class="fas fa-money-bill-wave mr-1"></i> {% trans "Hour Price" %}</strong>
           <p class="text-muted">
-            {{ profile.hour_price|floatformat:2 }} DA
+            {{ profile.hour_price|floatformat:2 }} {% trans "DA" %}
           </p>
 
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: Forms -->
     <div class="col-md-9">
 
-      <!-- Alerts -->
       {% if profile.is_verified_teacher and profile.hour_price == 0 %}
         <div class="alert alert-warning">
           <i class="fas fa-exclamation-triangle mr-2"></i>
-          You are offering free tutoring sessions.
+          {% trans "You are offering free tutoring sessions." %}
         </div>
       {% elif profile.is_verified_teacher %}
         <div class="alert alert-success">
           <i class="fas fa-check-circle mr-2"></i>
-          Your account is verified.
+          {% trans "Your account is verified." %}
         </div>
       {% endif %}
 
-      <!-- FORM CARD -->
       <div class="card card-primary">
         <div class="card-header">
-          <h3 class="card-title">Update Profile</h3>
+          <h3 class="card-title">{% trans "Update Profile" %}</h3>
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -71,8 +63,7 @@
 
           <div class="card-body">
 
-            <!-- USER INFO -->
-            <h5 class="mb-3">Account Info</h5>
+            <h5 class="mb-3">{% trans "Account Info" %}</h5>
             <div class="row">
               <div class="col-md-6">
                 {{ user_form.first_name.label_tag }}
@@ -111,12 +102,11 @@
 
             <hr>
 
-            <!-- TEACHER INFO -->
-            <h5 class="mb-3">Teaching Info</h5>
+            <h5 class="mb-3">{% trans "Teaching Info" %}</h5>
 
             {% if profile.is_verified_teacher %}
               <div class="alert alert-info">
-                Level and subject are locked after verification.
+                {% trans "Level and subject are locked after verification." %}
               </div>
             {% endif %}
 
@@ -145,7 +135,7 @@
 
           <div class="card-footer text-right">
             <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save"></i> Save Changes
+              <i class="fas fa-save"></i> {% trans "Save Changes" %}
             </button>
           </div>
 

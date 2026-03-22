@@ -14,7 +14,7 @@ class TermsPageView(TemplateView):
             "title": _("Acceptance of Terms"),
             "content": [
                 _(
-                    "By accessing or using EduGDZ, you confirm that you have read, understood, and agree to be bound by these Terms of Service."
+                    "By accessing or using WonderNet, you confirm that you have read, understood, and agree to be bound by these Terms of Service."
                 ),
                 _(
                     "If you do not agree with any part of these terms, you must not use the platform."
@@ -34,7 +34,7 @@ class TermsPageView(TemplateView):
             "title": _("Eligibility"),
             "content": [
                 _(
-                    "EduGDZ is designed for students and teachers within the Algerian education system."
+                    "WonderNet is designed for students and teachers within the Algerian education system."
                 ),
                 _(
                     "You must provide accurate and complete information during registration."
@@ -43,7 +43,7 @@ class TermsPageView(TemplateView):
                     "Users under 13 years of age require parental or guardian consent to register."
                 ),
                 _(
-                    "EduGDZ reserves the right to refuse service to anyone at its sole discretion."
+                    "WonderNet reserves the right to refuse service to anyone at its sole discretion."
                 ),
             ],
         },
@@ -76,7 +76,7 @@ class TermsPageView(TemplateView):
             "color": "success",
             "title": _("Acceptable Use"),
             "content": [
-                _("You agree to use EduGDZ only for lawful educational purposes."),
+                _("You agree to use WonderNet only for lawful educational purposes."),
                 _(
                     "You must not upload, share, or distribute content that is offensive, harmful, or violates any law."
                 ),
@@ -101,13 +101,13 @@ class TermsPageView(TemplateView):
             "title": _("Content & Intellectual Property"),
             "content": [
                 _(
-                    "All content on EduGDZ — including lessons, exercises, exams, and platform design — is the intellectual property of EduGDZ or its content contributors."
+                    "All content on WonderNet — including lessons, exercises, exams, and platform design — is the intellectual property of WonderNet or its content contributors."
                 ),
                 _(
                     "You may not reproduce, distribute, or commercially exploit any platform content without explicit written permission."
                 ),
                 _(
-                    "Teachers who upload content to EduGDZ grant EduGDZ a non-exclusive licence to display and distribute that content to students."
+                    "Teachers who upload content to WonderNet grant WonderNet a non-exclusive licence to display and distribute that content to students."
                 ),
                 _(
                     "You retain ownership of content you create, but you are responsible for ensuring it does not infringe on third-party rights."
@@ -165,7 +165,7 @@ class TermsPageView(TemplateView):
             "title": _("Disclaimers"),
             "content": [
                 _(
-                    'EduGDZ is provided "as is" without warranties of any kind, express or implied.'
+                    'WonderNet is provided "as is" without warranties of any kind, express or implied.'
                 ),
                 _(
                     "We do not guarantee that the platform will be error-free, uninterrupted, or meet your specific requirements."
@@ -174,7 +174,7 @@ class TermsPageView(TemplateView):
                     "We are not responsible for the accuracy of content uploaded by third-party teachers."
                 ),
                 _(
-                    "EduGDZ does not issue official diplomas, certificates, or qualifications recognised by the Algerian Ministry of Education."
+                    "WonderNet does not issue official diplomas, certificates, or qualifications recognised by the Algerian Ministry of Education."
                 ),
                 _(
                     "We are not liable for any loss of data, interruption of service, or damages arising from platform use."
@@ -241,7 +241,7 @@ class TermsPageView(TemplateView):
             {
                 "page_title": _("Terms of Service"),
                 "page_subtitle": _(
-                    "Please read these terms carefully before using EduGDZ"
+                    "Please read these terms carefully before using WonderNet"
                 ),
                 "last_updated": "1 January 2026",
                 "sections": self.SECTIONS,

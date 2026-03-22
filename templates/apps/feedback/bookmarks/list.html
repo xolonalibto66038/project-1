@@ -1,6 +1,5 @@
 {% extends "layouts/base.html" %} 
-
-{% load static %} 
+{% load static i18n %} 
 
 {% block extra_css %}
 {% endblock %} 
@@ -16,7 +15,7 @@
           <div class="card-header">
             <h3 class="card-title">
               <i class="fas fa-bookmark mr-1"></i>
-              My Bookmarks
+              {% trans "My Bookmarks" %}
             </h3>
           </div>
 
@@ -32,6 +31,7 @@
                       <div class="card-header py-2">
                         <h3 class="card-title text-capitalize text-sm">
                           <i class="fas fa-layer-group mr-1"></i>
+                          {# If 'type' is a fixed category, wrap it in trans #}
                           {{ type }}
                         </h3>
                       </div>
@@ -68,7 +68,11 @@
 
                       <div class="card-footer text-center py-2 bg-light">
                         <small class="text-muted">
-                          {{ items|length }} item{{ items|length|pluralize }}
+                          {% blocktrans count counter=items|length %}
+                            {{ counter }} item
+                          {% plural %}
+                            {{ counter }} items
+                          {% endblocktrans %}
                         </small>
                       </div>
 
@@ -80,9 +84,9 @@
             {% else %}
               <div class="empty-state text-center py-5">
                 <i class="far fa-bookmark fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">No bookmarks yet</h5>
+                <h5 class="text-muted">{% trans "No bookmarks yet" %}</h5>
                 <p class="text-sm text-muted mb-0">
-                  Save resources to access them quickly later.
+                  {% trans "Save resources to access them quickly later." %}
                 </p>
               </div>
             {% endif %}
@@ -98,4 +102,4 @@
 {% endblock %}
 
 {% block extra_js %}
-{% endblock %} 
+{% endblock %}

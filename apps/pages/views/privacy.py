@@ -34,7 +34,7 @@ class PrivacyPageView(TemplateView):
             "color": "info",
             "title": _("How We Use Your Information"),
             "content": [
-                _("To provide, maintain, and improve the EduGDZ platform."),
+                _("To provide, maintain, and improve the WonderNet platform."),
                 _(
                     "To personalise your learning experience based on your grade, level, and progress."
                 ),
@@ -156,7 +156,7 @@ class PrivacyPageView(TemplateView):
             "title": _("Children's Privacy"),
             "content": [
                 _(
-                    "EduGDZ is intended for use by students of all ages within the Algerian education system."
+                    "WonderNet is intended for use by students of all ages within the Algerian education system."
                 ),
                 _(
                     "For users under 13, we recommend parental supervision during registration."

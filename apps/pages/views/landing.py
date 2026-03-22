@@ -35,7 +35,7 @@ class LandingPageView(TemplateView):
 
         context.update(
             {
-                "page_title": _("Welcome to EduGDZ"),
+                "page_title": _("Welcome to WonderNet"),
                 "cta_text": _("Get Started"),
                 **stats,
             }

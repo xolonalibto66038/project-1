@@ -11,8 +11,8 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>Welcome to EduPlatform</h1>
-        <p class="text-muted">Learn. Teach. Grow together.</p>
+        <h1>{% trans "Welcome to" %} <b>WonderNet</b> {% trans "Platform" %}</h1>
+        <p class="text-muted">{% trans "Learn. Teach. Grow together." %}</p>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -29,17 +29,17 @@
   <div class="card card-primary card-outline">
     <div class="card-body text-center py-5">
       <h1 class="display-4 font-weight-bold">
-        The Smart Education Platform
+        {% trans "The Smart Education Platform" %}
       </h1>
       <p class="lead mt-3">
-        A modern learning management system designed for students and teachers.
+        {% trans "A modern learning management system designed for students and teachers." %}
       </p>
       <div class="mt-4">
         <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mr-2">
-          <i class="fas fa-user-graduate mr-1"></i> I'm a Student
+          <i class="fas fa-user-graduate mr-1"></i> {% trans "I'm a Student" %}
         </a>
         <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg">
-          <i class="fas fa-chalkboard-teacher mr-1"></i> I'm a Teacher
+          <i class="fas fa-chalkboard-teacher mr-1"></i> {% trans "I'm a Teacher" %}
         </a>
       </div>
     </div>
@@ -48,12 +48,12 @@
   <!-- CTA -->
   <div class="card bg-gradient-primary mt-4">
     <div class="card-body text-center py-5">
-      <h2 class="font-weight-bold">Start Your Learning Journey Today</h2>
+      <h2 class="font-weight-bold">{% trans "Start Your Learning Journey Today" %}</h2>
       <p class="mt-2">
-        Join thousands of students and teachers already using EduPlatform.
+        {% trans "Join thousands of students and teachers already using EduPlatform." %}
       </p>
       <a href="{% url 'curriculum:level:level-list' %}" class="btn btn-light btn-lg mt-3">
-        <i class="fas fa-rocket mr-1"></i> Get Started
+        <i class="fas fa-rocket mr-1"></i> {% trans "Get Started" %}
       </a>
     </div>
   </div>
@@ -64,7 +64,7 @@
       <div class="small-box bg-info">
         <div class="inner">
           <h3>{{ courses_count }}</h3>
-          <p>Courses</p>
+          <p>{% trans "Courses" %}</p>
         </div>
         <div class="icon">
           <i class="fas fa-book"></i>
@@ -76,7 +76,7 @@
       <div class="small-box bg-success">
         <div class="inner">
           <h3>{{ students_count }}+</h3>
-          <p>Students</p>
+          <p>{% trans "Students" %}</p>
         </div>
         <div class="icon">
           <i class="fas fa-user-graduate"></i>
@@ -88,7 +88,7 @@
       <div class="small-box bg-warning">
         <div class="inner">
           <h3>{{ teachers_count }}+</h3>
-          <p>Teachers</p>
+          <p>{% trans "Teachers" %}</p>
         </div>
         <div class="icon">
           <i class="fas fa-chalkboard-teacher"></i>
@@ -100,7 +100,7 @@
       <div class="small-box bg-danger">
         <div class="inner">
           <h3>24/7</h3>
-          <p>Access</p>
+          <p>{% trans "Access" %}</p>
         </div>
         <div class="icon">
           <i class="fas fa-clock"></i>
@@ -116,15 +116,15 @@
       <div class="card card-outline card-info h-100">
         <div class="card-header">
           <h3 class="card-title">
-            <i class="fas fa-user-graduate mr-2"></i>For Students
+            <i class="fas fa-user-graduate mr-2"></i>{% trans "For Students" %}
           </h3>
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Interactive courses</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Track learning progress</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Assignments & quizzes</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Certificates & achievements</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Interactive courses" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Track learning progress" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Assignments & quizzes" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Certificates & achievements" %}</li>
           </ul>
         </div>
       </div>
@@ -135,15 +135,15 @@
       <div class="card card-outline card-success h-100">
         <div class="card-header">
           <h3 class="card-title">
-            <i class="fas fa-chalkboard-teacher mr-2"></i>For Teachers
+            <i class="fas fa-chalkboard-teacher mr-2"></i>{% trans "For Teachers" %}
           </h3>
         </div>
         <div class="card-body">
           <ul class="list-unstyled">
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Create & manage courses</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Student performance analytics</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Assignments & grading</li>
-            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Live sessions & discussions</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Create & manage courses" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Student performance analytics" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Assignments & grading" %}</li>
+            <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>{% trans "Live sessions & discussions" %}</li>
           </ul>
         </div>
       </div>

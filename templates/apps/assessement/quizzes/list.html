@@ -1,21 +1,17 @@
 {% extends "layouts/base.html" %}
-
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Quiz List" %}{% endblock title %}
 
 {% block content %}
-<!-- PAGE HEADER -->
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2 align-items-center">
       <div class="col-sm-8">
         <h1 class="font-weight-bold">
-          <i class="fas fa-clipboard-list"></i> {% trans 'Quiz list' %}
+          <i class="fas fa-clipboard-list"></i> {% trans "Quiz List" %}
         </h1>
       </div>
-      {% comment %} <p>BreadCrumb</p> {% endcomment %}
     </div>
   </div>
 </section>
@@ -25,10 +21,10 @@
 
   <div class="card card-outline card-primary">
     <div class="card-header">
-      <h3 class="card-title">My Quizzes</h3>
+      <h3 class="card-title">{% trans "My Quizzes" %}</h3>
       <div class="card-tools me-2">
         <a href="{% url 'assessment:quiz:quiz-create' %}" class="btn btn-sm btn-primary">
-          <i class="fas fa-plus"></i> Create Quiz
+          <i class="fas fa-plus"></i> {% trans "Create Quiz" %}
         </a>
       </div>
     </div>
@@ -36,68 +32,74 @@
     <div class="card-body p-0">
 
       {% if quizzes %}
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Questions</th>
-              <th>Total Points</th>
-              <th>Published</th>
-              <th>Available</th>
-              <th>Created</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Questions" %}</th>
+                <th>{% trans "Total Points" %}</th>
+                <th>{% trans "Published" %}</th>
+                <th>{% trans "Available" %}</th>
+                <th>{% trans "Created" %}</th>
+                <th class="text-end">{% trans "Actions" %}</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {% for quiz in quizzes %}
-            <tr>
-              <td>
-                <strong>{{ quiz.title }}</strong><br>
-                <small class="text-muted">{{ quiz.description|truncatechars:60 }}</small>
-              </td>
+            <tbody>
+              {% for quiz in quizzes %}
+              <tr>
+                <td>
+                  <strong>{{ quiz.title }}</strong><br>
+                  <small class="text-muted">{{ quiz.description|truncatechars:60 }}</small>
+                </td>
 
-              <td>{{ quiz.question_count }}</td>
-              <td>{{ quiz.total_points }}</td>
+                <td>{{ quiz.question_count }}</td>
+                <td>{{ quiz.total_points }}</td>
 
-              <td>
-                {% if quiz.is_published %}
-                  <span class="badge bg-success">Yes</span>
-                {% else %}
-                  <span class="badge bg-secondary">No</span>
-                {% endif %}
-              </td>
+                <td>
+                  {% if quiz.is_published %}
+                    <span class="badge bg-success">{% trans "Yes" %}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{% trans "No" %}</span>
+                  {% endif %}
+                </td>
 
-              <td>
-                {% if quiz.is_available %}
-                  <span class="badge bg-success">Open</span>
-                {% else %}
-                  <span class="badge bg-danger">Closed</span>
-                {% endif %}
-              </td>
+                <td>
+                  {% if quiz.is_available %}
+                    <span class="badge bg-success">{% trans "Open" %}</span>
+                  {% else %}
+                    <span class="badge bg-danger">{% trans "Closed" %}</span>
+                  {% endif %}
+                </td>
 
-              <td>{{ quiz.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ quiz.created_at|date:"SHORT_DATE_FORMAT" }}</td>
 
-              <td class="text-end">
-                <a href="{% url 'assessment:quiz:quiz-detail' quiz.pk %}" class="btn btn-sm btn-info">View</a>
-                <a href="{% url 'assessment:quiz:quiz-update' quiz.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                <a href="{% url 'assessment:quiz:quiz-delete' quiz.pk %}" class="btn btn-sm btn-danger">Delete</a>
-              </td>
+                <td class="text-end text-nowrap">
+                  <a href="{% url 'assessment:quiz:quiz-detail' quiz.pk %}" class="btn btn-sm btn-info">
+                    {% trans "View" %}
+                  </a>
+                  <a href="{% url 'assessment:quiz:quiz-update' quiz.pk %}" class="btn btn-sm btn-warning">
+                    {% trans "Edit" %}
+                  </a>
+                  <a href="{% url 'assessment:quiz:quiz-delete' quiz.pk %}" class="btn btn-sm btn-danger">
+                    {% trans "Delete" %}
+                  </a>
+                </td>
 
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       {% else %}
         <div class="p-4 text-center text-muted">
-          No quizzes created yet.
+          {% trans "No quizzes created yet." %}
         </div>
       {% endif %}
 
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
     <div class="card-footer clearfix">
       <ul class="pagination pagination-sm m-0 float-end">

@@ -11,9 +11,9 @@ class FAQPageView(TemplateView):
             "id": "faq1",
             "icon": "fas fa-info-circle",
             "color": "primary",
-            "question": _("Is EduGDZ free to use?"),
+            "question": _("Is WonderNet free to use?"),
             "answer": _(
-                "Yes. EduGDZ is completely free. All educational resources can be accessed without any fees or subscriptions."
+                "Yes. WonderNet is completely free. All educational resources can be accessed without any fees or subscriptions."
             ),
         },
         {
@@ -47,9 +47,9 @@ class FAQPageView(TemplateView):
             "id": "faq5",
             "icon": "fas fa-certificate",
             "color": "success",
-            "question": _("Does EduGDZ provide certificates?"),
+            "question": _("Does WonderNet provide certificates?"),
             "answer": _(
-                "No. EduGDZ focuses on educational support and exam preparation materials, not formal certification."
+                "No. WonderNet focuses on educational support and exam preparation materials, not formal certification."
             ),
         },
         {
@@ -65,7 +65,7 @@ class FAQPageView(TemplateView):
             "id": "faq7",
             "icon": "fas fa-share-alt",
             "color": "dark",
-            "question": _("Can EduGDZ content be shared elsewhere?"),
+            "question": _("Can WonderNet content be shared elsewhere?"),
             "answer": _(
                 "Content may be shared for educational, non-commercial purposes only. Commercial use without permission is prohibited."
             ),
@@ -78,7 +78,7 @@ class FAQPageView(TemplateView):
             {
                 "page_title": _("Frequently Asked Questions"),
                 "page_subtitle": _(
-                    "Find clear answers to the most common questions about EduGDZ"
+                    "Find clear answers to the most common questions about WonderNet"
                 ),
                 "faqs": self.FAQS,
             }

@@ -1,24 +1,21 @@
 {% extends "layouts/base.html" %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "Quiz Create" %}{% endblock title %}
 
 {% block content %}
-<!-- PAGE HEADER -->
 <section class="content-header">
   <div class="container-fluid">
     <div class="row mb-2 align-items-center">
       <div class="col-sm-8">
         <h1 class="font-weight-bold">
           {% if object %}
-            <i class="fas fa-edit"></i> Edit Quiz
+            <i class="fas fa-edit"></i> {% trans "Edit Quiz" %}
           {% else %}
-            <i class="fas fa-plus"></i> Create Quiz
+            <i class="fas fa-plus"></i> {% trans "Create Quiz" %}
           {% endif %}
         </h1>
       </div>
-      {% comment %} <p>BreadCrumb</p> {% endcomment %}
     </div>
   </div>
 </section>
@@ -28,7 +25,7 @@
     <div class="card card-primary">
       <div class="card-header">
         <h3 class="card-title">
-          {% if object %} Edit Quiz {% else %} Create Quiz {% endif %}
+          {% if object %} {% trans "Edit Quiz" %} {% else %} {% trans "Create Quiz" %} {% endif %}
         </h3>
       </div>
 
@@ -37,18 +34,16 @@
 
         <div class="card-body">
 
-          <!-- Global Errors -->
           {% if form.non_field_errors %}
             <div class="alert alert-danger">
               {{ form.non_field_errors }}
             </div>
           {% endif %}
 
-          <!-- ================= BASIC INFO ================= -->
-          <h5 class="mb-3">Basic Information</h5>
+          <h5 class="mb-3">{% trans "Basic Information" %}</h5>
 
           <div class="mb-3">
-            <label class="form-label">Title</label>
+            <label class="form-label">{% trans "Title" %}</label>
             {{ form.title }}
             {% if form.title.errors %}
               <div class="invalid-feedback d-block">
@@ -58,7 +53,7 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label">{% trans "Description" %}</label>
             {{ form.description }}
             {% if form.description.errors %}
               <div class="invalid-feedback d-block">
@@ -68,7 +63,7 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Instructions</label>
+            <label class="form-label">{% trans "Instructions" %}</label>
             {{ form.instructions }}
             {% if form.instructions.errors %}
               <div class="invalid-feedback d-block">
@@ -79,13 +74,11 @@
 
           <hr>
 
-          <!-- ================= SETTINGS ================= -->
-          <h5 class="mb-3">Quiz Settings</h5>
+          <h5 class="mb-3">{% trans "Quiz Settings" %}</h5>
 
           <div class="row">
-
             <div class="col-md-4 mb-3">
-              <label class="form-label">Time Limit (minutes)</label>
+              <label class="form-label">{% trans "Time Limit (minutes)" %}</label>
               {{ form.time_limit }}
               {% if form.time_limit.errors %}
                 <div class="invalid-feedback d-block">
@@ -95,7 +88,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label">Max Attempts</label>
+              <label class="form-label">{% trans "Max Attempts" %}</label>
               {{ form.max_attempts }}
               {% if form.max_attempts.errors %}
                 <div class="invalid-feedback d-block">
@@ -105,7 +98,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label">Passing Score (%)</label>
+              <label class="form-label">{% trans "Passing Score (%)" %}</label>
               {{ form.passing_score }}
               {% if form.passing_score.errors %}
                 <div class="invalid-feedback d-block">
@@ -113,17 +106,15 @@
                 </div>
               {% endif %}
             </div>
-
           </div>
 
           <hr>
 
-          <!-- ================= AVAILABILITY ================= -->
-          <h5 class="mb-3">Availability</h5>
+          <h5 class="mb-3">{% trans "Availability" %}</h5>
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Start Date</label>
+              <label class="form-label">{% trans "Start Date" %}</label>
               {{ form.start_date }}
               {% if form.start_date.errors %}
                 <div class="invalid-feedback d-block">
@@ -133,7 +124,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label">End Date</label>
+              <label class="form-label">{% trans "End Date" %}</label>
               {{ form.end_date }}
               {% if form.end_date.errors %}
                 <div class="invalid-feedback d-block">
@@ -141,16 +132,13 @@
                 </div>
               {% endif %}
             </div>
-
           </div>
 
-          <!-- ================= PARENT LINK ================= -->
           <hr>
-          <h5 class="mb-3">Parent Link</h5>
+          <h5 class="mb-3">{% trans "Parent Link" %}</h5>
           <div class="row">
-
             <div class="col-md-6 mb-3">
-              <label class="form-label">Subject</label>
+              <label class="form-label">{% trans "Subject" %}</label>
               {{ form.grade_subject }}
               {% if form.grade_subject.errors %}
                 <div class="invalid-feedback d-block">
@@ -158,12 +146,12 @@
                 </div>
               {% endif %}
               <small class="form-text text-muted">
-                Select a Subject if this quiz is for a subject. Leave empty if linked to a Course.
+                {% trans "Select a Subject if this quiz is for a subject. Leave empty if linked to a Course." %}
               </small>
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label">Course</label>
+              <label class="form-label">{% trans "Course" %}</label>
               {{ form.course }}
               {% if form.course.errors %}
                 <div class="invalid-feedback d-block">
@@ -171,44 +159,42 @@
                 </div>
               {% endif %}
               <small class="form-text text-muted">
-                Select a Course if this quiz is for a course. Leave empty if linked to a Subject.
+                {% trans "Select a Course if this quiz is for a course. Leave empty if linked to a Subject." %}
               </small>
             </div>
-
           </div>
 
           <hr>
 
-          <!-- ================= BEHAVIOR ================= -->
-          <h5 class="mb-3">Quiz Behavior</h5>
+          <h5 class="mb-3">{% trans "Quiz Behavior" %}</h5>
           <div class="form-check mb-2">
             {{ form.is_free }}
-            <label class="form-check-label">Free</label>
+            <label class="form-check-label">{% trans "Free" %}</label>
           </div>
 
           <div class="form-check mb-2">
             {{ form.is_published }}
-            <label class="form-check-label">Publish it</label>
+            <label class="form-check-label">{% trans "Publish it" %}</label>
           </div>
 
           <div class="form-check mb-2">
             {{ form.randomize_questions }}
             <label class="form-check-label">
-              Randomize Question Order
+              {% trans "Randomize Question Order" %}
             </label>
           </div>
 
           <div class="form-check mb-2">
             {{ form.show_results_immediately }}
             <label class="form-check-label">
-              Show Results Immediately
+              {% trans "Show Results Immediately" %}
             </label>
           </div>
 
           <div class="form-check mb-3">
             {{ form.allow_review }}
             <label class="form-check-label">
-              Allow Review After Submission
+              {% trans "Allow Review After Submission" %}
             </label>
           </div>
 
@@ -216,15 +202,14 @@
 
         <div class="card-footer text-end">
           <a href="{% url 'assessment:quiz:quiz-list' %}" class="btn btn-secondary">
-            Cancel
+            {% trans "Cancel" %}
           </a>
           <button type="submit" class="btn btn-primary">
-            {% if object %} Update Quiz {% else %} Save Quiz {% endif %}
+            {% if object %} {% trans "Update Quiz" %} {% else %} {% trans "Save Quiz" %} {% endif %}
           </button>
         </div>
 
       </form>
-
     </div>
   </div>
 </section>
