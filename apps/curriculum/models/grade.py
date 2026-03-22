@@ -48,3 +48,22 @@ class Grade(TimeStampModel):
 
     def __str__(self):
         return self.short_name
+
+    @staticmethod
+    def _display_name(obj: object) -> str:
+        """
+        Resolve the best human-readable label for any curriculum model.
+
+        Priority:
+        1. get_name_display()  — present when ``name`` is a choices field (e.g. Level)
+        2. name                — full label (e.g. Grade.name = "1ère Année Primaire")
+        3. short_name          — compact fallback (e.g. Grade.short_name = "1AP")
+        4. str(obj)            — last resort, always defined
+        """
+        if callable(getattr(obj, "get_name_display", None)):
+            return obj.get_name_display()
+        if hasattr(obj, "name") and obj.name:
+            return obj.name
+        if hasattr(obj, "short_name") and obj.short_name:
+            return obj.short_name
+        return str(obj)

@@ -1,5 +1,7 @@
 import logging
 
+from ..models import Grade
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,3 +18,15 @@ class GradeLoggingMixin:
             },
         )
         return super().dispatch(request, *args, **kwargs)
+
+
+class GradeQuerySetMixin:
+    """
+    Single responsibility: provide the canonical Grade queryset
+    with its level pre-fetched.
+
+    Reusable across any Grade-based view — no logic tied to the detail page.
+    """
+
+    def get_queryset(self):
+        return Grade.objects.select_related("level").all()

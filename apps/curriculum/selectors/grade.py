@@ -2,7 +2,20 @@ from collections import defaultdict
 
 from django.db.models import Count, Prefetch
 
+from apps.curriculum.selectors.subject import (
+    get_course_counts_for_subjects,
+    get_course_resource_counts_for_subjects,
+    get_progress_counts_for_student,
+    get_resource_counts_for_subjects,
+)
+
 from ..models import Grade, Level, Specialty
+from ..selectors.grade_subject import (
+    get_course_counts_for_grade_subjects,
+    get_course_resource_counts_for_grade_subjects,
+    get_grade_subjects_for_grade,
+    get_resource_counts_for_grade_subjects,
+)
 
 
 def get_level_by_pk(pk):
@@ -76,84 +89,6 @@ def get_level_stats(level):
     }
 
 
-# def get_grade_groups_with_specialties(level):
-#     """
-#     Returns grades for a level grouped by order.
-#     Grades with specialties are expanded — one entry per specialty.
-#     Grades without specialties appear once with specialty=None.
-
-#     Returns:
-#         [
-#             {
-#                 'order': 1,
-#                 'grade': <Grade>,
-#                 'entries': [
-#                     {'grade': <Grade>, 'specialty': None},        # no-specialty grade
-#                     # OR
-#                     {'grade': <Grade>, 'specialty': <Specialty>}, # one per specialty
-#                 ]
-#             },
-#             ...
-#         ]
-#     """
-#     grades = (
-#         Grade.objects.filter(level=level)
-#         .prefetch_related(
-#             Prefetch(
-#                 "specialties",
-#                 queryset=Specialty.objects.order_by("name"),
-#             )
-#         )
-#         .select_related("level")
-#         .order_by("order", "name")
-#     )
-
-#     grouped = defaultdict(lambda: {"grade": None, "entries": []})
-
-#     for grade in grades:
-#         specialties = list(grade.specialties.all())
-
-#         group = grouped[grade.order]
-#         group["grade"] = grade  # representative grade for the group header
-
-#         if specialties:
-#             for specialty in specialties:
-#                 group["entries"].append(
-#                     {
-#                         "grade": grade,
-#                         "specialty": specialty,
-#                         "label": f"{grade.short_name} – {specialty.short_name}",
-#                         "url_kwargs": {
-#                             "grade_pk": grade.pk,
-#                             "specialty_pk": specialty.pk,
-#                         },
-#                     }
-#                 )
-#         else:
-#             group["entries"].append(
-#                 {
-#                     "grade": grade,
-#                     "specialty": None,
-#                     "label": grade.name,
-#                     "url_kwargs": {
-#                         "grade_pk": grade.pk,
-#                         "specialty_pk": None,
-#                     },
-#                 }
-#             )
-
-#     return [
-#         {
-#             "order": order,
-#             "grade": data["grade"],
-#             "entries": data["entries"],
-#             "single": len(data["entries"])
-#             == 1,  # hint for template (no accordion needed)
-#         }
-#         for order, data in sorted(grouped.items())
-#     ]
-
-
 def get_grade_groups_with_specialties(level, student_grade=None):
     grades = (
         Grade.objects.filter(level=level)
@@ -214,3 +149,101 @@ def get_grade_groups_with_specialties(level, student_grade=None):
         }
         for order, data in sorted(grouped.items())
     ]
+
+
+def build_enriched_subjects(grade, user=None, specialty=None):
+    grade_subjects = list(get_grade_subjects_for_grade(grade, specialty=specialty))
+
+    if not grade_subjects:
+        return []
+
+    subject_ids = [gs.subject_id for gs in grade_subjects]
+
+    course_counts = get_course_counts_for_subjects(subject_ids)
+    subject_resource_counts = get_resource_counts_for_subjects(subject_ids)
+    course_resource_counts = get_course_resource_counts_for_subjects(subject_ids)
+
+    is_student = (
+        user is not None
+        and user.is_authenticated
+        and getattr(user, "is_student", False)
+    )
+    progress_counts = (
+        get_progress_counts_for_student(user, subject_ids) if is_student else {}
+    )
+
+    enriched = []
+    for gs in grade_subjects:  # ← iterate GradeSubjects, not subjects
+        sid = gs.subject_id
+        courses_count = course_counts.get(sid, 0)
+        completed = progress_counts.get(sid, 0)
+
+        enriched.append(
+            {
+                "grade_subject": gs,  # ← keep the GradeSubject
+                "subject": gs.subject,  # ← still available for display
+                "courses_count": courses_count,
+                "subject_resources_count": subject_resource_counts.get(sid, 0),
+                "course_resources_count": course_resource_counts.get(sid, 0),
+                "resources_count": subject_resource_counts.get(sid, 0)
+                + course_resource_counts.get(sid, 0),
+                "completed_courses": completed,
+                "total_courses": courses_count,
+                "progress": (
+                    round(completed / courses_count * 100, 1) if courses_count else 0
+                ),
+                "show_progress": is_student,
+            }
+        )
+
+    return enriched
+
+
+def build_enriched_grade_subjects(grade, user=None, specialty=None):
+    grade_subjects = list(get_grade_subjects_for_grade(grade, specialty=specialty))
+
+    if not grade_subjects:
+        return []
+
+    grade_subject_ids = [gs.pk for gs in grade_subjects]  # ← use GradeSubject PKs
+
+    course_counts = get_course_counts_for_grade_subjects(grade_subject_ids)
+    subject_resource_counts = get_resource_counts_for_grade_subjects(grade_subject_ids)
+    course_resource_counts = get_course_resource_counts_for_grade_subjects(
+        grade_subject_ids
+    )
+
+    is_student = (
+        user is not None
+        and user.is_authenticated
+        and getattr(user, "is_student", False)
+    )
+    progress_counts = (
+        get_progress_counts_for_student(user, grade_subject_ids) if is_student else {}
+    )
+
+    enriched = []
+    for gs in grade_subjects:
+        gid = gs.pk  # ← key by GradeSubject PK, not subject_id
+        courses_count = course_counts.get(gid, 0)
+        completed = progress_counts.get(gid, 0)
+
+        enriched.append(
+            {
+                "grade_subject": gs,
+                "subject": gs.subject,
+                "courses_count": courses_count,
+                "subject_resources_count": subject_resource_counts.get(gid, 0),
+                "course_resources_count": course_resource_counts.get(gid, 0),
+                "resources_count": subject_resource_counts.get(gid, 0)
+                + course_resource_counts.get(gid, 0),
+                "completed_courses": completed,
+                "total_courses": courses_count,
+                "progress": (
+                    round(completed / courses_count * 100, 1) if courses_count else 0
+                ),
+                "show_progress": is_student,
+            }
+        )
+
+    return enriched

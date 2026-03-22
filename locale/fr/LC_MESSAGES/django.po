@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 09:40+0100\n"
+"POT-Creation-Date: 2026-03-22 15:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1397,6 +1397,7 @@ msgstr "Ressource dupliquée en tant que brouillon."
 #: .\apps\content\admin\video.py:51 .\apps\content\models\course.py:89
 #: .\apps\content\models\resource.py:39 .\apps\recommender\models.py:83
 #: .\templates\apps\assessement\quizzes\create.html:154
+#: .\templates\apps\content\courses\_header.html:13
 #: .\templates\apps\content\resources\detail.html:98
 #: .\templates\apps\content\resources\form.html:79
 #: .\templates\apps\curriculum\grade_subjects\detail.html:69
@@ -2197,6 +2198,35 @@ msgstr "Secondaire"
 msgid "University"
 msgstr "Université"
 
+#: .\apps\curriculum\consts.py:10
+msgid ""
+"The foundation of a child's education, focusing on literacy, numeracy, and "
+"essential social values."
+msgstr ""
+"Le fondement de l'éducation d'un enfant, axé sur l'alphabétisation, le "
+"calcul et les valeurs sociales essentielles."
+
+#: .\apps\curriculum\consts.py:19
+msgid ""
+"A critical transitional phase that strengthens academic foundations and "
+"develops critical thinking."
+msgstr ""
+"Une phase de transition critique qui renforce les fondations académiques et "
+"développe la pensée critique."
+
+#: .\apps\curriculum\consts.py:28
+msgid ""
+"Preparing students for higher education through specialised academic tracks."
+msgstr ""
+"Préparer les étudiants à l'enseignement supérieur à travers des filières "
+"académiques spécialisées."
+
+#: .\apps\curriculum\consts.py:36
+msgid "A hub for advanced learning, research, and innovation."
+msgstr ""
+"Une plaque tournante pour l’apprentissage avancé, la recherche et "
+"l’innovation."
+
 #: .\apps\curriculum\models\grade.py:14
 msgid "The education level this grade belongs to."
 msgstr "Le niveau d’éducation auquel appartient cette année."
@@ -2679,11 +2709,11 @@ msgstr "L’utilisation d’WonderNet est-elle gratuite ?"
 
 #: .\apps\pages\views\faq.py:16
 msgid ""
-"Yes. WonderNet is completely free. All educational resources can be accessed "
-"without any fees or subscriptions."
+"Yes. WonderNet is completely free. All educational resources can be accessed"
+" without any fees or subscriptions."
 msgstr ""
-"Oui. WonderNet est entièrement gratuit. Toutes les ressources pédagogiques sont"
-" accessibles sans frais ni abonnement."
+"Oui. WonderNet est entièrement gratuit. Toutes les ressources pédagogiques "
+"sont accessibles sans frais ni abonnement."
 
 #: .\apps\pages\views\faq.py:23
 msgid "Can I download study materials?"
@@ -2728,8 +2758,8 @@ msgstr "WonderNet fournit-il des certificats ?"
 
 #: .\apps\pages\views\faq.py:52
 msgid ""
-"No. WonderNet focuses on educational support and exam preparation materials, "
-"not formal certification."
+"No. WonderNet focuses on educational support and exam preparation materials,"
+" not formal certification."
 msgstr ""
 "Non. WonderNet se concentre sur le soutien pédagogique et le matériel de "
 "préparation aux examens, et non sur la certification formelle."
@@ -3037,8 +3067,8 @@ msgid ""
 "WonderNet is intended for use by students of all ages within the Algerian "
 "education system."
 msgstr ""
-"WonderNet est destiné à être utilisé par les étudiants de tous âges au sein du "
-"système éducatif algérien."
+"WonderNet est destiné à être utilisé par les étudiants de tous âges au sein "
+"du système éducatif algérien."
 
 #: .\apps\pages\views\privacy.py:162
 msgid ""
@@ -3113,11 +3143,11 @@ msgstr "Acceptation des conditions"
 
 #: .\apps\pages\views\terms.py:17
 msgid ""
-"By accessing or using WonderNet, you confirm that you have read, understood, "
-"and agree to be bound by these Terms of Service."
+"By accessing or using WonderNet, you confirm that you have read, understood,"
+" and agree to be bound by these Terms of Service."
 msgstr ""
-"En accédant ou en utilisant WonderNet, vous confirmez que vous avez lu, compris"
-" et accepté d'être lié par ces conditions d'utilisation."
+"En accédant ou en utilisant WonderNet, vous confirmez que vous avez lu, "
+"compris et accepté d'être lié par ces conditions d'utilisation."
 
 #: .\apps\pages\views\terms.py:20
 msgid ""
@@ -3148,11 +3178,11 @@ msgstr "Admissibilité"
 
 #: .\apps\pages\views\terms.py:37
 msgid ""
-"WonderNet is designed for students and teachers within the Algerian education "
-"system."
+"WonderNet is designed for students and teachers within the Algerian "
+"education system."
 msgstr ""
-"WonderNet est conçu pour les étudiants et les enseignants du système éducatif "
-"algérien."
+"WonderNet est conçu pour les étudiants et les enseignants du système "
+"éducatif algérien."
 
 #: .\apps\pages\views\terms.py:40
 msgid ""
@@ -3272,12 +3302,13 @@ msgstr "Contenu et propriété intellectuelle"
 
 #: .\apps\pages\views\terms.py:104
 msgid ""
-"All content on WonderNet — including lessons, exercises, exams, and platform "
-"design — is the intellectual property of WonderNet or its content contributors."
+"All content on WonderNet — including lessons, exercises, exams, and platform"
+" design — is the intellectual property of WonderNet or its content "
+"contributors."
 msgstr ""
-"Tout le contenu d'WonderNet — y compris les leçons, les exercices, les examens "
-"et la conception de la plateforme — est la propriété intellectuelle d'WonderNet"
-" ou de ses contributeurs de contenu."
+"Tout le contenu d'WonderNet — y compris les leçons, les exercices, les "
+"examens et la conception de la plateforme — est la propriété intellectuelle "
+"d'WonderNet ou de ses contributeurs de contenu."
 
 #: .\apps\pages\views\terms.py:107
 msgid ""
@@ -3289,12 +3320,12 @@ msgstr ""
 
 #: .\apps\pages\views\terms.py:110
 msgid ""
-"Teachers who upload content to WonderNet grant WonderNet a non-exclusive licence "
-"to display and distribute that content to students."
+"Teachers who upload content to WonderNet grant WonderNet a non-exclusive "
+"licence to display and distribute that content to students."
 msgstr ""
-"Les enseignants qui téléchargent du contenu sur WonderNet accordent à WonderNet "
-"une licence non exclusive pour afficher et distribuer ce contenu aux "
-"étudiants."
+"Les enseignants qui téléchargent du contenu sur WonderNet accordent à "
+"WonderNet une licence non exclusive pour afficher et distribuer ce contenu "
+"aux étudiants."
 
 #: .\apps\pages\views\terms.py:113
 msgid ""
@@ -3422,8 +3453,8 @@ msgid ""
 "WonderNet does not issue official diplomas, certificates, or qualifications "
 "recognised by the Algerian Ministry of Education."
 msgstr ""
-"WonderNet ne délivre pas de diplômes, certificats ou qualifications officiels "
-"reconnus par le ministère algérien de l'Éducation."
+"WonderNet ne délivre pas de diplômes, certificats ou qualifications "
+"officiels reconnus par le ministère algérien de l'Éducation."
 
 #: .\apps\pages\views\terms.py:180
 msgid ""
@@ -5876,10 +5907,10 @@ msgstr "Un écosystème complet pour l’excellence académique en Algérie."
 
 #: .\templates\apps\curriculum\levels\list.html:92
 msgid ""
-"WonderNet is built for students who refuse to settle for average. Fully aligned"
-" with the Algerian national curriculum, the platform provides structured "
-"lessons, expertly solved exercises, and high-quality exam simulations across"
-" every level and subject."
+"WonderNet is built for students who refuse to settle for average. Fully "
+"aligned with the Algerian national curriculum, the platform provides "
+"structured lessons, expertly solved exercises, and high-quality exam "
+"simulations across every level and subject."
 msgstr ""
 "WonderNet est conçu pour les étudiants qui refusent de se contenter de la "
 "moyenne. Entièrement alignée sur le programme national algérien, la "
@@ -5889,8 +5920,8 @@ msgstr ""
 
 #: .\templates\apps\curriculum\levels\list.html:95
 msgid ""
-"Whether you are a student, a parent, or a teacher — WonderNet empowers you with"
-" clarity, confidence, and real results."
+"Whether you are a student, a parent, or a teacher — WonderNet empowers you "
+"with clarity, confidence, and real results."
 msgstr ""
 "Que vous soyez étudiant, parent ou enseignant, WonderNet vous offre clarté, "
 "confiance et résultats réels."
@@ -6459,11 +6490,7 @@ msgid "Please wait a moment before trying again."
 msgstr "Veuillez patienter un moment avant de réessayer."
 
 #: .\templates\errors\429.html:46
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "            %(count)s subject(s)\n"
-#| "          "
+#, python-format
 msgid ""
 "\n"
 "            Try again in %(seconds)s seconds.\n"

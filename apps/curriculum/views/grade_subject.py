@@ -1,245 +1,282 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, Count, Q, Value, When
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
-from apps.accounts.models import CustomUser
-from apps.assessment.choices import QuestionType
-from apps.assessment.models import Quiz
-from apps.content.choices import DifficultyLevel, ResourceStatus, ResourceType, Term
-from apps.content.models import Course, Resource
-from apps.curriculum.selectors.grade_subject import (
-    get_grade_subject_progress_for_student,
-)
+from apps.content.choices import DifficultyLevel, ResourceType, Term
 
 from ..mixins import GradeSubjectQuarterMixin
 from ..models import GradeSubject
-from ..selectors import (
-    get_grade_subject_by_pk,
-    get_grade_subject_counts,
-    get_grade_subject_counts_by_quarter,
+from ..services.grade_subject import (
+    CoursePageBuilder,
+    CourseQueryFilterExtractor,
+    CoursesByQuarterCrumbBuilder,
+    GradeSubjectCountsProvider,
+    GradeSubjectCrumbBuilder,
+    GradeSubjectObjectProvider,
+    ProgressProviderFactory,
+    QuizFilterExtractor,
+    QuizQuerysetBuilder,
+    QuizSidebarProvider,
+    QuizzesCrumbBuilder,
+    ResourceFilter,
+    ResourceFilterExtractor,
+    ResourceListCrumbBuilder,
+    ResourceQuerysetBuilder,
+    ResourceSidebarProvider,
+    ResourceTabConfig,
+    ResourceTermGrouper,
+    ResourceTypeTitleResolver,
+    TermLabelResolver,
 )
-from ..services import build_grade_subject_courses_page
 
 User = get_user_model()
 
-SUBJECT_RESOURCE_TYPE_CONFIG = {
-    "tests": {
-        "resource_type": ResourceType.TEST,
-        "tab": "tests",
-        "title": _("Tests"),
-        "icon": "fas fa-clipboard-check",
-    },
-    "exams": {
-        "resource_type": ResourceType.EXAM,
-        "tab": "exams",
-        "title": _("Exams"),
-        "icon": "fas fa-file-alt",
-    },
-    "past-papers": {
-        "resource_type": ResourceType.PAST_PAPER,
-        "tab": "past-papers",
-        "title": _("Past Papers"),
-        "icon": "fas fa-file-signature",
-    },
-    "mock-exams": {
-        "resource_type": ResourceType.MOCK_EXAM,
-        "tab": "mock-exams",
-        "title": _("Mock Exams"),
-        "icon": "fas fa-stopwatch",
-    },
-    "textbooks": {
-        "resource_type": ResourceType.TEXTBOOK,
-        "tab": "textbooks",
-        "title": _("Textbooks"),
-        "icon": "fas fa-book-open",
-    },
-    "foreign-books": {
-        "resource_type": ResourceType.FOREIGN_BOOK,
-        "tab": "foreign-books",
-        "title": _("Foreign Books"),
-        "icon": "fas fa-book",
-    },
-    "study-guides": {
-        "resource_type": ResourceType.STUDY_GUIDE,
-        "tab": "study-guides",
-        "title": _("Study Guides"),
-        "icon": "fas fa-book-reader",
-    },
-}
-
 
 class GradeSubjectDetailView(DetailView):
+    """
+    Displays the detail page for a single GradeSubject.
+
+    All data-fetching, configuration, and breadcrumb logic is delegated
+    to focused service classes injected via __init__.
+
+    Responsibilities delegated:
+        - GradeSubjectObjectProvider   → cached object fetch
+        - GradeSubjectCountsProvider   → total + per-quarter content counts
+        - ProgressProviderFactory      → selects Student or Anonymous provider
+        - ResourceTabConfig            → tab definitions (not view logic)
+        - GradeSubjectCrumbBuilder     → breadcrumb trail with specialty URL
+    """
+
     model = GradeSubject
     template_name = "apps/curriculum/grade_subjects/detail.html"
     context_object_name = "grade_subject"
 
-    def get_object(self, queryset=None):
-        if not hasattr(self, "_grade_subject"):
-            # No term filter here — we want the unfiltered object for breadcrumbs
-            self._grade_subject = get_grade_subject_by_pk(pk=self.kwargs["pk"])
-        return self._grade_subject
+    # ── Dependency injection ──────────────────────────────────────────────────
 
-    def get_context_data(self, **kwargs):
+    def __init__(
+        self,
+        object_provider: GradeSubjectObjectProvider | None = None,
+        counts_provider: GradeSubjectCountsProvider | None = None,
+        progress_factory: ProgressProviderFactory | None = None,
+        tab_config: ResourceTabConfig | None = None,
+        breadcrumb_builder: GradeSubjectCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.object_provider = object_provider or GradeSubjectObjectProvider()
+        self.counts_provider = counts_provider or GradeSubjectCountsProvider()
+        self.progress_factory = progress_factory or ProgressProviderFactory()
+        self.tab_config = tab_config or ResourceTabConfig()
+        self.breadcrumb_builder = breadcrumb_builder or GradeSubjectCrumbBuilder()
+
+    # ── Object ────────────────────────────────────────────────────────────────
+
+    def get_object(self, queryset=None) -> object:
+        return self.object_provider.get(pk=self.kwargs["pk"])
+
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+
+        gs = self.object
         user = self.request.user
-        is_student = self.request.user.is_authenticated and getattr(
-            self.request.user, "is_student", False
-        )
-        gs = self.get_object()
+        pk = gs.pk
 
-        grade = gs.grade
-        level = grade.level
-        subject = gs.subject
-        specialty = gs.specialty
+        counts = self.counts_provider.get_counts(pk)
+        counts_by_quarter = self.counts_provider.get_by_quarter(pk)
 
-        # One DB hit per term (3 total) — returns counts for all quarters
-        counts_by_quarter = get_grade_subject_counts_by_quarter(pk=self.kwargs["pk"])
-        counts = get_grade_subject_counts(pk=self.kwargs["pk"])
-        progress = (
-            get_grade_subject_progress_for_student(user, gs.pk)
-            if is_student
-            else {
-                "completed_courses": 0,
-                "total_courses": counts["course_count"],
-                "progress_pct": 0,
-            }
-        )
+        progress_provider = self.progress_factory.for_user(user)
+        progress = progress_provider.get_progress(user, pk)
+
+        self._dispatch_messages(gs, counts, progress)
 
         context.update(
             {
-                "grade": grade,
-                "level": level,
-                "subject": subject,
-                "specialty": specialty,
+                "grade": gs.grade,
+                "level": gs.grade.level,
+                "subject": gs.subject,
+                "specialty": gs.specialty,
+                "is_student": self.progress_factory.for_user(user).__class__.__name__
+                == "StudentProgressProvider",
                 "quarters": Term.choices,
                 "current_quarter": Term.FIRST,
                 "course_count": counts["course_count"],
                 "resource_count": counts["resource_count"],
                 "quiz_count": counts["quiz_count"],
                 "counts_by_quarter": counts_by_quarter,
-                "is_student": is_student,
                 "completed_courses": progress["completed_courses"],
                 "progress_pct": progress["progress_pct"],
-                # Subject resource tab config — slugs + icons only, counts come from counts_by_quarter
-                "subject_resource_tabs": [
-                    ("test", "Tests", "fas fa-clipboard-check"),
-                    ("exam", "Exams", "fas fa-file-alt"),
-                    ("past_paper", "Past Papers", "fas fa-file-signature"),
-                    ("mock_exam", "Mock Exams", "fas fa-stopwatch"),
-                    ("textbook", "Textbooks", "fas fa-book-open"),
-                    ("foreign_book", "Foreign Books", "fas fa-book"),
-                    ("study_guide", "Study Guides", "fas fa-book-reader"),
-                ],
+                "subject_resource_tabs": self.tab_config.get_tabs(),
+                "crumbs": self.breadcrumb_builder.build_for_grade_subject(gs),
+                "page_title": gs.subject.short_name,
+                "page_description": _(
+                    "Courses, resources, and quizzes for this subject."
+                ),
             }
         )
 
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
-
-        context["crumbs"] = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-            {
-                "label": level.name,
-                "url": reverse(
-                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                ),
-            },
-            {
-                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                "url": grade_url,  # ← correct URL with specialty param when needed
-            },
-            {"label": subject.short_name, "url": None},
-        ]
-
         return context
+
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(
+        self,
+        gs: object,
+        counts: dict,
+        progress: dict,
+    ) -> None:
+        if counts.get("course_count", 0) == 0:
+            messages.info(
+                self.request,
+                _("No courses have been added to this subject yet."),
+            )
+
+        if progress.get("progress_pct", 0) == 100:
+            messages.success(
+                self.request,
+                _("You have completed all courses in this subject. Well done!"),
+            )
 
 
 class GradeSubjectCoursesByQuarterView(GradeSubjectQuarterMixin, ListView):
+    """
+    Lists courses for a GradeSubject filtered by quarter, difficulty,
+    and search query.
+
+    Responsibilities delegated:
+        - GradeSubjectQuarterMixin      → grade_subject + get_term()
+        - CourseQueryFilterExtractor    → GET param extraction + cleaning
+        - CoursePageBuilder             → course list construction
+        - TermLabelResolver             → term key → display string
+        - CoursesByQuarterCrumbBuilder  → 5-crumb breadcrumb trail
+    """
+
     template_name = "apps/curriculum/grade_subjects/courses_by_quarter.html"
     context_object_name = "courses"
     paginate_by = 10
 
-    # ListView.get_queryset is bypassed — we build the list ourselves
-    # and hand it back as a plain Python list for the paginator.
-    def get_queryset(self):
-        return build_grade_subject_courses_page(
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        filter_extractor: CourseQueryFilterExtractor | None = None,
+        course_builder: CoursePageBuilder | None = None,
+        term_resolver: TermLabelResolver | None = None,
+        breadcrumb_builder: CoursesByQuarterCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.filter_extractor = filter_extractor or CourseQueryFilterExtractor()
+        self.course_builder = course_builder or CoursePageBuilder()
+        self.term_resolver = term_resolver or TermLabelResolver(Term.choices)
+        self.breadcrumb_builder = breadcrumb_builder or CoursesByQuarterCrumbBuilder()
+
+    # ── Queryset ──────────────────────────────────────────────────────────────
+
+    def get_queryset(self) -> list:
+        self._filters = self.filter_extractor.extract(self.request)
+        return self.course_builder.build(
             grade_subject=self.grade_subject,
-            quarter=self.kwargs.get("quarter"),  # ← pass raw URL kwarg directly
+            quarter=self.kwargs.get("quarter"),
             user=self.request.user,
-            difficulty=self.request.GET.get("difficulty", "").strip() or None,
-            search=self.request.GET.get("q", "").strip() or None,
+            filters=self._filters,
         )
 
-    def get_context_data(self, **kwargs):
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
         gs = self.grade_subject
-        grade = gs.grade
-        level = gs.grade.level
-        specialty = gs.specialty
         term = self.get_term()
-        context["difficulty_choices"] = DifficultyLevel.choices
-        context["current_difficulty"] = self.request.GET.get("difficulty", "")
-        context["current_search"] = self.request.GET.get("q", "")
+        filters = self._filters  # already extracted in get_queryset
+        quarter_display = self.term_resolver.resolve(term)
 
-        quarter_display = dict(Term.choices).get(term, term or "")
-
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
+        self._dispatch_messages(context)
 
         context.update(
             {
+                "difficulty_choices": DifficultyLevel.choices,
+                "current_difficulty": filters.difficulty or "",
+                "current_search": filters.search or "",
+                "querystring": filters.querystring,
                 "quarter_display": quarter_display,
-                "is_student": self.request.user.is_authenticated
-                and getattr(self.request.user, "is_student", False),
-                "querystring": qp.urlencode(),
-                "crumbs": [
-                    {
-                        "label": "Home",
-                        "url": reverse("pages:landing"),
-                        "icon": "fas fa-home",
-                    },
-                    {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-                    {
-                        "label": level.name,
-                        "url": reverse(
-                            "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                        ),
-                    },
-                    {
-                        "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                        "url": grade_url,
-                    },
-                    {
-                        "label": gs.subject.short_name,
-                        "url": reverse(
-                            "curriculum:grade-subject:grade-subject-detail",
-                            kwargs={"pk": gs.pk},
-                        ),
-                    },
-                    {"label": f"Courses — {quarter_display}", "url": None},
-                ],
+                "is_student": (
+                    self.request.user.is_authenticated
+                    and getattr(self.request.user, "is_student", False)
+                ),
+                "crumbs": self.breadcrumb_builder.build_for_courses_by_quarter(
+                    gs, quarter_display
+                ),
+                "page_title": _("%(subject)s — %(quarter)s")
+                % {
+                    "subject": gs.subject.short_name,
+                    "quarter": quarter_display,
+                },
             }
         )
 
         return context
 
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(self, context: dict) -> None:
+        page_obj = context.get("page_obj")
+        if page_obj is not None and not page_obj.object_list:
+            messages.info(
+                self.request,
+                _("No courses found for this quarter and filter combination."),
+            )
+
 
 class GradeSubjectResourceListByTermView(ListView):
-    model = Resource
+    """
+    Lists published resources for a GradeSubject, filtered by term,
+    resource type, and 6 additional filter params.
+
+    Operates in two modes:
+      - Filtered mode  (active_term set)  → paginated flat list
+      - Grouping mode  (no active_term)   → unpaginated, grouped by term
+
+    Responsibilities delegated:
+        - ResourceFilterExtractor      → 8 GET params + URL kwarg priority
+        - ResourceQuerysetBuilder      → ORM + 8 filter conditions
+        - ResourceTypeTitleResolver    → slug → display label
+        - ResourceSidebarProvider      → courses + teachers sidebar
+        - ResourceTermGrouper          → group-by-term for grouping mode
+        - ResourceListCrumbBuilder     → 6-crumb breadcrumb trail
+    """
+
+    model = GradeSubject  # overridden by get_queryset
     template_name = "apps/curriculum/grade_subjects/resources_by_term.html"
     context_object_name = "resources"
 
-    def setup(self, request, *args, **kwargs):
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        filter_extractor: ResourceFilterExtractor | None = None,
+        queryset_builder: ResourceQuerysetBuilder | None = None,
+        title_resolver: ResourceTypeTitleResolver | None = None,
+        sidebar_provider: ResourceSidebarProvider | None = None,
+        term_grouper: ResourceTermGrouper | None = None,
+        breadcrumb_builder: ResourceListCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.filter_extractor = filter_extractor or ResourceFilterExtractor()
+        self.queryset_builder = queryset_builder or ResourceQuerysetBuilder()
+        self.title_resolver = title_resolver or ResourceTypeTitleResolver()
+        self.sidebar_provider = sidebar_provider or ResourceSidebarProvider()
+        self.term_grouper = term_grouper or ResourceTermGrouper()
+        self.breadcrumb_builder = breadcrumb_builder or ResourceListCrumbBuilder()
+
+    # ── Setup ─────────────────────────────────────────────────────────────────
+
+    def setup(self, request, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.grade_subject = get_object_or_404(
             GradeSubject.objects.select_related("grade", "subject", "specialty"),
@@ -249,411 +286,172 @@ class GradeSubjectResourceListByTermView(ListView):
         self.current_term = self.kwargs.get("term")
         self.resource_slug = self.kwargs.get("resource_slug")
 
+    # ── Pagination — dynamic based on active term ─────────────────────────────
+
     @property
-    def paginate_by(self):
-        # Only paginate when a specific term is active — grouping mode has no pagination
+    def paginate_by(self) -> int | None:
         if self.current_term or self.request.GET.get("term"):
             return 15
         return None
 
-    def _get_filters(self):
-        GET = self.request.GET
-        return {
-            "q": GET.get("q", "").strip(),
-            "difficulty": GET.get("difficulty", "").strip(),
-            "term": GET.get("term", "").strip(),
-            "resource_type": GET.get("resource_type", "").strip(),
-            "has_solution": GET.get("has_solution", "").strip(),
-            "is_free": GET.get("is_free", "").strip(),
-            "course": GET.get("course", "").strip(),
-            "teacher": GET.get("teacher", "").strip(),
-        }
+    # ── Queryset ──────────────────────────────────────────────────────────────
 
     def get_queryset(self):
-        f = self._get_filters()
-
-        qs = (
-            Resource.objects.filter(
-                grade_subject=self.grade_subject,
-                resource_type__in=ResourceType.get_subject_values(),
-                status=ResourceStatus.PUBLISHED,
-            )
-            .select_related("created_by", "course")
-            .prefetch_related("tags")
-            .order_by("term", "resource_type", "order")
+        self._filters = self.filter_extractor.extract(
+            self.request,
+            current_term=self.current_term,
+            resource_slug=self.resource_slug,
         )
+        return self.queryset_builder.build(self.grade_subject, self._filters)
 
-        # URL kwarg term takes priority over GET param
-        if self.current_term:
-            qs = qs.filter(term=self.current_term)
-        elif f["term"]:
-            qs = qs.filter(term=f["term"])
+    # ── Context ───────────────────────────────────────────────────────────────
 
-        if self.resource_slug:
-            qs = qs.filter(resource_type=self.resource_slug)
-        elif f["resource_type"]:
-            qs = qs.filter(resource_type=f["resource_type"])
-
-        if f["q"]:
-            qs = qs.filter(
-                Q(title__icontains=f["q"])
-                | Q(content__icontains=f["q"])
-                | Q(tags__name__icontains=f["q"])
-            ).distinct()
-
-        if f["difficulty"]:
-            qs = qs.filter(difficulty=f["difficulty"])
-
-        if f["has_solution"] == "1":
-            qs = qs.filter(has_solution=True)
-        elif f["has_solution"] == "0":
-            qs = qs.filter(has_solution=False)
-
-        if f["is_free"] == "1":
-            qs = qs.filter(is_free=True)
-        elif f["is_free"] == "0":
-            qs = qs.filter(is_free=False)
-
-        if f["course"]:
-            qs = qs.filter(course_id=f["course"])
-
-        if f["teacher"]:
-            qs = qs.filter(created_by_id=f["teacher"])
-
-        return qs
-
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
 
         gs = self.grade_subject
-        grade = gs.grade
-        level = gs.grade.level
-        specialty = gs.specialty
-        f = self._get_filters()
+        filters = self._filters
+        sidebar = self.sidebar_provider.fetch(gs)
+        resource_type_title = self.title_resolver.resolve(self.resource_slug)
 
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
-
-        resource_type_title = dict(ResourceType.get_subject_choices()).get(
-            self.resource_slug
-        ) or (
-            self.resource_slug.replace("_", " ").title()
-            if self.resource_slug
-            else "Resources"
-        )
-
-        # Courses scoped to this grade_subject
-        courses = (
-            Course.objects.filter(grade_subject=gs, is_active=True)
-            .only("id", "title")
-            .order_by("title")
-        )
-
-        # Teachers who have published resources on this grade_subject
-        teachers = (
-            User.objects.filter(
-                resources__grade_subject=gs,
-                resources__status=ResourceStatus.PUBLISHED,
-            )
-            .distinct()
-            .only("id", "first_name", "last_name")
-        )
+        self._dispatch_messages(context, filters)
 
         context.update(
             {
                 "grade_subject": gs,
                 "resource_slug": self.resource_slug,
-                "level": level,
-                "grade": grade,
+                "level": gs.grade.level,
+                "grade": gs.grade,
                 "subject": gs.subject,
-                "specialty": specialty,
+                "specialty": gs.specialty,
                 "current_term": self.current_term,
                 "resource_type_title": resource_type_title,
-                "resource_type_icon": "fas fa-file-alt",  # adjust per type if needed
+                "resource_type_icon": "fas fa-file-alt",
                 "difficulty_choices": DifficultyLevel.choices,
                 "term_choices": Term.choices,
                 "resource_type_choices": ResourceType.get_subject_choices(),
-                "courses": courses,
-                "teachers": teachers,
-                "filter_q": f["q"],
-                "filter_difficulty": f["difficulty"],
-                "filter_term": f["term"],
-                "filter_resource_type": f["resource_type"],
-                "filter_has_solution": f["has_solution"],
-                "filter_is_free": f["is_free"],
-                "filter_course": f["course"],
-                "filter_teacher": f["teacher"],
-                "querystring": qp.urlencode(),
-                "crumbs": [
-                    {
-                        "label": "Home",
-                        "url": reverse("pages:landing"),
-                        "icon": "fas fa-home",
-                    },
-                    {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-                    {
-                        "label": level.name,
-                        "url": reverse(
-                            "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                        ),
-                    },
-                    {
-                        "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                        "url": grade_url,
-                    },
-                    {
-                        "label": gs.subject.short_name,
-                        "url": reverse(
-                            "curriculum:grade-subject:grade-subject-detail",
-                            kwargs={"pk": gs.pk},
-                        ),
-                    },
-                    {"label": resource_type_title, "url": None},
-                ],
+                "courses": sidebar.courses,
+                "teachers": sidebar.teachers,
+                "filter_q": filters.q or "",
+                "filter_difficulty": filters.difficulty or "",
+                "filter_term": filters.term or "",
+                "filter_resource_type": filters.resource_type or "",
+                "filter_has_solution": filters.has_solution or "",
+                "filter_is_free": filters.is_free or "",
+                "filter_course": filters.course or "",
+                "filter_teacher": filters.teacher or "",
+                "querystring": filters.querystring,
+                "crumbs": self.breadcrumb_builder.build_for_resources(
+                    gs, resource_type_title
+                ),
+                "page_title": resource_type_title,
             }
         )
 
-        # Group by term only when no term filter is active
-        active_term = self.current_term or f["term"]
-        if not active_term:
-            context["resources_by_term"] = self._group_by_term(context["object_list"])
+        # Grouping mode — only when no term is active
+        if not filters.active_term:
+            context["resources_by_term"] = self.term_grouper.group(
+                context["object_list"],
+                Term.choices,
+            )
 
         return context
 
-    def _group_by_term(self, resources):
-        term_order = [t[0] for t in Term.choices]
-        grouped = {term: [] for term in term_order}
-        for resource in resources:
-            if resource.term in grouped:
-                grouped[resource.term].append(resource)
-        return [
-            (term, Term(term).label, grouped[term])
-            for term in term_order
-            if grouped[term]
-        ]
+    # ── Private ───────────────────────────────────────────────────────────────
 
-    # class GradeSubjectResourceListByTermView(ListView):
-    #     model = Resource
-    #     template_name = "apps/curriculum/grade_subjects/resources_by_term.html"
-    #     context_object_name = "resources"
-
-    #     def setup(self, request, *args, **kwargs):
-    #         super().setup(request, *args, **kwargs)
-    #         self.grade_subject = get_object_or_404(
-    #             GradeSubject.objects.select_related("grade", "subject", "specialty"),
-    #             pk=self.kwargs["pk"],
-    #             is_active=True,
-    #         )
-    #         self.current_term = self.kwargs.get("term")
-    #         self.resource_slug = self.kwargs.get("resource_slug")  # e.g. "tests", "exams"
-
-    #     def get_queryset(self):
-    #         qs = (
-    #             Resource.objects.filter(
-    #                 grade_subject=self.grade_subject,
-    #                 resource_type__in=ResourceType.get_subject_values(),
-    #                 status="published",
-    #             )
-    #             .select_related("created_by")
-    #             .prefetch_related("tags")
-    #             .order_by("term", "resource_type", "order")
-    #         )
-
-    #         if self.current_term:
-    #             qs = qs.filter(term=self.current_term)
-
-    #         if self.resource_slug:
-    #             qs = qs.filter(resource_type=self.resource_slug)
-
-    #         return qs
-
-    #     def get_context_data(self, **kwargs):
-    #         context = super().get_context_data(**kwargs)
-
-    #         gs = self.grade_subject
-    #         grade = gs.grade
-    #         level = gs.grade.level
-    #         specialty = gs.specialty
-
-    #         grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-    #         if specialty:
-    #             grade_url += f"?specialty={specialty.pk}"
-
-    #         context["grade_subject"] = gs
-    #         context["resource_slug"] = self.resource_slug
-    #         context["level"] = level
-    #         context["grade"] = grade
-    #         context["subject"] = gs.subject
-    #         context["specialty"] = specialty
-    #         context["current_term"] = self.current_term
-    #         context["terms"] = Term.choices
-    #         context["resource_types"] = ResourceType.get_subject_choices()
-    #         context["crumbs"] = [
-    #             {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-    #             {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-    #             {
-    #                 "label": level.name,
-    #                 "url": reverse(
-    #                     "curriculum:level:level-detail", kwargs={"pk": level.pk}
-    #                 ),
-    #             },
-    #             {
-    #                 "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-    #                 "url": grade_url,
-    #             },
-    #             {
-    #                 "label": gs.subject.short_name,
-    #                 "url": reverse(
-    #                     "curriculum:grade-subject:grade-subject-detail",
-    #                     kwargs={"pk": gs.pk},
-    #                 ),
-    #             },
-    #             {
-    #                 "label": (
-    #                     self.resource_slug.title() if self.resource_slug else "Resources"
-    #                 ),
-    #                 "url": None,
-    #             },
-    #         ]
-
-    #         if not self.current_term:
-    #             context["resources_by_term"] = self._group_by_term(context["resources"])
-
-    #         return context
-
-    def _group_by_term(self, resources):
-        """Group resources by term, preserving Term order."""
-        term_order = [t[0] for t in Term.choices]
-        grouped = {term: [] for term in term_order}
-
-        for resource in resources:
-            if resource.term in grouped:
-                grouped[resource.term].append(resource)
-
-        # Return as list of (term_value, term_label, resources) tuples,
-        # skipping empty terms
-        return [
-            (term, Term(term).label, grouped[term])
-            for term in term_order
-            if grouped[term]
-        ]
+    def _dispatch_messages(self, context: dict, filters: ResourceFilter) -> None:
+        page_obj = context.get("page_obj")
+        if page_obj is not None and not page_obj.object_list:
+            messages.info(
+                self.request,
+                _("No resources match your current filters."),
+            )
+        elif not context.get("object_list"):
+            messages.info(
+                self.request,
+                _("No resources have been added to this subject yet."),
+            )
 
 
 class GradeSubjectQuizzesView(GradeSubjectQuarterMixin, ListView):
+    """
+    Lists published quizzes for a GradeSubject with filtering by
+    search query, course, teacher, and auto-gradable flag.
+
+    Responsibilities delegated:
+        - GradeSubjectQuarterMixin  → grade_subject resolution
+        - QuizFilterExtractor       → 4 GET params → QuizFilter dataclass
+        - QuizQuerysetBuilder       → filtered + annotated ORM queryset
+        - QuizSidebarProvider       → courses + teachers sidebar data
+        - QuizzesCrumbBuilder       → 6-crumb breadcrumb trail
+    """
+
     template_name = "apps/curriculum/grade_subjects/quizzes.html"
     context_object_name = "quizzes"
     paginate_by = 12
+
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        filter_extractor: QuizFilterExtractor | None = None,
+        queryset_builder: QuizQuerysetBuilder | None = None,
+        sidebar_provider: QuizSidebarProvider | None = None,
+        breadcrumb_builder: QuizzesCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.filter_extractor = filter_extractor or QuizFilterExtractor()
+        self.queryset_builder = queryset_builder or QuizQuerysetBuilder()
+        self.sidebar_provider = sidebar_provider or QuizSidebarProvider()
+        self.breadcrumb_builder = breadcrumb_builder or QuizzesCrumbBuilder()
+
+    # ── Lifecycle ─────────────────────────────────────────────────────────────
 
     def dispatch(self, request, *args, **kwargs):
         self.get_grade_subject()
         return super().dispatch(request, *args, **kwargs)
 
+    # ── Queryset ──────────────────────────────────────────────────────────────
+
     def get_queryset(self):
-        q = self.request.GET.get("q", "").strip()
-        course_id = self.request.GET.get("course", "").strip()
-        teacher_id = self.request.GET.get("teacher", "").strip()
-        auto_grade = self.request.GET.get("auto_gradable", "").strip()
+        self._filters = self.filter_extractor.extract(self.request)
+        return self.queryset_builder.build(self.grade_subject, self._filters)
 
-        qs = (
-            Quiz.objects.filter(
-                grade_subject=self.grade_subject,
-                is_published=True,
-            )
-            .select_related("created_by", "course")
-            .annotate(
-                questions_count=Count("quiz_questions", distinct=True),
-                # ← removed auto_gradable annotation entirely for now
-            )
-            .order_by("-created_at")
-        )
+    # ── Context ───────────────────────────────────────────────────────────────
 
-        if q:
-            qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
-
-        if course_id:
-            qs = qs.filter(course_id=course_id)
-
-        if teacher_id:
-            qs = qs.filter(created_by_id=teacher_id)
-
-        if auto_grade == "1":
-            qs = qs.filter(is_auto_gradable_snapshot=True)
-        elif auto_grade == "0":
-            qs = qs.filter(is_auto_gradable_snapshot=False)
-
-        return qs
-
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+
         gs = self.grade_subject
-        grade = gs.grade
-        level = gs.grade.level
-        specialty = gs.specialty
+        filters = self._filters
+        sidebar = self.sidebar_provider.fetch(gs)
 
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
-
-        # Courses scoped to this grade_subject only
-        courses = (
-            Course.objects.filter(grade_subject=gs)
-            .only("id", "title")
-            .order_by("title")
-        )
-
-        # Teachers who have published quizzes on this grade_subject
-        teachers = (
-            CustomUser.objects.filter(
-                created_quizzes__grade_subject=gs,
-                created_quizzes__is_published=True,
-            )
-            .distinct()
-            .only("id", "first_name", "last_name")
-        )
+        self._dispatch_messages(context)
 
         context.update(
             {
-                "filter_q": self.request.GET.get("q", ""),
-                "filter_course": self.request.GET.get("course", ""),
-                "filter_teacher": self.request.GET.get("teacher", ""),
-                "filter_auto_grade": self.request.GET.get("auto_gradable", ""),
-                "querystring": qp.urlencode(),
-                "courses": courses,
-                "teachers": teachers,
-                "crumbs": [
-                    {
-                        "label": "Home",
-                        "url": reverse("pages:landing"),
-                        "icon": "fas fa-home",
-                    },
-                    {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-                    {
-                        "label": level.name,
-                        "url": reverse(
-                            "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                        ),
-                    },
-                    {
-                        "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                        "url": grade_url,
-                    },
-                    {
-                        "label": gs.subject.short_name,
-                        "url": reverse(
-                            "curriculum:grade-subject:grade-subject-detail",
-                            kwargs={"pk": gs.pk},
-                        ),
-                    },
-                    {"label": "Quizzes", "url": None},
-                ],
+                "filter_q": filters.q or "",
+                "filter_course": filters.course_id or "",
+                "filter_teacher": filters.teacher_id or "",
+                "filter_auto_grade": filters.auto_grade or "",
+                "querystring": filters.querystring,
+                "courses": sidebar.courses,
+                "teachers": sidebar.teachers,
+                "crumbs": self.breadcrumb_builder.build_for_quizzes(gs),
+                "page_title": _("Quizzes — %(subject)s")
+                % {"subject": gs.subject.short_name},
             }
         )
 
         return context
+
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(self, context: dict) -> None:
+        page_obj = context.get("page_obj")
+        if page_obj is not None and not page_obj.object_list:
+            messages.info(
+                self.request,
+                _("No quizzes match your current filters."),
+            )

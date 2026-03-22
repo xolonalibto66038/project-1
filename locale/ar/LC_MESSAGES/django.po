@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 09:39+0100\n"
+"POT-Creation-Date: 2026-03-22 15:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1376,6 +1376,7 @@ msgstr "تم تكرار المورد كمسودة."
 #: .\apps\content\admin\video.py:51 .\apps\content\models\course.py:89
 #: .\apps\content\models\resource.py:39 .\apps\recommender\models.py:83
 #: .\templates\apps\assessement\quizzes\create.html:154
+#: .\templates\apps\content\courses\_header.html:13
 #: .\templates\apps\content\resources\detail.html:98
 #: .\templates\apps\content\resources\form.html:79
 #: .\templates\apps\curriculum\grade_subjects\detail.html:69
@@ -2156,6 +2157,29 @@ msgstr "ثانوي"
 msgid "University"
 msgstr "جامعة"
 
+#: .\apps\curriculum\consts.py:10
+msgid ""
+"The foundation of a child's education, focusing on literacy, numeracy, and "
+"essential social values."
+msgstr ""
+"أساس تعليم الطفل، مع التركيز على القراءة والكتابة والحساب والقيم الاجتماعية "
+"الأساسية."
+
+#: .\apps\curriculum\consts.py:19
+msgid ""
+"A critical transitional phase that strengthens academic foundations and "
+"develops critical thinking."
+msgstr "مرحلة انتقالية حاسمة تعزز الأسس الأكاديمية وتطور التفكير النقدي."
+
+#: .\apps\curriculum\consts.py:28
+msgid ""
+"Preparing students for higher education through specialised academic tracks."
+msgstr "إعداد الطلاب للتعليم العالي من خلال مسارات أكاديمية متخصصة."
+
+#: .\apps\curriculum\consts.py:36
+msgid "A hub for advanced learning, research, and innovation."
+msgstr "مركز للتعلم المتقدم والبحث والابتكار."
+
 #: .\apps\curriculum\models\grade.py:14
 msgid "The education level this grade belongs to."
 msgstr "المستوى التعليمي الذي ينتمي إليه هذا الصف."
@@ -2621,11 +2645,11 @@ msgstr "هل WonderNet مجاني للاستخدام؟"
 
 #: .\apps\pages\views\faq.py:16
 msgid ""
-"Yes. WonderNet is completely free. All educational resources can be accessed "
-"without any fees or subscriptions."
+"Yes. WonderNet is completely free. All educational resources can be accessed"
+" without any fees or subscriptions."
 msgstr ""
-"نعم. WonderNet مجاني تماما. يمكن الوصول إلى جميع الموارد التعليمية دون أي رسوم "
-"أو اشتراكات."
+"نعم. WonderNet مجاني تماما. يمكن الوصول إلى جميع الموارد التعليمية دون أي "
+"رسوم أو اشتراكات."
 
 #: .\apps\pages\views\faq.py:23
 msgid "Can I download study materials?"
@@ -2667,8 +2691,8 @@ msgstr "هل تقدم WonderNet شهادات؟"
 
 #: .\apps\pages\views\faq.py:52
 msgid ""
-"No. WonderNet focuses on educational support and exam preparation materials, "
-"not formal certification."
+"No. WonderNet focuses on educational support and exam preparation materials,"
+" not formal certification."
 msgstr ""
 "لا، تركز WonderNet على الدعم التعليمي ومواد التحضير للامتحانات، وليس على "
 "الشهادات الرسمية."
@@ -2896,6 +2920,8 @@ msgid ""
 "Passwords are hashed using industry-standard algorithms and are never stored"
 " in plain text."
 msgstr ""
+"تتم تجزئة كلمات المرور باستخدام خوارزميات متوافقة مع معايير الصناعة ولا يتم "
+"تخزينها أبدًا في نص عادي."
 
 #: .\apps\pages\views\privacy.py:130
 msgid "We regularly review our security practices and apply updates promptly."
@@ -2994,7 +3020,7 @@ msgstr "استمرار استخدام المنصة بعد التغييرات ي�
 msgid ""
 "The \"Last Updated\" date at the top of this page reflects the most recent "
 "revision."
-msgstr ""
+msgstr "يعكس تاريخ \"آخر تحديث\" الموجود أعلى هذه الصفحة أحدث مراجعة."
 
 #: .\apps\pages\views\privacy.py:196 .\templates\account\role_select.html:69
 #: .\templates\account\signup.html:130 .\templates\pages\privacy.html:4
@@ -3012,11 +3038,11 @@ msgstr "قبول الشروط"
 
 #: .\apps\pages\views\terms.py:17
 msgid ""
-"By accessing or using WonderNet, you confirm that you have read, understood, "
-"and agree to be bound by these Terms of Service."
+"By accessing or using WonderNet, you confirm that you have read, understood,"
+" and agree to be bound by these Terms of Service."
 msgstr ""
-"من خلال الوصول إلى WonderNet أو استخدامه، فإنك تؤكد أنك قرأت شروط الخدمة هذه "
-"وفهمتها ووافقت على الالتزام بها."
+"من خلال الوصول إلى WonderNet أو استخدامه، فإنك تؤكد أنك قرأت شروط الخدمة هذه"
+" وفهمتها ووافقت على الالتزام بها."
 
 #: .\apps\pages\views\terms.py:20
 msgid ""
@@ -3045,8 +3071,8 @@ msgstr "الأهلية"
 
 #: .\apps\pages\views\terms.py:37
 msgid ""
-"WonderNet is designed for students and teachers within the Algerian education "
-"system."
+"WonderNet is designed for students and teachers within the Algerian "
+"education system."
 msgstr "تم تصميم WonderNet للطلاب والمعلمين داخل نظام التعليم الجزائري."
 
 #: .\apps\pages\views\terms.py:40
@@ -3147,12 +3173,13 @@ msgstr "المحتوى والملكية الفكرية"
 
 #: .\apps\pages\views\terms.py:104
 msgid ""
-"All content on WonderNet — including lessons, exercises, exams, and platform "
-"design — is the intellectual property of WonderNet or its content contributors."
+"All content on WonderNet — including lessons, exercises, exams, and platform"
+" design — is the intellectual property of WonderNet or its content "
+"contributors."
 msgstr ""
-"جميع المحتوى الموجود على WonderNet - بما في ذلك الدروس والتمارين والامتحانات "
-"وتصميم النظام الأساسي - هو ملكية فكرية لشركة WonderNet أو المساهمين في المحتوى "
-"الخاص بها."
+"جميع المحتوى الموجود على WonderNet - بما في ذلك الدروس والتمارين والامتحانات"
+" وتصميم النظام الأساسي - هو ملكية فكرية لشركة WonderNet أو المساهمين في "
+"المحتوى الخاص بها."
 
 #: .\apps\pages\views\terms.py:107
 msgid ""
@@ -3164,11 +3191,11 @@ msgstr ""
 
 #: .\apps\pages\views\terms.py:110
 msgid ""
-"Teachers who upload content to WonderNet grant WonderNet a non-exclusive licence "
-"to display and distribute that content to students."
+"Teachers who upload content to WonderNet grant WonderNet a non-exclusive "
+"licence to display and distribute that content to students."
 msgstr ""
-"يمنح المعلمون الذين يقومون بتحميل المحتوى إلى WonderNet WonderNet ترخيصًا غير حصري"
-" لعرض هذا المحتوى وتوزيعه على الطلاب."
+"يمنح المعلمون الذين يقومون بتحميل المحتوى إلى WonderNet WonderNet ترخيصًا "
+"غير حصري لعرض هذا المحتوى وتوزيعه على الطلاب."
 
 #: .\apps\pages\views\terms.py:113
 msgid ""
@@ -3961,7 +3988,7 @@ msgstr "نقاط"
 
 #: .\templates\apps\assessement\questions\essay.html:57
 msgid "Answer Length Settings"
-msgstr ""
+msgstr "إعدادات طول الإجابة"
 
 #: .\templates\apps\assessement\questions\essay.html:61
 #, fuzzy
@@ -3983,11 +4010,11 @@ msgstr "محتوى السؤال"
 
 #: .\templates\apps\assessement\questions\essay.html:76
 msgid "Sample Answer (Instructor Only)"
-msgstr ""
+msgstr "إجابة نموذجية (للمدرس فقط)"
 
 #: .\templates\apps\assessement\questions\essay.html:81
 msgid "Explanation (Shown After Submission)"
-msgstr ""
+msgstr "الشرح (يظهر بعد التقديم)"
 
 #: .\templates\apps\assessement\questions\essay.html:87
 #, fuzzy
@@ -3997,16 +4024,16 @@ msgstr "الدرجات"
 
 #: .\templates\apps\assessement\questions\essay.html:92
 msgid "Enable Auto-Grading with Keywords"
-msgstr ""
+msgstr "تمكين التصنيف التلقائي باستخدام الكلمات الأساسية"
 
 #: .\templates\apps\assessement\questions\essay.html:97
 msgid "Keywords (comma separated)"
-msgstr ""
+msgstr "الكلمات الرئيسية (مفصولة بفواصل)"
 
 #: .\templates\apps\assessement\questions\essay.html:106
 #: .\templates\apps\assessement\questions\tf.html:74
 msgid "Active (visible for quizzes)"
-msgstr ""
+msgstr "نشط (مرئي للاختبارات)"
 
 #: .\templates\apps\assessement\questions\essay.html:117
 #: .\templates\apps\assessement\questions\mcq.html:166
@@ -4430,7 +4457,7 @@ msgstr "إعدادات إم سي كيو"
 
 #: .\templates\apps\assessement\quizzes\create.html:81
 msgid "Time Limit (minutes)"
-msgstr ""
+msgstr "الحد الزمني (بالدقائق)"
 
 #: .\templates\apps\assessement\quizzes\create.html:91
 #: .\templates\apps\assessement\quizzes\detail.html:45
@@ -4474,12 +4501,16 @@ msgid ""
 "Select a Subject if this quiz is for a subject. Leave empty if linked to a "
 "Course."
 msgstr ""
+"حدد موضوعًا إذا كان هذا الاختبار مخصصًا لموضوع ما. اتركه فارغًا إذا كان "
+"مرتبطًا بالدورة التدريبية."
 
 #: .\templates\apps\assessement\quizzes\create.html:162
 msgid ""
 "Select a Course if this quiz is for a course. Leave empty if linked to a "
 "Subject."
 msgstr ""
+"حدد دورة إذا كان هذا الاختبار مخصصًا لدورة تدريبية. اتركه فارغًا إذا كان "
+"مرتبطًا بموضوع ما."
 
 #: .\templates\apps\assessement\quizzes\create.html:169
 #, fuzzy
@@ -4495,15 +4526,15 @@ msgstr "تم النشر"
 
 #: .\templates\apps\assessement\quizzes\create.html:183
 msgid "Randomize Question Order"
-msgstr ""
+msgstr "ترتيب عشوائي للأسئلة"
 
 #: .\templates\apps\assessement\quizzes\create.html:190
 msgid "Show Results Immediately"
-msgstr ""
+msgstr "عرض النتائج على الفور"
 
 #: .\templates\apps\assessement\quizzes\create.html:197
 msgid "Allow Review After Submission"
-msgstr ""
+msgstr "السماح بالمراجعة بعد التقديم"
 
 #: .\templates\apps\assessement\quizzes\create.html:208
 #, fuzzy
@@ -4519,7 +4550,7 @@ msgstr "لغز"
 
 #: .\templates\apps\assessement\quizzes\detail.html:19
 msgid "Back"
-msgstr ""
+msgstr "خلف"
 
 #: .\templates\apps\assessement\quizzes\detail.html:26
 #, fuzzy
@@ -4553,7 +4584,7 @@ msgstr "دقائق"
 
 #: .\templates\apps\assessement\quizzes\detail.html:59
 msgid "No limit"
-msgstr ""
+msgstr "لا يوجد حد"
 
 #: .\templates\apps\assessement\quizzes\detail.html:109
 #, fuzzy
@@ -4573,7 +4604,7 @@ msgstr "اختباراتي"
 
 #: .\templates\apps\assessement\quizzes\list.html:43
 msgid "Available"
-msgstr ""
+msgstr "متاح"
 
 #: .\templates\apps\assessement\quizzes\list.html:97
 #, fuzzy
@@ -5703,10 +5734,10 @@ msgstr "نظام بيئي متكامل للتميز الأكاديمي في ال
 
 #: .\templates\apps\curriculum\levels\list.html:92
 msgid ""
-"WonderNet is built for students who refuse to settle for average. Fully aligned"
-" with the Algerian national curriculum, the platform provides structured "
-"lessons, expertly solved exercises, and high-quality exam simulations across"
-" every level and subject."
+"WonderNet is built for students who refuse to settle for average. Fully "
+"aligned with the Algerian national curriculum, the platform provides "
+"structured lessons, expertly solved exercises, and high-quality exam "
+"simulations across every level and subject."
 msgstr ""
 "تم تصميم WonderNet للطلاب الذين يرفضون الاستقرار في المتوسط. تتوافق المنصة "
 "تمامًا مع المنهج الوطني الجزائري، وتوفر دروسًا منظمة وتمارين تم حلها بخبرة "
@@ -5714,8 +5745,8 @@ msgstr ""
 
 #: .\templates\apps\curriculum\levels\list.html:95
 msgid ""
-"Whether you are a student, a parent, or a teacher — WonderNet empowers you with"
-" clarity, confidence, and real results."
+"Whether you are a student, a parent, or a teacher — WonderNet empowers you "
+"with clarity, confidence, and real results."
 msgstr ""
 "سواء كنت طالبًا أو أحد الوالدين أو مدرسًا - فإن WonderNet يمكّنك من الوضوح "
 "والثقة والنتائج الحقيقية."
@@ -6032,7 +6063,7 @@ msgstr "لم يتم العثور على جلسات التدريس"
 
 #: .\templates\apps\tutoring\teacher\teacher_sessions.html:21
 msgid "Manage and confirm student tutoring sessions"
-msgstr ""
+msgstr "إدارة وتأكيد جلسات التدريس للطلاب"
 
 #: .\templates\apps\tutoring\teacher\teacher_sessions.html:209
 msgid "Confirm"
@@ -6141,7 +6172,7 @@ msgstr "سعر الساعة"
 
 #: .\templates\dashboard\update_teacher.html:35
 msgid "DA"
-msgstr ""
+msgstr "دا"
 
 #: .\templates\dashboard\update_teacher.html:47
 #, fuzzy
@@ -6163,19 +6194,19 @@ msgstr "نطاق التدريس"
 
 #: .\templates\dashboard\update_teacher.html:109
 msgid "Level and subject are locked after verification."
-msgstr ""
+msgstr "يتم قفل المستوى والموضوع بعد التحقق."
 
 #: .\templates\errors\400.html:11 .\templates\errors\400.html:20
 msgid "400 Error Page"
-msgstr ""
+msgstr "400 صفحة خطأ"
 
 #: .\templates\errors\400.html:34
 msgid "Bad Request."
-msgstr ""
+msgstr "اقتراح غير جيد."
 
 #: .\templates\errors\400.html:38
 msgid "The server could not understand your request due to invalid syntax."
-msgstr ""
+msgstr "تعذر على الخادم فهم طلبك بسبب بناء جملة غير صالح."
 
 #: .\templates\errors\400.html:39
 #, fuzzy
@@ -6190,14 +6221,16 @@ msgid ""
 "        Meanwhile, you may <a href=\"%(home_url)s\">return to home</a>.\n"
 "        "
 msgstr ""
+"\n"
+"وفي هذه الأثناء، يمكنك <a href=\"%(home_url)s\">العودة إلى المنزل</a>."
 
 #: .\templates\errors\403.html:5
 msgid "403 — Access Denied"
-msgstr ""
+msgstr "403 - تم رفض الوصول"
 
 #: .\templates\errors\403.html:12 .\templates\errors\403.html:21
 msgid "403 Error Page"
-msgstr ""
+msgstr "403 صفحة الخطأ"
 
 #: .\templates\errors\403.html:35
 #, fuzzy
@@ -6228,6 +6261,8 @@ msgid ""
 "          Meanwhile, you may <a href=\"%(home_url)s\">return to home</a>.\n"
 "        "
 msgstr ""
+"\n"
+"وفي هذه الأثناء، يمكنك <a href=\"%(home_url)s\">العودة إلى المنزل</a>."
 
 #: .\templates\errors\403.html:54 .\templates\errors\404.html:60
 #: .\templates\errors\429.html:61 .\templates\errors\500.html:60
@@ -6238,11 +6273,11 @@ msgstr "العودة إلى تسجيل الدخول"
 
 #: .\templates\errors\404.html:5
 msgid "404 — Page Not Found"
-msgstr ""
+msgstr "404 - الصفحة غير موجودة"
 
 #: .\templates\errors\404.html:12 .\templates\errors\404.html:21
 msgid "404 Error Page"
-msgstr ""
+msgstr "404 صفحة الخطأ"
 
 #: .\templates\errors\404.html:35
 #, fuzzy
@@ -6263,33 +6298,31 @@ msgid ""
 "          Meanwhile, you may <a href=\"%(home_url)s\">return to home</a> or try using the search form.\n"
 "        "
 msgstr ""
+"\n"
+"وفي الوقت نفسه، يمكنك <a href=\"%(home_url)s\">العودة إلى المنزل</a> أو محاولة استخدام نموذج البحث."
 
 #: .\templates\errors\429.html:5
 msgid "429 — Too Many Requests"
-msgstr ""
+msgstr "429 - الطلبات كثيرة جدًا"
 
 #: .\templates\errors\429.html:12 .\templates\errors\429.html:21
 msgid "429 Error Page"
-msgstr ""
+msgstr "429 صفحة خطأ"
 
 #: .\templates\errors\429.html:35
 msgid "Too Many Requests."
-msgstr ""
+msgstr "طلبات كثيرة جدًا."
 
 #: .\templates\errors\429.html:39
 msgid "You have sent too many requests in a short period of time."
-msgstr ""
+msgstr "لقد أرسلت عددًا كبيرًا جدًا من الطلبات في فترة زمنية قصيرة."
 
 #: .\templates\errors\429.html:40
 msgid "Please wait a moment before trying again."
-msgstr ""
+msgstr "يرجى الانتظار لحظة قبل المحاولة مرة أخرى."
 
 #: .\templates\errors\429.html:46
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "            %(count)s exercise(s) found\n"
-#| "          "
+#, python-format
 msgid ""
 "\n"
 "            Try again in %(seconds)s seconds.\n"
@@ -6298,11 +6331,11 @@ msgstr ""
 
 #: .\templates\errors\500.html:5
 msgid "500 — Server Error"
-msgstr ""
+msgstr "500 — خطأ في الخادم"
 
 #: .\templates\errors\500.html:12 .\templates\errors\500.html:21
 msgid "500 Error Page"
-msgstr ""
+msgstr "500 صفحة خطأ"
 
 #: .\templates\errors\500.html:35
 #, fuzzy
@@ -6312,7 +6345,7 @@ msgstr "حدث خطأ ما."
 
 #: .\templates\errors\500.html:38
 msgid "We will work on fixing that right away."
-msgstr ""
+msgstr "سنعمل على إصلاح ذلك على الفور."
 
 #: .\templates\includes\footer.html:8
 msgid "All rights reserved."

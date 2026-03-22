@@ -1,114 +1,165 @@
-from django.urls import reverse
+import logging
+
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from ..mixins import LevelQuerySetMixin
 from ..models import Level
-from ..selectors import get_grade_groups_with_specialties, get_level_stats
+from ..services.level import (
+    BreadcrumbBuilder,
+    GradeGroupAssembler,
+    LevelDetailBreadcrumbBuilder,
+    LevelEnricher,
+    LevelListMessageService,
+    LevelStatsProvider,
+    StudentGradeResolver,
+    StudentGradeResolverProtocol,
+    StudentLevelResolver,
+    StudentLevelResolverProtocol,
+)
 
-# ── config: one place to update level presentation ──
-LEVEL_CONFIG = {
-    "primaire": {
-        "color": "primary",
-        "image": "dist/img/levels/primary.png",
-        "title": "Primary School",
-        "description": "The foundation of a child's education, focusing on "
-        "literacy, numeracy, and essential social values.",
-    },
-    "moyen": {
-        "color": "info",
-        "image": "dist/img/levels/middle.png",
-        "title": "Middle School",
-        "description": "A critical transitional phase that strengthens academic "
-        "foundations and develops critical thinking.",
-    },
-    "secondaire": {
-        "color": "warning",
-        "image": "dist/img/levels/high.png",
-        "title": "High School",
-        "description": "Preparing students for higher education through "
-        "specialised academic tracks.",
-    },
-    "university": {
-        "color": "success",
-        "image": "dist/img/levels/university.png",
-        "title": "University",
-        "description": "A hub for advanced learning, research, and innovation.",
-    },
-}
+logger = logging.getLogger(__name__)
 
 
 class LevelListView(LevelQuerySetMixin, ListView):
+    """
+    Displays all curriculum levels with enriched presentation metadata.
+
+    Levels are not paginated — the domain has a fixed small set (4 total).
+    Inject custom services via constructor kwargs for testing or extension.
+
+    Responsibilities delegated:
+        - StudentLevelResolver  → who is this student and what level are they on?
+        - LevelEnricher         → how does a level look in the template?
+        - BreadcrumbBuilder     → what does the breadcrumb trail look like?
+        - LevelListMessageService → what flash messages should fire?
+    """
+
     template_name = "apps/curriculum/levels/list.html"
     context_object_name = "levels"
 
-    # No pagination — levels are few and fixed (4 total)
-    # If you ever have many levels, re-enable paginate_by
+    # ── Dependency injection ──────────────────────────────────────────────────
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    def __init__(
+        self,
+        resolver: StudentLevelResolverProtocol | None = None,
+        enricher: LevelEnricher | None = None,
+        breadcrumb_builder: BreadcrumbBuilder | None = None,
+        message_service: LevelListMessageService | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.resolver = resolver or StudentLevelResolver()
+        self.enricher = enricher or LevelEnricher()
+        self.breadcrumb_builder = breadcrumb_builder or BreadcrumbBuilder()
+        self.message_service = message_service or LevelListMessageService()
 
-    def get_context_data(self, **kwargs):
+    # ── Queryset ──────────────────────────────────────────────────────────────
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if not qs.exists():
+            logger.warning("LevelListView: queryset returned no Level objects.")
+        return qs
+
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        student_level = None
 
-        if user.is_authenticated and getattr(user, "is_student", False):
-            profile = getattr(user, "student_profile", None)
-            if profile and profile.grade:
-                student_level = profile.grade.level
+        student_level = self.resolver.resolve(self.request.user)
+        enriched_levels = self.enricher.enrich_all(context["levels"], student_level)
 
-        # ── Annotate each level with its presentation config ──
-        enriched = []
-        for level in context["levels"]:
-            config = LEVEL_CONFIG.get(level.name, {})
-            enriched.append(
-                {
-                    "level": level,
-                    "color": config.get("color", "secondary"),
-                    "image": config.get("image", "dist/img/levels/default.png"),
-                    "title": config.get("title", level.get_name_display()),
-                    "description": config.get("description", ""),
-                    "is_student_level": student_level is not None
-                    and level.pk == student_level.pk,
-                }
-            )
+        self.message_service.dispatch(self.request, enriched_levels, student_level)
 
-        context["enriched_levels"] = enriched
-        context["crumbs"] = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": None},
-        ]
+        context["enriched_levels"] = enriched_levels
+        context["crumbs"] = self.breadcrumb_builder.build()
+        context["page_title"] = _("Curriculum Levels")
+        context["page_description"] = _(
+            "Browse all available curriculum levels and find the one that matches your studies."
+        )
         return context
 
 
 class LevelDetailView(DetailView):
+    """
+    Displays the detail page for a single curriculum level.
+
+    Responsibilities delegated:
+        - StudentGradeResolver       → which grade does this student belong to?
+        - GradeGroupAssembler        → grade groups + specialties for this level
+        - LevelStatsProvider         → aggregated level statistics
+        - LevelDetailBreadcrumbBuilder → resolved breadcrumb trail
+
+    All four services are injected via __init__, making the view fully
+    testable without touching the database or request cycle.
+    """
+
     model = Level
     template_name = "apps/curriculum/levels/detail.html"
     context_object_name = "level"
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    # ── Dependency injection ──────────────────────────────────────────────────
 
-    def get_context_data(self, **kwargs):
+    def __init__(
+        self,
+        grade_resolver: StudentGradeResolverProtocol | None = None,
+        group_assembler: GradeGroupAssembler | None = None,
+        stats_provider: LevelStatsProvider | None = None,
+        breadcrumb_builder: LevelDetailBreadcrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.grade_resolver = grade_resolver or StudentGradeResolver()
+        self.group_assembler = group_assembler or GradeGroupAssembler()
+        self.stats_provider = stats_provider or LevelStatsProvider()
+        self.breadcrumb_builder = breadcrumb_builder or LevelDetailBreadcrumbBuilder()
+
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        student_grade = None
-
-        if user.is_authenticated and getattr(user, "is_student", False):
-            profile = getattr(user, "student_profile", None)
-            student_grade = profile.grade
-
         level = self.object
 
-        context["grade_groups"] = get_grade_groups_with_specialties(
-            level, student_grade=student_grade
+        student_grade = self.grade_resolver.resolve(self.request.user)
+        grade_groups = self.group_assembler.fetch(level, student_grade)
+        stats = self.stats_provider.fetch(level)
+
+        self._dispatch_messages(grade_groups, stats)
+
+        context["grade_groups"] = grade_groups
+        context["stats"] = stats
+        context["crumbs"] = self.breadcrumb_builder.build_for_level(level)
+        context["page_title"] = level.get_name_display()
+        context["page_description"] = _(
+            "Explore grades, specialties, and statistics for this curriculum level."
         )
-        context["stats"] = get_level_stats(level)
-
-        context["crumbs"] = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-            {"label": level.get_name_display(), "url": None},
-        ]
-
         return context
+
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(
+        self,
+        grade_groups: list,
+        stats: dict,
+    ) -> None:
+        if not grade_groups:
+            messages.warning(
+                self.request,
+                _("No grade groups are configured for this level yet."),
+            )
+            logger.warning(
+                "LevelDetailView: no grade groups for level pk=%s.",
+                self.object.pk,
+            )
+
+        if not stats:
+            messages.info(
+                self.request,
+                _("Statistics for this level are not yet available."),
+            )
+            logger.info(
+                "LevelDetailView: empty stats for level pk=%s.",
+                self.object.pk,
+            )

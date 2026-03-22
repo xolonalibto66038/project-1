@@ -1,72 +1,75 @@
 import logging
 
-from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 
-from ..mixins import GradeLoggingMixin
-from ..models import Grade, Specialty
-from ..services import build_enriched_grade_subjects
+from ..mixins.grade import GradeLoggingMixin, GradeQuerySetMixin
+from ..models import Grade
+from ..services.grade import (
+    ChainedSpecialtyResolver,
+    EnrichedSubjectBuilder,
+    GradeDetailBreadcrumbBuilder,
+    SpecialtyResolverProtocol,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class GradeDetailView(GradeLoggingMixin, DetailView):
+class GradeDetailView(GradeQuerySetMixin, GradeLoggingMixin, DetailView):
+    """
+    Displays the detail page for a single curriculum grade.
+
+    Specialty resolution follows a priority chain:
+        1. Authenticated student's profile specialty (if grade matches)
+        2. ?specialty=<pk> query parameter
+        3. None (anonymous / teacher with no param)
+
+    All services are injected via __init__ — the view is fully testable
+    without a database or request cycle.
+
+    Responsibilities delegated:
+        - GradeQuerySetMixin          → canonical queryset with level prefetch
+        - ChainedSpecialtyResolver    → specialty priority chain
+        - EnrichedSubjectBuilder      → subject list with enrichment metadata
+        - GradeDetailBreadcrumbBuilder → resolved breadcrumb trail
+    """
+
     model = Grade
     template_name = "apps/curriculum/grades/detail.html"
     context_object_name = "grade"
 
-    def get_queryset(self):
-        return Grade.objects.select_related("level").all()
+    # ── Dependency injection ──────────────────────────────────────────────────
 
-    def get_context_data(self, **kwargs):
+    def __init__(
+        self,
+        specialty_resolver: SpecialtyResolverProtocol | None = None,
+        subject_builder: EnrichedSubjectBuilder | None = None,
+        breadcrumb_builder: GradeDetailBreadcrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.specialty_resolver = specialty_resolver or ChainedSpecialtyResolver()
+        self.subject_builder = subject_builder or EnrichedSubjectBuilder()
+        self.breadcrumb_builder = breadcrumb_builder or GradeDetailBreadcrumbBuilder()
+
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         grade = self.object
         user = self.request.user
-        specialty = self._resolve_specialty(user, grade)
-        context["enriched_subjects"] = build_enriched_grade_subjects(
-            grade=grade,
-            user=user,
-            specialty=specialty,
-        )
+
+        specialty = self.specialty_resolver.resolve(user, grade, self.request)
+        enriched_subjects = self.subject_builder.build(grade, user, specialty)
+
         context["specialty"] = specialty
-        context["crumbs"] = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-            {
-                "label": grade.level.get_name_display(),
-                "url": reverse(
-                    "curriculum:level:level-detail", kwargs={"pk": grade.level.pk}
-                ),
-            },
-            {
-                "label": f"{grade.short_name}{' - ' + specialty.short_name if specialty else ''}",
-                "url": None,
-            },
-        ]
+        context["enriched_subjects"] = enriched_subjects
+        context["crumbs"] = self.breadcrumb_builder.build_for_grade(grade, specialty)
+        context["page_title"] = _("%(grade)s%(specialty)s") % {
+            "grade": grade.short_name,
+            "specialty": f" — {specialty.short_name}" if specialty else "",
+        }
+        context["page_description"] = _(
+            "Subjects and resources for this grade and specialty."
+        )
         return context
-
-    def _resolve_specialty(self, user, grade):
-        """
-        Priority:
-        1. Authenticated student's profile specialty (if matches this grade)
-        2. ?specialty=<pk> query param (guest / teacher browsing)
-        3. None
-        """
-        # 1. Student profile
-        if user.is_authenticated and getattr(user, "is_student", False):
-            try:
-                sp = user.student_profile.specialty
-                if sp and sp.grade_id == grade.pk:
-                    return sp
-            except Exception:
-                pass
-
-        # 2. Query param fallback
-        specialty_pk = self.request.GET.get("specialty")
-        if specialty_pk:
-            return Specialty.objects.filter(
-                pk=specialty_pk,
-                grade=grade,
-            ).first()
-
-        return None

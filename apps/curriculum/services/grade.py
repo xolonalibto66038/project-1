@@ -1,173 +1,178 @@
-from ..selectors import (
-    get_course_counts_for_subjects,
-    get_course_resource_counts_for_subjects,
-    get_grade_subjects_for_grade,
-    get_progress_counts_for_student,
-    get_resource_counts_for_subjects,
-)
+import logging
+from typing import Protocol, runtime_checkable
+
+from django.http import HttpRequest
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+from ..selectors.grade import build_enriched_grade_subjects
+from .level import BreadcrumbBuilder  # shared base
+
+logger = logging.getLogger(__name__)
 
 
-def build_enriched_subjects(grade, user=None, specialty=None):
-    grade_subjects = list(get_grade_subjects_for_grade(grade, specialty=specialty))
+class EnrichedSubjectBuilder:
+    """
+    Single responsibility: produce the enriched subject list for a grade page.
 
-    if not grade_subjects:
-        return []
+    Open for extension — override ``build`` to inject extra context,
+    apply caching, or filter by feature flag without modifying the view.
+    """
 
-    subject_ids = [gs.subject_id for gs in grade_subjects]
+    def build(
+        self,
+        grade: object,
+        user: object,
+        specialty: object | None,
+    ) -> list:
+        return build_enriched_grade_subjects(
+            grade=grade,
+            user=user,
+            specialty=specialty,
+        )
 
-    course_counts = get_course_counts_for_subjects(subject_ids)
-    subject_resource_counts = get_resource_counts_for_subjects(subject_ids)
-    course_resource_counts = get_course_resource_counts_for_subjects(subject_ids)
 
-    is_student = (
-        user is not None
-        and user.is_authenticated
-        and getattr(user, "is_student", False)
-    )
-    progress_counts = (
-        get_progress_counts_for_student(user, subject_ids) if is_student else {}
-    )
+@runtime_checkable
+class SpecialtyResolverProtocol(Protocol):
+    """
+    Inversion boundary for specialty resolution.
 
-    enriched = []
-    for gs in grade_subjects:  # ← iterate GradeSubjects, not subjects
-        sid = gs.subject_id
-        courses_count = course_counts.get(sid, 0)
-        completed = progress_counts.get(sid, 0)
+    Each implementation represents one source in the priority chain.
+    The view depends only on this protocol — never on concrete resolvers.
+    """
 
-        enriched.append(
+    def resolve(
+        self,
+        user: object,
+        grade: object,
+        request: HttpRequest,
+    ) -> object | None: ...
+
+
+class ProfileSpecialtyResolver:
+    """
+    Strategy 1 — authenticated student's profile specialty.
+
+    Returns the specialty only when it belongs to the current grade;
+    silently returns None on any attribute error (missing profile, etc.).
+    """
+
+    def resolve(
+        self,
+        user: object,
+        grade: object,
+        request: HttpRequest,
+    ) -> object | None:
+        if not (user.is_authenticated and getattr(user, "is_student", False)):
+            return None
+
+        try:
+            sp = user.student_profile.specialty
+            if sp and sp.grade_id == grade.pk:
+                return sp
+        except Exception:
+            logger.debug(
+                "ProfileSpecialtyResolver: could not read specialty for user %s.",
+                getattr(user, "pk", "?"),
+            )
+        return None
+
+
+class QueryParamSpecialtyResolver:
+    """
+    Strategy 2 — ?specialty=<pk> query parameter.
+
+    Validates the pk belongs to the requested grade to prevent
+    cross-grade data leakage (IDOR guard).
+    """
+
+    PARAM_NAME = "specialty"
+
+    def resolve(
+        self,
+        user: object,
+        grade: object,
+        request: HttpRequest,
+    ) -> object | None:
+        from ..models import Specialty  # local import avoids circular deps
+
+        specialty_pk = request.GET.get(self.PARAM_NAME)
+        if not specialty_pk:
+            return None
+
+        return (
+            Specialty.objects.filter(pk=specialty_pk, grade=grade)
+            .select_related("grade")
+            .first()
+        )
+
+
+class ChainedSpecialtyResolver:
+    """
+    Composes an ordered list of resolvers and returns the first non-None result.
+
+    Open for extension — pass a different resolver list to the constructor
+    to reorder, add, or remove strategies without touching the view or any
+    individual resolver.  Closed for modification.
+
+    Default chain: profile → query param → None.
+    """
+
+    def __init__(
+        self,
+        resolvers: list[SpecialtyResolverProtocol] | None = None,
+    ) -> None:
+        self.resolvers: list[SpecialtyResolverProtocol] = resolvers or [
+            ProfileSpecialtyResolver(),
+            QueryParamSpecialtyResolver(),
+        ]
+
+    def resolve(
+        self,
+        user: object,
+        grade: object,
+        request: HttpRequest,
+    ) -> object | None:
+        for resolver in self.resolvers:
+            result = resolver.resolve(user, grade, request)
+            if result is not None:
+                return result
+        return None
+
+
+class GradeDetailBreadcrumbBuilder(BreadcrumbBuilder):
+    """
+    Extends BreadcrumbBuilder (OCP) with the level crumb, then appends
+    a dynamic terminal crumb showing grade name + optional specialty.
+
+    The base chain (Home → Levels) is inherited unchanged.
+    """
+
+    CRUMB_DEFINITIONS: list[dict] = [
+        {"label": _("Home"), "url_name": "pages:landing", "icon": "fas fa-home"},
+        {"label": _("Levels"), "url_name": "curriculum:level:level-list"},
+    ]
+
+    def build_for_grade(
+        self,
+        grade: object,
+        specialty: object | None,
+    ) -> list[dict]:
+        crumbs = self.build()
+
+        crumbs.append(
             {
-                "grade_subject": gs,  # ← keep the GradeSubject
-                "subject": gs.subject,  # ← still available for display
-                "courses_count": courses_count,
-                "subject_resources_count": subject_resource_counts.get(sid, 0),
-                "course_resources_count": course_resource_counts.get(sid, 0),
-                "resources_count": subject_resource_counts.get(sid, 0)
-                + course_resource_counts.get(sid, 0),
-                "completed_courses": completed,
-                "total_courses": courses_count,
-                "progress": (
-                    round(completed / courses_count * 100, 1) if courses_count else 0
+                "label": grade.level.get_name_display(),
+                "url": reverse(
+                    "curriculum:level:level-detail",
+                    kwargs={"pk": grade.level.pk},
                 ),
-                "show_progress": is_student,
             }
         )
 
-    return enriched
+        terminal_label = grade.short_name
+        if specialty:
+            terminal_label = f"{terminal_label} — {specialty.short_name}"
 
-
-# def build_enriched_subjects(grade, user=None, specialty=None):
-#     """
-#     Returns enriched subjects for a grade.
-#     If specialty is provided → only subjects linked to that specialty via GradeSubject.
-#     If specialty is None → subjects where GradeSubject.specialty is null (no-specialty grades).
-#     """
-#     grade_subjects = list(get_grade_subjects_for_grade(grade, specialty=specialty))
-#     subjects = [gs.subject for gs in grade_subjects]
-#     subject_ids = [s.id for s in subjects]
-
-#     if not subjects:
-#         return []
-
-#     course_counts = get_course_counts_for_subjects(subject_ids)
-#     subject_resource_counts = get_resource_counts_for_subjects(subject_ids)
-#     course_resource_counts = get_course_resource_counts_for_subjects(subject_ids)
-
-#     is_student = (
-#         user is not None
-#         and user.is_authenticated
-#         and getattr(user, "is_student", False)
-#     )
-#     progress_counts = (
-#         get_progress_counts_for_student(user, subject_ids) if is_student else {}
-#     )
-
-#     enriched = []
-#     for subject in subjects:
-#         sid = subject.id
-#         courses_count = course_counts.get(sid, 0)
-#         subject_resources_count = subject_resource_counts.get(sid, 0)
-#         course_resources_count = course_resource_counts.get(sid, 0)
-#         completed_courses = progress_counts.get(sid, 0)
-
-#         enriched.append(
-#             {
-#                 "subject": subject,
-#                 "courses_count": courses_count,
-#                 "subject_resources_count": subject_resources_count,
-#                 "course_resources_count": course_resources_count,
-#                 "resources_count": subject_resources_count + course_resources_count,
-#                 "completed_courses": completed_courses,
-#                 "total_courses": courses_count,
-#                 "progress": (
-#                     round(completed_courses / courses_count * 100, 1)
-#                     if courses_count
-#                     else 0
-#                 ),
-#                 "show_progress": is_student,
-#             }
-#         )
-
-#     return enriched
-
-
-# def build_enriched_subjects(grade, user=None):
-#     """
-#     Returns a list of Subject objects annotated with:
-#       - courses_count
-#       - subject_resources_count
-#       - course_resources_count
-#       - resources_count  (combined)
-#       - completed_courses (if student)
-#       - total_courses
-#       - progress (%)
-
-#     Single responsibility: assembles per-subject stats
-#     from individual selector calls.
-#     """
-#     subjects    = list(get_subjects_for_grade(grade))
-#     subject_ids = [s.id for s in subjects]
-
-#     if not subjects:
-#         return []
-
-#     course_counts          = get_course_counts_for_subjects(subject_ids)
-#     subject_resource_counts = get_resource_counts_for_subjects(subject_ids)
-#     course_resource_counts  = get_course_resource_counts_for_subjects(subject_ids)
-
-#     is_student     = (
-#         user is not None
-#         and user.is_authenticated
-#         and getattr(user, 'is_student', False)
-#     )
-#     progress_counts = (
-#         get_progress_counts_for_student(user, subject_ids)
-#         if is_student else {}
-#     )
-
-#     enriched = []
-#     for subject in subjects:
-#         sid = subject.id
-
-#         courses_count           = course_counts.get(sid, 0)
-#         subject_resources_count = subject_resource_counts.get(sid, 0)
-#         course_resources_count  = course_resource_counts.get(sid, 0)
-#         completed_courses       = progress_counts.get(sid, 0)
-
-#         progress = (
-#             round(completed_courses / courses_count * 100, 1)
-#             if courses_count else 0
-#         )
-
-#         enriched.append({
-#             'subject':                  subject,
-#             'courses_count':            courses_count,
-#             'subject_resources_count':  subject_resources_count,
-#             'course_resources_count':   course_resources_count,
-#             'resources_count':          subject_resources_count + course_resources_count,
-#             'completed_courses':        completed_courses,
-#             'total_courses':            courses_count,
-#             'progress':                 progress,
-#             'show_progress':            is_student,
-#         })
-
-#     return enriched
+        crumbs.append({"label": terminal_label, "url": None})
+        return crumbs
