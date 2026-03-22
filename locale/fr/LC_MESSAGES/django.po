@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 15:54+0100\n"
+"POT-Creation-Date: 2026-03-23 00:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1010,6 +1010,7 @@ msgid "Quiz"
 msgstr "Questionnaire"
 
 #: .\apps\assessment\models\quiz.py:113
+#: .\apps\curriculum\services\grade_subject.py:571
 #: .\templates\apps\assessement\quizzes\attempts.html:28
 #: .\templates\apps\assessement\quizzes\quiz_result.html:34
 #: .\templates\apps\content\courses\_header.html:64
@@ -1290,6 +1291,7 @@ msgid "Read-only computed values for reference."
 msgstr "Valeurs calculées en lecture seule pour référence."
 
 #: .\apps\content\admin\course.py:98 .\apps\content\models\resource.py:229
+#: .\apps\curriculum\services\grade_subject.py:728
 #: .\templates\apps\content\courses\detail.html:65
 #: .\templates\apps\curriculum\grades\detail.html:140
 #: .\templates\dashboard\teacher.html:83
@@ -1455,12 +1457,12 @@ msgstr "Devoirs"
 msgid "Summary"
 msgstr "Résumé"
 
-#: .\apps\content\choices.py:11 .\apps\content\views\course.py:63
+#: .\apps\content\choices.py:11 .\apps\content\consts.py:33
 #: .\templates\apps\content\courses\detail.html:151
 msgid "Notes"
 msgstr "Remarques"
 
-#: .\apps\content\choices.py:12 .\apps\content\views\course.py:69
+#: .\apps\content\choices.py:12 .\apps\content\consts.py:39
 #: .\templates\apps\content\courses\detail.html:158
 msgid "Series"
 msgstr "Série"
@@ -1546,6 +1548,30 @@ msgstr "Deuxième mandat"
 #: .\apps\content\choices.py:109
 msgid "Third Term"
 msgstr "Troisième mandat"
+
+#: .\apps\content\consts.py:9 .\templates\apps\content\courses\detail.html:123
+msgid "Lessons"
+msgstr "Leçons"
+
+#: .\apps\content\consts.py:15
+#: .\templates\apps\content\courses\detail.html:144
+msgid "Summaries"
+msgstr "Résumés"
+
+#: .\apps\content\consts.py:21
+#: .\templates\apps\content\courses\detail.html:137
+msgid "Homeworks"
+msgstr "Devoirs"
+
+#: .\apps\content\consts.py:27
+#: .\templates\apps\content\courses\course_exercises.html:5
+#: .\templates\apps\content\courses\course_exercises.html:35
+#: .\templates\apps\content\courses\course_exercises.html:74
+#: .\templates\apps\content\courses\course_exercises.html:91
+#: .\templates\apps\content\courses\detail.html:130
+#: .\templates\apps\curriculum\subjects\detail.html:97
+msgid "Exercises"
+msgstr "Exercices"
 
 #: .\apps\content\forms\resource.py:18
 #: .\templates\apps\content\resources\detail.html:133
@@ -1972,40 +1998,65 @@ msgid "Resource term must match the Course term (%(term)s)."
 msgstr ""
 "Le terme de la ressource doit correspondre au terme du cours (%(term)s)."
 
-#: .\apps\content\views\course.py:39
-#: .\templates\apps\content\courses\detail.html:123
-msgid "Lessons"
-msgstr "Leçons"
+#: .\apps\content\services\course.py:143
+#: .\apps\curriculum\services\grade.py:152
+#: .\apps\curriculum\services\grade_subject.py:191
+#: .\apps\curriculum\services\grade_subject.py:337
+#: .\apps\curriculum\services\grade_subject.py:526
+#: .\apps\curriculum\services\grade_subject.py:812
+#: .\apps\curriculum\services\level.py:213
+#: .\apps\curriculum\services\level.py:263
+#: .\templates\apps\assessement\questions\question_type_select.html:13
+#: .\templates\apps\assessement\quizzes\attempts.html:23
+#: .\templates\apps\assessement\quizzes\quiz_result.html:29
+#: .\templates\apps\billing\pricing.html:19
+#: .\templates\apps\billing\select_payment_method.html:17
+#: .\templates\apps\content\courses\course_exercises.html:51
+#: .\templates\apps\content\courses\resource_list.html:27
+#: .\templates\apps\curriculum\subjects\detail.html:56
+#: .\templates\apps\curriculum\subjects\resource_list.html:32
+#: .\templates\errors\400.html:17 .\templates\errors\403.html:18
+#: .\templates\errors\404.html:18 .\templates\errors\429.html:18
+#: .\templates\errors\500.html:18 .\templates\pages\about-us.html:19
+#: .\templates\pages\contact-us.html:20 .\templates\pages\faq.html:23
+#: .\templates\pages\landing.html:19 .\templates\pages\privacy.html:23
+#: .\templates\pages\terms.html:23
+msgid "Home"
+msgstr "Maison"
 
-#: .\apps\content\views\course.py:45
-#: .\templates\apps\content\courses\detail.html:144
-msgid "Summaries"
-msgstr "Résumés"
+#: .\apps\content\services\course.py:144 .\apps\curriculum\models\level.py:35
+#: .\apps\curriculum\services\grade.py:153
+#: .\apps\curriculum\services\grade_subject.py:192
+#: .\apps\curriculum\services\grade_subject.py:338
+#: .\apps\curriculum\services\grade_subject.py:527
+#: .\apps\curriculum\services\grade_subject.py:813
+#: .\apps\curriculum\services\level.py:214
+#: .\apps\curriculum\services\level.py:264
+#: .\templates\apps\content\courses\resource_list.html:30
+#: .\templates\apps\curriculum\subjects\detail.html:60
+#: .\templates\apps\curriculum\subjects\resource_list.html:36
+msgid "Levels"
+msgstr "Niveaux"
 
-#: .\apps\content\views\course.py:51
-#: .\templates\apps\content\courses\detail.html:137
-msgid "Homeworks"
-msgstr "Devoirs"
+#: .\apps\content\views\course.py:138
+#, fuzzy
+#| msgid "You have completed this course."
+msgid "You have completed this course. Well done!"
+msgstr "Vous avez terminé ce cours."
 
-#: .\apps\content\views\course.py:57
-#: .\templates\apps\content\courses\course_exercises.html:5
-#: .\templates\apps\content\courses\course_exercises.html:35
-#: .\templates\apps\content\courses\course_exercises.html:74
-#: .\templates\apps\content\courses\course_exercises.html:91
-#: .\templates\apps\content\courses\detail.html:130
-#: .\templates\apps\curriculum\subjects\detail.html:97
-msgid "Exercises"
-msgstr "Exercices"
+#: .\apps\content\views\course.py:144
+msgid "You are viewing this course outside your enrolled grade."
+msgstr "Vous consultez ce cours en dehors de votre niveau d'inscription."
 
-#: .\apps\content\views\course.py:524
+#: .\apps\content\views\course.py:496
 msgid "— All —"
 msgstr "- Tous -"
 
-#: .\apps\content\views\course.py:525
+#: .\apps\content\views\course.py:497
 msgid "With Solution"
 msgstr "Avec solution"
 
-#: .\apps\content\views\course.py:526
+#: .\apps\content\views\course.py:498
 msgid "Without Solution"
 msgstr "Sans solution"
 
@@ -2198,7 +2249,7 @@ msgstr "Secondaire"
 msgid "University"
 msgstr "Université"
 
-#: .\apps\curriculum\consts.py:10
+#: .\apps\curriculum\consts.py:12
 msgid ""
 "The foundation of a child's education, focusing on literacy, numeracy, and "
 "essential social values."
@@ -2206,7 +2257,7 @@ msgstr ""
 "Le fondement de l'éducation d'un enfant, axé sur l'alphabétisation, le "
 "calcul et les valeurs sociales essentielles."
 
-#: .\apps\curriculum\consts.py:19
+#: .\apps\curriculum\consts.py:21
 msgid ""
 "A critical transitional phase that strengthens academic foundations and "
 "develops critical thinking."
@@ -2214,18 +2265,60 @@ msgstr ""
 "Une phase de transition critique qui renforce les fondations académiques et "
 "développe la pensée critique."
 
-#: .\apps\curriculum\consts.py:28
+#: .\apps\curriculum\consts.py:30
 msgid ""
 "Preparing students for higher education through specialised academic tracks."
 msgstr ""
 "Préparer les étudiants à l'enseignement supérieur à travers des filières "
 "académiques spécialisées."
 
-#: .\apps\curriculum\consts.py:36
+#: .\apps\curriculum\consts.py:38
 msgid "A hub for advanced learning, research, and innovation."
 msgstr ""
 "Une plaque tournante pour l’apprentissage avancé, la recherche et "
 "l’innovation."
+
+#: .\apps\curriculum\consts.py:46
+#: .\apps\curriculum\services\grade_subject.py:143
+#: .\apps\curriculum\views\subject.py:28
+msgid "Tests"
+msgstr "Essais"
+
+#: .\apps\curriculum\consts.py:52
+#: .\apps\curriculum\services\grade_subject.py:144
+#: .\apps\curriculum\views\subject.py:34
+msgid "Exams"
+msgstr "Examens"
+
+#: .\apps\curriculum\consts.py:58
+#: .\apps\curriculum\services\grade_subject.py:145
+#: .\apps\curriculum\views\subject.py:40
+msgid "Past Papers"
+msgstr "Articles antérieurs"
+
+#: .\apps\curriculum\consts.py:64
+#: .\apps\curriculum\services\grade_subject.py:146
+#: .\apps\curriculum\views\subject.py:46
+msgid "Mock Exams"
+msgstr "Examens blancs"
+
+#: .\apps\curriculum\consts.py:70
+#: .\apps\curriculum\services\grade_subject.py:147
+#: .\apps\curriculum\views\subject.py:52
+msgid "Textbooks"
+msgstr "Manuels"
+
+#: .\apps\curriculum\consts.py:76
+#: .\apps\curriculum\services\grade_subject.py:148
+#: .\apps\curriculum\views\subject.py:58
+msgid "Foreign Books"
+msgstr "Livres étrangers"
+
+#: .\apps\curriculum\consts.py:82
+#: .\apps\curriculum\services\grade_subject.py:149
+#: .\apps\curriculum\views\subject.py:64
+msgid "Study Guides"
+msgstr "Guides d'étude"
 
 #: .\apps\curriculum\models\grade.py:14
 msgid "The education level this grade belongs to."
@@ -2273,13 +2366,6 @@ msgid ""
 msgstr ""
 "Contrôle l'ordre d'affichage des niveaux (par exemple 1=Primaire, 2=Moyen, "
 "3=Secondaire)."
-
-#: .\apps\curriculum\models\level.py:35
-#: .\templates\apps\content\courses\resource_list.html:30
-#: .\templates\apps\curriculum\subjects\detail.html:60
-#: .\templates\apps\curriculum\subjects\resource_list.html:36
-msgid "Levels"
-msgstr "Niveaux"
 
 #: .\apps\curriculum\models\specialty.py:14
 msgid "The Secondaire grade this specialty (filière) belongs to."
@@ -2351,40 +2437,118 @@ msgstr ""
 msgid "Grade Subjects"
 msgstr "Matières de classe"
 
-#: .\apps\curriculum\views\grade_subject.py:32
-#: .\apps\curriculum\views\subject.py:28
-msgid "Tests"
-msgstr "Essais"
+#: .\apps\curriculum\services\grade_subject.py:388
+#, python-format
+msgid "Courses — %(quarter)s"
+msgstr ""
 
-#: .\apps\curriculum\views\grade_subject.py:38
-#: .\apps\curriculum\views\subject.py:34
-msgid "Exams"
-msgstr "Examens"
+#: .\apps\curriculum\services\level.py:83
+#, fuzzy
+#| msgid "No questions found."
+msgid "No description available."
+msgstr "Aucune question trouvée."
 
-#: .\apps\curriculum\views\grade_subject.py:44
-#: .\apps\curriculum\views\subject.py:40
-msgid "Past Papers"
-msgstr "Articles antérieurs"
+#: .\apps\curriculum\services\level.py:148
+msgid ""
+"No curriculum levels are available at the moment. Please check back later."
+msgstr ""
+"Aucun niveau de programme n’est disponible pour le moment. Veuillez revenir "
+"plus tard."
 
-#: .\apps\curriculum\views\grade_subject.py:50
-#: .\apps\curriculum\views\subject.py:46
-msgid "Mock Exams"
-msgstr "Examens blancs"
+#: .\apps\curriculum\services\level.py:165
+msgid "Your current level is highlighted below."
+msgstr "Votre niveau actuel est mis en évidence ci-dessous."
 
-#: .\apps\curriculum\views\grade_subject.py:56
-#: .\apps\curriculum\views\subject.py:52
-msgid "Textbooks"
-msgstr "Manuels"
+#: .\apps\curriculum\views\grade.py:68
+#, python-format
+msgid "%(grade)s%(specialty)s"
+msgstr ""
 
-#: .\apps\curriculum\views\grade_subject.py:62
-#: .\apps\curriculum\views\subject.py:58
-msgid "Foreign Books"
-msgstr "Livres étrangers"
+#: .\apps\curriculum\views\grade.py:73
+#, fuzzy
+#| msgid "Subjects for this grade have not been added yet."
+msgid "Subjects and resources for this grade and specialty."
+msgstr "Les matières pour ce niveau n'ont pas encore été ajoutées."
 
-#: .\apps\curriculum\views\grade_subject.py:68
-#: .\apps\curriculum\views\subject.py:64
-msgid "Study Guides"
-msgstr "Guides d'étude"
+#: .\apps\curriculum\views\grade_subject.py:116
+#, fuzzy
+#| msgid "Browse quizzes for this subject"
+msgid "Courses, resources, and quizzes for this subject."
+msgstr "Parcourir les quiz sur ce sujet"
+
+#: .\apps\curriculum\views\grade_subject.py:134
+#, fuzzy
+#| msgid "No questions added to this quiz yet."
+msgid "No courses have been added to this subject yet."
+msgstr "Aucune question ajoutée à ce quiz pour l'instant."
+
+#: .\apps\curriculum\views\grade_subject.py:140
+#, fuzzy
+#| msgid "You have completed this course."
+msgid "You have completed all courses in this subject. Well done!"
+msgstr "Vous avez terminé ce cours."
+
+#: .\apps\curriculum\views\grade_subject.py:214
+#, python-format
+msgid "%(subject)s — %(quarter)s"
+msgstr ""
+
+#: .\apps\curriculum\views\grade_subject.py:231
+msgid "No courses found for this quarter and filter combination."
+msgstr "Aucun cours trouvé pour ce trimestre et cette combinaison de filtres."
+
+#: .\apps\curriculum\views\grade_subject.py:367
+#, fuzzy
+#| msgid "No exercises found matching your filters."
+msgid "No resources match your current filters."
+msgstr "Aucun exercice trouvé correspondant à vos filtres."
+
+#: .\apps\curriculum\views\grade_subject.py:372
+#, fuzzy
+#| msgid "No questions added to this quiz yet."
+msgid "No resources have been added to this subject yet."
+msgstr "Aucune question ajoutée à ce quiz pour l'instant."
+
+#: .\apps\curriculum\views\grade_subject.py:442
+#, python-format
+msgid "Quizzes — %(subject)s"
+msgstr "Quiz — %(subject)s"
+
+#: .\apps\curriculum\views\grade_subject.py:456
+#, fuzzy
+#| msgid "No exercises found matching your filters."
+msgid "No quizzes match your current filters."
+msgstr "Aucun exercice trouvé correspondant à vos filtres."
+
+#: .\apps\curriculum\views\level.py:78
+#, fuzzy
+#| msgid "Curriculum Hierarchy"
+msgid "Curriculum Levels"
+msgstr "Hiérarchie des programmes"
+
+#: .\apps\curriculum\views\level.py:80
+msgid ""
+"Browse all available curriculum levels and find the one that matches your "
+"studies."
+msgstr ""
+"Parcourez tous les niveaux de programme disponibles et trouvez celui qui "
+"correspond à vos études."
+
+#: .\apps\curriculum\views\level.py:136
+msgid "Explore grades, specialties, and statistics for this curriculum level."
+msgstr ""
+"Explorez les notes, les spécialités et les statistiques pour ce niveau du "
+"programme."
+
+#: .\apps\curriculum\views\level.py:150
+#, fuzzy
+#| msgid "Browse grades and subjects for this level"
+msgid "No grade groups are configured for this level yet."
+msgstr "Parcourir les notes et les matières pour ce niveau"
+
+#: .\apps\curriculum\views\level.py:160
+msgid "Statistics for this level are not yet available."
+msgstr "Les statistiques pour ce niveau ne sont pas encore disponibles."
 
 #: .\apps\curriculum\views\subject.py:102
 msgid "1st Term"
@@ -4329,24 +4493,6 @@ msgstr "Sélectionnez le type de question"
 #: .\templates\apps\assessement\questions\question_type_select.html:9
 msgid "Create a Question"
 msgstr "Créer une question"
-
-#: .\templates\apps\assessement\questions\question_type_select.html:13
-#: .\templates\apps\assessement\quizzes\attempts.html:23
-#: .\templates\apps\assessement\quizzes\quiz_result.html:29
-#: .\templates\apps\billing\pricing.html:19
-#: .\templates\apps\billing\select_payment_method.html:17
-#: .\templates\apps\content\courses\course_exercises.html:51
-#: .\templates\apps\content\courses\resource_list.html:27
-#: .\templates\apps\curriculum\subjects\detail.html:56
-#: .\templates\apps\curriculum\subjects\resource_list.html:32
-#: .\templates\errors\400.html:17 .\templates\errors\403.html:18
-#: .\templates\errors\404.html:18 .\templates\errors\429.html:18
-#: .\templates\errors\500.html:18 .\templates\pages\about-us.html:19
-#: .\templates\pages\contact-us.html:20 .\templates\pages\faq.html:23
-#: .\templates\pages\landing.html:19 .\templates\pages\privacy.html:23
-#: .\templates\pages\terms.html:23
-msgid "Home"
-msgstr "Maison"
 
 #: .\templates\apps\assessement\questions\question_type_select.html:30
 msgid "What type of question do you want to create?"

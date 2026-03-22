@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 15:53+0100\n"
+"POT-Creation-Date: 2026-03-23 00:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -996,6 +996,7 @@ msgid "Quiz"
 msgstr "لغز"
 
 #: .\apps\assessment\models\quiz.py:113
+#: .\apps\curriculum\services\grade_subject.py:571
 #: .\templates\apps\assessement\quizzes\attempts.html:28
 #: .\templates\apps\assessement\quizzes\quiz_result.html:34
 #: .\templates\apps\content\courses\_header.html:64
@@ -1271,6 +1272,7 @@ msgid "Read-only computed values for reference."
 msgstr "القيم المحسوبة للقراءة فقط كمرجع."
 
 #: .\apps\content\admin\course.py:98 .\apps\content\models\resource.py:229
+#: .\apps\curriculum\services\grade_subject.py:728
 #: .\templates\apps\content\courses\detail.html:65
 #: .\templates\apps\curriculum\grades\detail.html:140
 #: .\templates\dashboard\teacher.html:83
@@ -1434,12 +1436,12 @@ msgstr "العمل في المنزل"
 msgid "Summary"
 msgstr "ملخص"
 
-#: .\apps\content\choices.py:11 .\apps\content\views\course.py:63
+#: .\apps\content\choices.py:11 .\apps\content\consts.py:33
 #: .\templates\apps\content\courses\detail.html:151
 msgid "Notes"
 msgstr "ملحوظات"
 
-#: .\apps\content\choices.py:12 .\apps\content\views\course.py:69
+#: .\apps\content\choices.py:12 .\apps\content\consts.py:39
 #: .\templates\apps\content\courses\detail.html:158
 msgid "Series"
 msgstr "مسلسل"
@@ -1525,6 +1527,30 @@ msgstr "الفصل الدراسي الثاني"
 #: .\apps\content\choices.py:109
 msgid "Third Term"
 msgstr "الفصل الثالث"
+
+#: .\apps\content\consts.py:9 .\templates\apps\content\courses\detail.html:123
+msgid "Lessons"
+msgstr "دروس"
+
+#: .\apps\content\consts.py:15
+#: .\templates\apps\content\courses\detail.html:144
+msgid "Summaries"
+msgstr "ملخصات"
+
+#: .\apps\content\consts.py:21
+#: .\templates\apps\content\courses\detail.html:137
+msgid "Homeworks"
+msgstr "الواجبات المنزلية"
+
+#: .\apps\content\consts.py:27
+#: .\templates\apps\content\courses\course_exercises.html:5
+#: .\templates\apps\content\courses\course_exercises.html:35
+#: .\templates\apps\content\courses\course_exercises.html:74
+#: .\templates\apps\content\courses\course_exercises.html:91
+#: .\templates\apps\content\courses\detail.html:130
+#: .\templates\apps\curriculum\subjects\detail.html:97
+msgid "Exercises"
+msgstr "تمارين"
 
 #: .\apps\content\forms\resource.py:18
 #: .\templates\apps\content\resources\detail.html:133
@@ -1933,40 +1959,65 @@ msgstr "يجب أن يحتوي التمرين إما على ملف أو محتو
 msgid "Resource term must match the Course term (%(term)s)."
 msgstr "يجب أن يتطابق مصطلح المورد مع مصطلح الدورة التدريبية (%(term)s)."
 
-#: .\apps\content\views\course.py:39
-#: .\templates\apps\content\courses\detail.html:123
-msgid "Lessons"
-msgstr "دروس"
+#: .\apps\content\services\course.py:143
+#: .\apps\curriculum\services\grade.py:152
+#: .\apps\curriculum\services\grade_subject.py:191
+#: .\apps\curriculum\services\grade_subject.py:337
+#: .\apps\curriculum\services\grade_subject.py:526
+#: .\apps\curriculum\services\grade_subject.py:812
+#: .\apps\curriculum\services\level.py:213
+#: .\apps\curriculum\services\level.py:263
+#: .\templates\apps\assessement\questions\question_type_select.html:13
+#: .\templates\apps\assessement\quizzes\attempts.html:23
+#: .\templates\apps\assessement\quizzes\quiz_result.html:29
+#: .\templates\apps\billing\pricing.html:19
+#: .\templates\apps\billing\select_payment_method.html:17
+#: .\templates\apps\content\courses\course_exercises.html:51
+#: .\templates\apps\content\courses\resource_list.html:27
+#: .\templates\apps\curriculum\subjects\detail.html:56
+#: .\templates\apps\curriculum\subjects\resource_list.html:32
+#: .\templates\errors\400.html:17 .\templates\errors\403.html:18
+#: .\templates\errors\404.html:18 .\templates\errors\429.html:18
+#: .\templates\errors\500.html:18 .\templates\pages\about-us.html:19
+#: .\templates\pages\contact-us.html:20 .\templates\pages\faq.html:23
+#: .\templates\pages\landing.html:19 .\templates\pages\privacy.html:23
+#: .\templates\pages\terms.html:23
+msgid "Home"
+msgstr "بيت"
 
-#: .\apps\content\views\course.py:45
-#: .\templates\apps\content\courses\detail.html:144
-msgid "Summaries"
-msgstr "ملخصات"
+#: .\apps\content\services\course.py:144 .\apps\curriculum\models\level.py:35
+#: .\apps\curriculum\services\grade.py:153
+#: .\apps\curriculum\services\grade_subject.py:192
+#: .\apps\curriculum\services\grade_subject.py:338
+#: .\apps\curriculum\services\grade_subject.py:527
+#: .\apps\curriculum\services\grade_subject.py:813
+#: .\apps\curriculum\services\level.py:214
+#: .\apps\curriculum\services\level.py:264
+#: .\templates\apps\content\courses\resource_list.html:30
+#: .\templates\apps\curriculum\subjects\detail.html:60
+#: .\templates\apps\curriculum\subjects\resource_list.html:36
+msgid "Levels"
+msgstr "المستويات"
 
-#: .\apps\content\views\course.py:51
-#: .\templates\apps\content\courses\detail.html:137
-msgid "Homeworks"
-msgstr "الواجبات المنزلية"
+#: .\apps\content\views\course.py:138
+#, fuzzy
+#| msgid "You have completed this course."
+msgid "You have completed this course. Well done!"
+msgstr "لقد أكملت هذه الدورة."
 
-#: .\apps\content\views\course.py:57
-#: .\templates\apps\content\courses\course_exercises.html:5
-#: .\templates\apps\content\courses\course_exercises.html:35
-#: .\templates\apps\content\courses\course_exercises.html:74
-#: .\templates\apps\content\courses\course_exercises.html:91
-#: .\templates\apps\content\courses\detail.html:130
-#: .\templates\apps\curriculum\subjects\detail.html:97
-msgid "Exercises"
-msgstr "تمارين"
+#: .\apps\content\views\course.py:144
+msgid "You are viewing this course outside your enrolled grade."
+msgstr "أنت تشاهد هذه الدورة خارج الصف المسجل الخاص بك."
 
-#: .\apps\content\views\course.py:524
+#: .\apps\content\views\course.py:496
 msgid "— All —"
 msgstr "- الجميع -"
 
-#: .\apps\content\views\course.py:525
+#: .\apps\content\views\course.py:497
 msgid "With Solution"
 msgstr "مع الحل"
 
-#: .\apps\content\views\course.py:526
+#: .\apps\content\views\course.py:498
 msgid "Without Solution"
 msgstr "بدون حل"
 
@@ -2157,7 +2208,7 @@ msgstr "ثانوي"
 msgid "University"
 msgstr "جامعة"
 
-#: .\apps\curriculum\consts.py:10
+#: .\apps\curriculum\consts.py:12
 msgid ""
 "The foundation of a child's education, focusing on literacy, numeracy, and "
 "essential social values."
@@ -2165,20 +2216,62 @@ msgstr ""
 "أساس تعليم الطفل، مع التركيز على القراءة والكتابة والحساب والقيم الاجتماعية "
 "الأساسية."
 
-#: .\apps\curriculum\consts.py:19
+#: .\apps\curriculum\consts.py:21
 msgid ""
 "A critical transitional phase that strengthens academic foundations and "
 "develops critical thinking."
 msgstr "مرحلة انتقالية حاسمة تعزز الأسس الأكاديمية وتطور التفكير النقدي."
 
-#: .\apps\curriculum\consts.py:28
+#: .\apps\curriculum\consts.py:30
 msgid ""
 "Preparing students for higher education through specialised academic tracks."
 msgstr "إعداد الطلاب للتعليم العالي من خلال مسارات أكاديمية متخصصة."
 
-#: .\apps\curriculum\consts.py:36
+#: .\apps\curriculum\consts.py:38
 msgid "A hub for advanced learning, research, and innovation."
 msgstr "مركز للتعلم المتقدم والبحث والابتكار."
+
+#: .\apps\curriculum\consts.py:46
+#: .\apps\curriculum\services\grade_subject.py:143
+#: .\apps\curriculum\views\subject.py:28
+msgid "Tests"
+msgstr "الاختبارات"
+
+#: .\apps\curriculum\consts.py:52
+#: .\apps\curriculum\services\grade_subject.py:144
+#: .\apps\curriculum\views\subject.py:34
+msgid "Exams"
+msgstr "الامتحانات"
+
+#: .\apps\curriculum\consts.py:58
+#: .\apps\curriculum\services\grade_subject.py:145
+#: .\apps\curriculum\views\subject.py:40
+msgid "Past Papers"
+msgstr "الأوراق الماضية"
+
+#: .\apps\curriculum\consts.py:64
+#: .\apps\curriculum\services\grade_subject.py:146
+#: .\apps\curriculum\views\subject.py:46
+msgid "Mock Exams"
+msgstr "الامتحانات الوهمية"
+
+#: .\apps\curriculum\consts.py:70
+#: .\apps\curriculum\services\grade_subject.py:147
+#: .\apps\curriculum\views\subject.py:52
+msgid "Textbooks"
+msgstr "الكتب المدرسية"
+
+#: .\apps\curriculum\consts.py:76
+#: .\apps\curriculum\services\grade_subject.py:148
+#: .\apps\curriculum\views\subject.py:58
+msgid "Foreign Books"
+msgstr "كتب اجنبية"
+
+#: .\apps\curriculum\consts.py:82
+#: .\apps\curriculum\services\grade_subject.py:149
+#: .\apps\curriculum\views\subject.py:64
+msgid "Study Guides"
+msgstr "أدلة الدراسة"
 
 #: .\apps\curriculum\models\grade.py:14
 msgid "The education level this grade belongs to."
@@ -2223,13 +2316,6 @@ msgid ""
 msgstr ""
 "يتحكم في ترتيب عرض المستويات (على سبيل المثال 1=Primaire، 2=Moyen، "
 "3=Secondaire)."
-
-#: .\apps\curriculum\models\level.py:35
-#: .\templates\apps\content\courses\resource_list.html:30
-#: .\templates\apps\curriculum\subjects\detail.html:60
-#: .\templates\apps\curriculum\subjects\resource_list.html:36
-msgid "Levels"
-msgstr "المستويات"
 
 #: .\apps\curriculum\models\specialty.py:14
 msgid "The Secondaire grade this specialty (filière) belongs to."
@@ -2293,40 +2379,113 @@ msgstr ""
 msgid "Grade Subjects"
 msgstr "مواضيع الصف"
 
-#: .\apps\curriculum\views\grade_subject.py:32
-#: .\apps\curriculum\views\subject.py:28
-msgid "Tests"
-msgstr "الاختبارات"
+#: .\apps\curriculum\services\grade_subject.py:388
+#, python-format
+msgid "Courses — %(quarter)s"
+msgstr ""
 
-#: .\apps\curriculum\views\grade_subject.py:38
-#: .\apps\curriculum\views\subject.py:34
-msgid "Exams"
-msgstr "الامتحانات"
+#: .\apps\curriculum\services\level.py:83
+#, fuzzy
+#| msgid "No questions found."
+msgid "No description available."
+msgstr "لم يتم العثور على أي أسئلة."
 
-#: .\apps\curriculum\views\grade_subject.py:44
-#: .\apps\curriculum\views\subject.py:40
-msgid "Past Papers"
-msgstr "الأوراق الماضية"
+#: .\apps\curriculum\services\level.py:148
+msgid ""
+"No curriculum levels are available at the moment. Please check back later."
+msgstr ""
+"لا تتوفر مستويات المنهج في الوقت الراهن. يرجى التحقق مرة أخرى في وقت لاحق."
 
-#: .\apps\curriculum\views\grade_subject.py:50
-#: .\apps\curriculum\views\subject.py:46
-msgid "Mock Exams"
-msgstr "الامتحانات الوهمية"
+#: .\apps\curriculum\services\level.py:165
+msgid "Your current level is highlighted below."
+msgstr "تم تسليط الضوء على مستواك الحالي أدناه."
 
-#: .\apps\curriculum\views\grade_subject.py:56
-#: .\apps\curriculum\views\subject.py:52
-msgid "Textbooks"
-msgstr "الكتب المدرسية"
+#: .\apps\curriculum\views\grade.py:68
+#, python-format
+msgid "%(grade)s%(specialty)s"
+msgstr ""
 
-#: .\apps\curriculum\views\grade_subject.py:62
-#: .\apps\curriculum\views\subject.py:58
-msgid "Foreign Books"
-msgstr "كتب اجنبية"
+#: .\apps\curriculum\views\grade.py:73
+#, fuzzy
+#| msgid "Subjects for this grade have not been added yet."
+msgid "Subjects and resources for this grade and specialty."
+msgstr "لم تتم إضافة المواد الدراسية لهذا الصف بعد."
 
-#: .\apps\curriculum\views\grade_subject.py:68
-#: .\apps\curriculum\views\subject.py:64
-msgid "Study Guides"
-msgstr "أدلة الدراسة"
+#: .\apps\curriculum\views\grade_subject.py:116
+#, fuzzy
+#| msgid "Browse quizzes for this subject"
+msgid "Courses, resources, and quizzes for this subject."
+msgstr "تصفح الاختبارات لهذا الموضوع"
+
+#: .\apps\curriculum\views\grade_subject.py:134
+#, fuzzy
+#| msgid "No questions added to this quiz yet."
+msgid "No courses have been added to this subject yet."
+msgstr "لم تتم إضافة أي أسئلة إلى هذا الاختبار حتى الآن."
+
+#: .\apps\curriculum\views\grade_subject.py:140
+#, fuzzy
+#| msgid "You have completed this course."
+msgid "You have completed all courses in this subject. Well done!"
+msgstr "لقد أكملت هذه الدورة."
+
+#: .\apps\curriculum\views\grade_subject.py:214
+#, python-format
+msgid "%(subject)s — %(quarter)s"
+msgstr ""
+
+#: .\apps\curriculum\views\grade_subject.py:231
+msgid "No courses found for this quarter and filter combination."
+msgstr "لم يتم العثور على دورات لهذا الربع ومجموعة التصفية."
+
+#: .\apps\curriculum\views\grade_subject.py:367
+#, fuzzy
+#| msgid "No exercises found matching your filters."
+msgid "No resources match your current filters."
+msgstr "لم يتم العثور على تمارين مطابقة لمرشحاتك."
+
+#: .\apps\curriculum\views\grade_subject.py:372
+#, fuzzy
+#| msgid "No questions added to this quiz yet."
+msgid "No resources have been added to this subject yet."
+msgstr "لم تتم إضافة أي أسئلة إلى هذا الاختبار حتى الآن."
+
+#: .\apps\curriculum\views\grade_subject.py:442
+#, python-format
+msgid "Quizzes — %(subject)s"
+msgstr ""
+
+#: .\apps\curriculum\views\grade_subject.py:456
+#, fuzzy
+#| msgid "No exercises found matching your filters."
+msgid "No quizzes match your current filters."
+msgstr "لم يتم العثور على تمارين مطابقة لمرشحاتك."
+
+#: .\apps\curriculum\views\level.py:78
+#, fuzzy
+#| msgid "Curriculum Hierarchy"
+msgid "Curriculum Levels"
+msgstr "التسلسل الهرمي للمناهج الدراسية"
+
+#: .\apps\curriculum\views\level.py:80
+msgid ""
+"Browse all available curriculum levels and find the one that matches your "
+"studies."
+msgstr "تصفح جميع مستويات المناهج المتاحة وابحث عن المستوى الذي يناسب دراستك."
+
+#: .\apps\curriculum\views\level.py:136
+msgid "Explore grades, specialties, and statistics for this curriculum level."
+msgstr "استكشف الدرجات والتخصصات والإحصائيات الخاصة بهذا المستوى الدراسي."
+
+#: .\apps\curriculum\views\level.py:150
+#, fuzzy
+#| msgid "Browse grades and subjects for this level"
+msgid "No grade groups are configured for this level yet."
+msgstr "تصفح الدرجات والمواضيع لهذا المستوى"
+
+#: .\apps\curriculum\views\level.py:160
+msgid "Statistics for this level are not yet available."
+msgstr "إحصائيات هذا المستوى ليست متاحة بعد."
 
 #: .\apps\curriculum\views\subject.py:102
 msgid "1st Term"
@@ -4165,24 +4324,6 @@ msgstr "حدد نوع السؤال"
 #: .\templates\apps\assessement\questions\question_type_select.html:9
 msgid "Create a Question"
 msgstr "إنشاء سؤال"
-
-#: .\templates\apps\assessement\questions\question_type_select.html:13
-#: .\templates\apps\assessement\quizzes\attempts.html:23
-#: .\templates\apps\assessement\quizzes\quiz_result.html:29
-#: .\templates\apps\billing\pricing.html:19
-#: .\templates\apps\billing\select_payment_method.html:17
-#: .\templates\apps\content\courses\course_exercises.html:51
-#: .\templates\apps\content\courses\resource_list.html:27
-#: .\templates\apps\curriculum\subjects\detail.html:56
-#: .\templates\apps\curriculum\subjects\resource_list.html:32
-#: .\templates\errors\400.html:17 .\templates\errors\403.html:18
-#: .\templates\errors\404.html:18 .\templates\errors\429.html:18
-#: .\templates\errors\500.html:18 .\templates\pages\about-us.html:19
-#: .\templates\pages\contact-us.html:20 .\templates\pages\faq.html:23
-#: .\templates\pages\landing.html:19 .\templates\pages\privacy.html:23
-#: .\templates\pages\terms.html:23
-msgid "Home"
-msgstr "بيت"
 
 #: .\templates\apps\assessement\questions\question_type_select.html:30
 msgid "What type of question do you want to create?"

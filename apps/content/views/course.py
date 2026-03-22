@@ -1,9 +1,9 @@
 import logging
 
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
@@ -16,161 +16,133 @@ from apps.assessment.models import Quiz
 from apps.authentication.mixins import StudentRequiredMixin
 from apps.progress.models import ContentProgress
 
-from ..choices import DifficultyLevel, ResourceType, Term
+from ..choices import DifficultyLevel, Term
+from ..consts import RESOURCE_TYPE_CONFIG
 from ..mixins.course import CourseMixin
 from ..models import Course, VideoResource
 from ..selectors import (
     get_course_by_pk,
     get_course_exercises,
-    get_course_progress,
     get_course_resources,
     resolve_course_breadcrumb,
 )
-from ..services import record_course_visit
+from ..services.course import (
+    CourseCrumbBuilder,
+    CourseProgressProvider,
+    CourseVisitRecorder,
+    CourseVisitRecorderProtocol,
+    StudentGradeMatchChecker,
+)
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
-RESOURCE_TYPE_CONFIG = {
-    "lessons": {
-        "resource_type": ResourceType.LESSON,
-        "tab": "lessons",
-        "title": _("Lessons"),
-        "icon": "fas fa-chalkboard-teacher",
-    },
-    "summaries": {
-        "resource_type": ResourceType.SUMMARY,
-        "tab": "summaries",
-        "title": _("Summaries"),
-        "icon": "fas fa-align-left",
-    },
-    "homeworks": {
-        "resource_type": ResourceType.HOMEWORK,
-        "tab": "homeworks",
-        "title": _("Homeworks"),
-        "icon": "fas fa-pencil-ruler",
-    },
-    "exercises": {
-        "resource_type": ResourceType.EXERCISE,
-        "tab": "exercises",
-        "title": _("Exercises"),
-        "icon": "fas fa-pencil-alt",
-    },
-    "notes": {
-        "resource_type": ResourceType.NOTES,
-        "tab": "notes",
-        "title": _("Notes"),
-        "icon": "fas fa-sticky-note",
-    },
-    "series": {
-        "resource_type": ResourceType.SERIES,
-        "tab": "series",
-        "title": _("Series"),
-        "icon": "fas fa-layer-group",
-    },
-}
-
 
 class CourseDetailView(CourseMixin, DetailView):
+    """
+    Displays the detail page for a single Course.
+
+    The get() override intentionally records a student visit as a
+    side effect before rendering — this is the correct lifecycle
+    placement (not in get_context_data, which may be called multiple
+    times in testing).
+
+    Responsibilities delegated:
+        - CourseVisitRecorder          → atomic visit recording
+        - StudentGradeMatchChecker     → student × course grade matching
+        - CourseProgressProvider       → progress data for matching students
+        - CourseCrumbBuilder           → dynamic breadcrumb chain
+    """
+
     model = Course
     template_name = "apps/content/courses/detail.html"
     context_object_name = "course"
     pk_url_kwarg = "pk"
 
-    def get_object(self, queryset=None):
-        # Use our annotated selector instead of the default queryset
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        visit_recorder: CourseVisitRecorderProtocol | None = None,
+        grade_match_checker: StudentGradeMatchChecker | None = None,
+        progress_provider: CourseProgressProvider | None = None,
+        breadcrumb_builder: CourseCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.visit_recorder = visit_recorder or CourseVisitRecorder()
+        self.grade_match_checker = grade_match_checker or StudentGradeMatchChecker()
+        self.progress_provider = progress_provider or CourseProgressProvider()
+        self.breadcrumb_builder = breadcrumb_builder or CourseCrumbBuilder()
+
+    # ── Object ────────────────────────────────────────────────────────────────
+
+    def get_object(self, queryset=None) -> object:
         return get_course_by_pk(self.kwargs["pk"])
+
+    # ── Request lifecycle ─────────────────────────────────────────────────────
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        # Record visit for students
         if request.user.is_authenticated and getattr(request.user, "is_student", False):
-            with transaction.atomic():
-                record_course_visit(request.user, self.object)
+            self.visit_recorder.record(request.user, self.object)
 
         return self.render_to_response(self.get_context_data())
 
-    def get_context_data(self, **kwargs):
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+
         course = self.object
         user = self.request.user
-        crumbs = resolve_course_breadcrumb(course)
 
-        context["active_tab"] = "details"
-        context["term_display"] = course.get_term_display()
-        context["breadcrumb"] = crumbs
-        context["level"] = crumbs["level"]
-        context["grade"] = crumbs["grade"]
-        context["subject"] = crumbs["subject"]
-        context["chapter"] = crumbs["chapter"]
+        crumb_data = resolve_course_breadcrumb(course)
+        is_matching_student = self.grade_match_checker.is_matching(user, course)
+        progress = self.progress_provider.get_progress(
+            user, course, is_matching_student
+        )
 
-        is_matching_student = False
-        if self.request.user.is_authenticated and self.request.user.is_student:
-            student_grade = getattr(self.request.user.student_profile, "grade", None)
-            course_grade = (
-                course.effective_grade_subject.grade
-                if course.effective_grade_subject
-                else None
-            )
-            is_matching_student = (
-                student_grade is not None and student_grade == course_grade
-            )
+        self._dispatch_messages(course, is_matching_student, progress)
 
-        context["is_matching_student"] = is_matching_student
-        context["progress"] = None
-        if is_matching_student:
-            context["progress"] = get_course_progress(user, course)
-
-        # ── Breadcrumb ────────────────────────────────────────────────────────────
-        level = crumbs["level"]
-        grade = crumbs["grade"]
-        subject = crumbs["subject"]
-        chapter = crumbs["chapter"]
-        gs = course.effective_grade_subject
-        specialty = gs.specialty if gs else None
-
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
-
-        breadcrumbs = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
+        context.update(
             {
-                "label": level.name,
-                "url": reverse(
-                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                ),
-            },
-            {
-                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                "url": grade_url,
-            },
-            {
-                "label": subject.short_name,
-                "url": reverse(
-                    "curriculum:grade-subject:grade-subject-detail",
-                    kwargs={"pk": gs.pk},
-                ),
-            },
-        ]
-
-        if chapter:
-            breadcrumbs.append(
-                {
-                    "label": chapter.title,
-                    "url": None,  # add chapter detail URL here if you have one
-                }
-            )
-
-        breadcrumbs.append({"label": course.title, "url": None})
-
-        context["crumbs"] = breadcrumbs
-        # ─────────────────────────────────────────────────────────────────────────
+                "active_tab": "details",
+                "term_display": course.get_term_display(),
+                "level": crumb_data["level"],
+                "grade": crumb_data["grade"],
+                "subject": crumb_data["subject"],
+                "chapter": crumb_data["chapter"],
+                "is_matching_student": is_matching_student,
+                "progress": progress,
+                "crumbs": self.breadcrumb_builder.build_for_course(course, crumb_data),
+                "page_title": course.title,
+            }
+        )
 
         return context
+
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(
+        self,
+        course: object,
+        is_matching_student: bool,
+        progress: object | None,
+    ) -> None:
+        if progress and getattr(progress, "progress_pct", 0) == 100:
+            messages.success(
+                self.request,
+                _("You have completed this course. Well done!"),
+            )
+
+        if not is_matching_student and self.request.user.is_authenticated:
+            messages.info(
+                self.request,
+                _("You are viewing this course outside your enrolled grade."),
+            )
 
 
 class CourseExercisesView(CourseMixin, ListView):
