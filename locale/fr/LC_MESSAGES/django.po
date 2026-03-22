@@ -1,0 +1,277 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-22 01:32+0100\n"
+"PO-Revision-Date: 2026-03-22 01:40+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: .\apps\accounts\admin\custom_user.py:19 .\apps\accounts\models\student.py:51
+msgid "Student Profile"
+msgstr "Profil de l'étudiant"
+
+#: .\apps\accounts\admin\custom_user.py:29 .\apps\accounts\models\teacher.py:68
+msgid "Teacher Profile"
+msgstr "Profil de l'enseignant"
+
+#: .\apps\accounts\admin\custom_user.py:91
+msgid "Authentication"
+msgstr "Authentification"
+
+#: .\apps\accounts\admin\custom_user.py:97
+msgid "Personal Info"
+msgstr "Informations personnelles"
+
+#: .\apps\accounts\admin\custom_user.py:112
+msgid "Role & Verification"
+msgstr "Rôle et vérification"
+
+#: .\apps\accounts\admin\custom_user.py:118
+msgid "Permissions"
+msgstr "Permissions"
+
+#: .\apps\accounts\admin\custom_user.py:131
+msgid "Timestamps"
+msgstr "Horodatage"
+
+#: .\apps\accounts\admin\custom_user.py:142
+msgid "Required Info"
+msgstr "Informations requises"
+
+#: .\apps\accounts\admin\custom_user.py:164
+#: .\apps\accounts\models\custom_user.py:51
+msgid "Avatar"
+msgstr "Avatar"
+
+#: .\apps\accounts\admin\custom_user.py:181
+msgid "Full Name"
+msgstr "Nom complet"
+
+#: .\apps\accounts\admin\custom_user.py:185
+#: .\apps\accounts\models\custom_user.py:42
+msgid "Role"
+msgstr "Rôle"
+
+#: .\apps\accounts\admin\custom_user.py:207
+msgid "Verify selected users (email)"
+msgstr "Vérifier les utilisateurs sélectionnés (e-mail)"
+
+#: .\apps\accounts\admin\custom_user.py:212
+msgid "Unverify selected users"
+msgstr "Annuler la vérification des utilisateurs"
+
+#: .\apps\accounts\admin\custom_user.py:219
+msgid "Activate selected users"
+msgstr "Activer les utilisateurs sélectionnés"
+
+#: .\apps\accounts\admin\custom_user.py:224
+msgid "Deactivate selected users"
+msgstr "Désactiver les utilisateurs sélectionnés"
+
+#: .\apps\accounts\admin\custom_user.py:250
+msgid "Impersonation requires django-hijack to be installed and configured."
+msgstr "L'usurpation d'identité nécessite l'installation et la configuration de django-hijack."
+
+#: .\apps\accounts\admin\student.py:54 .\apps\accounts\admin\teacher.py:49
+msgid "User Account"
+msgstr "Compte utilisateur"
+
+#: .\apps\accounts\admin\student.py:60
+msgid "Academic Info"
+msgstr "Informations académiques"
+
+#: .\apps\accounts\admin\student.py:64
+msgid "Specialty is only applicable to Secondaire students."
+msgstr "La spécialité ne s'applique qu'aux élèves du secondaire."
+
+#: .\apps\accounts\admin\student.py:69 .\apps\accounts\admin\teacher.py:72
+msgid "Profile"
+msgstr "Profil"
+
+#: .\apps\accounts\admin\student.py:90 .\apps\accounts\admin\teacher.py:93
+msgid "Email"
+msgstr "E-mail"
+
+#: .\apps\accounts\admin\student.py:94
+msgid "Level"
+msgstr "Niveau"
+
+#: .\apps\accounts\admin\student.py:112 .\apps\accounts\admin\teacher.py:109
+#: .\apps\accounts\models\student.py:46 .\apps\accounts\models\teacher.py:47
+msgid "Bio"
+msgstr "Biographie"
+
+#: .\apps\accounts\admin\student.py:118
+msgid "Clear specialty for selected students"
+msgstr "Effacer la spécialité pour les étudiants sélectionnés"
+
+#: .\apps\accounts\admin\teacher.py:55
+msgid "Teaching Scope"
+msgstr "Portée de l'enseignement"
+
+#: .\apps\accounts\admin\teacher.py:59
+msgid ""
+"A teacher is scoped to a Level + Subject. The subject must belong to the "
+"selected level."
+msgstr "Un enseignant est affecté à un Niveau + Matière. La matière doit appartenir au niveau sélectionné."
+
+#: .\apps\accounts\admin\teacher.py:65
+msgid "Verification"
+msgstr "Vérification"
+
+#: .\apps\accounts\admin\teacher.py:68
+msgid "Only verified teachers can publish resources."
+msgstr "Seuls les enseignants vérifiés peuvent publier des ressources."
+
+#: .\apps\accounts\admin\teacher.py:97
+msgid "Verified"
+msgstr "Vérifié"
+
+#: .\apps\accounts\admin\teacher.py:115
+msgid "Verify selected teachers"
+msgstr "Vérifier les enseignants sélectionnés"
+
+#: .\apps\accounts\admin\teacher.py:124
+msgid "Unverify selected teachers"
+msgstr "Annuler la vérification des enseignants"
+
+#: .\apps\accounts\choices.py:8
+msgid "Student"
+msgstr "Étudiant"
+
+#: .\apps\accounts\choices.py:9
+msgid "Teacher"
+msgstr "Enseignant"
+
+#: .\apps\accounts\choices.py:13
+msgid "Male"
+msgstr "Homme"
+
+#: .\apps\accounts\choices.py:14
+msgid "Female"
+msgstr "Femme"
+
+# --- Algerian Wilayas (Names usually remain same in FR) ---
+#: .\apps\accounts\choices.py:33
+msgid "Alger"
+msgstr "Alger"
+
+#: .\apps\accounts\choices.py:48
+msgid "Oran"
+msgstr "Oran"
+
+#: .\apps\accounts\choices.py:42
+msgid "Constantine"
+msgstr "Constantine"
+
+# --- General System Messages ---
+#: .\apps\accounts\forms\student.py:33
+msgid "The selected specialty does not belong to the selected grade."
+msgstr "La spécialité sélectionnée n'appartient pas au niveau scolaire choisi."
+
+#: .\apps\accounts\managers\user.py:11
+msgid "Email address is required."
+msgstr "L'adresse e-mail est requise."
+
+#: .\apps\accounts\models\custom_user.py:22
+msgid "First Name"
+msgstr "Prénom"
+
+#: .\apps\accounts\models\custom_user.py:27
+msgid "Last Name"
+msgstr "Nom"
+
+#: .\apps\accounts\models\custom_user.py:34
+msgid "Email Address"
+msgstr "Adresse e-mail"
+
+#: .\apps\accounts\models\custom_user.py:57
+msgid "Phone Number"
+msgstr "Numéro de téléphone"
+
+#: .\apps\accounts\models\custom_user.py:58
+msgid "Algerian phone number (e.g. 0555 123 456)."
+msgstr "Numéro de téléphone algérien (ex: 0555 123 456)."
+
+#: .\apps\accounts\models\custom_user.py:63
+msgid "Date of Birth"
+msgstr "Date de naissance"
+
+#: .\apps\accounts\models\custom_user.py:70
+msgid "Gender"
+msgstr "Genre"
+
+#: .\apps\accounts\models\custom_user.py:77
+msgid "Wilaya"
+msgstr "Wilaya"
+
+#: .\apps\accounts\models\custom_user.py:84
+msgid "Is Verified"
+msgstr "Est vérifié"
+
+#: .\apps\accounts\models\custom_user.py:94
+msgid "User"
+msgstr "Utilisateur"
+
+#: .\apps\accounts\models\custom_user.py:95
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: .\apps\accounts\models\student.py:29
+msgid "Grade"
+msgstr "Niveau scolaire"
+
+#: .\apps\accounts\models\student.py:38
+msgid "Specialty"
+msgstr "Spécialité / Filière"
+
+#: .\apps\accounts\models\teacher.py:39
+msgid "Subject"
+msgstr "Matière"
+
+#: .\apps\accounts\models\teacher.py:63
+msgid "Hourly Price"
+msgstr "Prix horaire"
+
+#: .\apps\assessment\admin\answer.py:109
+msgid "Correct"
+msgstr "Correct"
+
+#: .\apps\assessment\choices.py:6
+msgid "Essay"
+msgstr "Rédaction / Dissertation"
+
+#: .\apps\assessment\choices.py:7
+msgid "Multiple Choice"
+msgstr "Choix multiples"
+
+#: .\apps\assessment\choices.py:8
+msgid "True / False"
+msgstr "Vrai / Faux"
+
+#: .\apps\assessment\models\quiz.py:112
+msgid "Quiz"
+msgstr "Quiz"
+
+#: .\apps\assessment\models\quiz.py:113
+msgid "Quizzes"
+msgstr "Quiz"
+
+#: .\apps\billing\choices.py:12
+msgid "Free"
+msgstr "Gratuit"
+
+#: .\apps\billing\choices.py:14
+msgid "Premium"
+msgstr "Premium"
+
+#: .\apps\content\admin\chapter.py:84
+msgid "Courses"
+msgstr "Cours"

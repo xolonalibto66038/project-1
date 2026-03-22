@@ -1,12 +1,14 @@
+{% load static %}
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}EduGDZ{% endblock %}</title>
+  <title>{% block title %}{% trans "EduGDZ" %}{% endblock %}</title>
 
   <!-- Favicon -->
-  <link rel="icon" href="/static/img/favicon.ico">
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
 
   {% include "includes/styles.html" %}
   {% block extra_css %}{% endblock extra_css %}

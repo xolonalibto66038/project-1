@@ -1,0 +1,120 @@
+/* ─────────────────────────────────────────────
+   RTL fixes for AdminLTE 3.x
+   Applied only when <html dir="rtl"> is present
+───────────────────────────────────────────── */
+
+/* ── Sidebar position ── */
+.main-sidebar {
+  right: 0;
+  left: auto;
+  box-shadow: -3px 0 8px rgba(0,0,0,.2);
+}
+
+/* ── Navbar margin ── */
+.main-header.navbar {
+  margin-right: 250px;
+  margin-left: 0;
+}
+
+/* ── Content + Footer ── */
+.content-wrapper,
+.main-footer {
+  margin-right: 250px;
+  margin-left: 0;
+  transition: margin-right .3s ease-in-out;
+}
+
+/* ── Sidebar collapsed ── */
+.sidebar-collapse .main-sidebar {
+  right: -250px;
+  left: auto;
+}
+.sidebar-collapse .content-wrapper,
+.sidebar-collapse .main-footer,
+.sidebar-collapse .main-header.navbar {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* ── Sidebar mini hover expand ── */
+.sidebar-mini.sidebar-collapse .main-sidebar:hover {
+  right: 0;
+}
+
+/* ── Sidebar border ── */
+.main-sidebar {
+  border-left: 1px solid rgba(255,255,255,.1);
+  border-right: none;
+}
+
+/* ── Nav treeview indent ── */
+.nav-sidebar .nav-treeview {
+  padding-right: 1rem;
+  padding-left: 0;
+}
+
+/* ── Card tools ── */
+.card-tools {
+  float: left;
+  margin-right: 0;
+  margin-left: -.625rem;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  flex-direction: row-reverse;
+}
+.breadcrumb-item + .breadcrumb-item {
+  padding-right: .5rem;
+  padding-left: 0;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+  padding-right: 0;
+  padding-left: .5rem;
+  float: right;
+}
+
+/* ── Input group ── */
+.input-group > .input-group-prepend > .input-group-text,
+.input-group > .input-group-prepend > .btn {
+  border-radius: 0 .25rem .25rem 0;
+}
+.input-group > .form-control:not(:last-child) {
+  border-radius: .25rem 0 0 .25rem;
+}
+
+/* ── Dropdown menus ── */
+.dropdown-menu-right {
+  right: auto;
+  left: 0;
+}
+
+/* ── Float utilities ── */
+.float-right { float: left !important; }
+.float-left  { float: right !important; }
+
+/* ── Navbar brand text spacing ── */
+.brand-text {
+  margin-right: .5rem;
+  margin-left: 0;
+}
+
+/* ── FontAwesome — never flip icon fonts ── */
+i,
+.fas, .far, .fal, .fab, .fad,
+[class^="fa-"],
+[class*=" fa-"] {
+  font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands" !important;
+}
+
+/* ── Arabic font ── */
+body,
+.nav-sidebar .nav-link p,
+.brand-text,
+.user-panel .info,
+.card-title,
+.card-body,
+h1, h2, h3, h4, h5, h6,
+p, span, a, button, input, select, textarea, label {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+}

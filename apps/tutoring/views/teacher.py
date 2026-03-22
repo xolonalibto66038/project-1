@@ -15,7 +15,7 @@ from apps.authentication.decorators import teacher_required
 
 from ..helpers import convert_to_browser_join_url, redirect_back
 from ..models import TutoringSession
-from ..services import MeetService, ZoomService
+from ..services import ZoomService  # MeetService
 
 
 @login_required
@@ -255,39 +255,39 @@ def confirm_session(request, session_id):
     return redirect("tutoring:teacher:teacher-sessions")
 
 
-@login_required
-@teacher_required
-@transaction.atomic
-def confirm_meet_session(request, session_id):
+# @login_required
+# @teacher_required
+# @transaction.atomic
+# def confirm_meet_session(request, session_id):
 
-    session = TutoringSession.objects.select_for_update().get(
-        id=session_id,
-        teacher=request.user,
-    )
+#     session = TutoringSession.objects.select_for_update().get(
+#         id=session_id,
+#         teacher=request.user,
+#     )
 
-    if session.status != TutoringSession.Status.PAYMENT_AUTHORIZED:
-        raise ValidationError("Payment not authorized")
+#     if session.status != TutoringSession.Status.PAYMENT_AUTHORIZED:
+#         raise ValidationError("Payment not authorized")
 
-    scheduled_at_str = request.POST.get("scheduled_at")
-    scheduled_at = parse_datetime(scheduled_at_str)
+#     scheduled_at_str = request.POST.get("scheduled_at")
+#     scheduled_at = parse_datetime(scheduled_at_str)
 
-    if not scheduled_at:
-        raise ValidationError("Invalid datetime")
+#     if not scheduled_at:
+#         raise ValidationError("Invalid datetime")
 
-    scheduled_at = timezone.make_aware(scheduled_at)
-    session.scheduled_at = scheduled_at
-    session.save(update_fields=["scheduled_at"])  # save before API call
+#     scheduled_at = timezone.make_aware(scheduled_at)
+#     session.scheduled_at = scheduled_at
+#     session.save(update_fields=["scheduled_at"])  # save before API call
 
-    meeting = MeetService.create_meeting(session)
+#     meeting = MeetService.create_meeting(session)
 
-    session.meeting_id = meeting["event_id"]
-    session.meeting_join_url = meeting["join_url"]
-    session.meeting_start_url = meeting["start_url"]
-    session.status = TutoringSession.Status.CONFIRMED
-    session.confirmed_at = timezone.now()
-    session.save()
+#     session.meeting_id = meeting["event_id"]
+#     session.meeting_join_url = meeting["join_url"]
+#     session.meeting_start_url = meeting["start_url"]
+#     session.status = TutoringSession.Status.CONFIRMED
+#     session.confirmed_at = timezone.now()
+#     session.save()
 
-    return redirect("tutoring:teacher:teacher-sessions")
+#     return redirect("tutoring:teacher:teacher-sessions")
 
 
 @login_required

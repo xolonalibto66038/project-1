@@ -6,25 +6,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% endblock %} | EMS</title>
-
   {% include "includes/styles.html" %}
   {% block extra_css %}{% endblock %}
 </head>
 
-<body class="hold-transition
-  {% if request.user.is_authenticated %}
-    sidebar-mini
-  {% else %}
-    layout-top-nav
-  {% endif %}
-  layout-navbar-fixed layout-fixed sidebar-collapse">
+<body class="hold-transition {% if request.user.is_authenticated %}sidebar-mini{% else %}layout-top-nav{% endif %} layout-navbar-fixed layout-fixed sidebar-collapse">
 
 <div class="wrapper">
-
-  {# ================= Navbar ================= #}
   {% include "includes/navbar.html" %}
 
-  {# ================= Sidebar ================= #}
   {% if request.user.is_authenticated %}
     {% if request.user.is_student %}
       {% include "includes/sidebar.html" %}
@@ -33,84 +23,27 @@
     {% endif %}
   {% endif %}
 
-  {# ================= Content Wrapper ================= #}
   <div class="content-wrapper">
-    <!-- {% if messages %}
-        <div>
-            <strong>{% trans "Messages:" %}</strong>
-            <ul>
-                {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-            </ul>
-        </div>
-    {% endif %} -->
-
-    {# ================= Global Notifications ================= #}
     {% if request.user.is_authenticated %}
       <section class="content pt-2 pb-0">
         <div class="container-fluid">
           <div class="row">
-            <div class="col-12 col-md-10 col-lg-12 mx-auto">
-
-              {# -------- Slim Profile Alert -------- #}
-              {% comment %} {% if not request.user.is_profile_complete %}
-                <div class="alert alert-warning alert-dismissible py-2 px-3 mb-2 shadow-sm border-0">
-                  <button type="button" class="close pt-2" data-dismiss="alert" aria-hidden="true">&times;</button>
-                  
-                  <div class="d-flex align-items-center">
-                    <i class="fas fa-user-check mr-3 text-dark"></i>
-                    <div class="text-sm">
-                      <strong>Profile {{ request.user.get_profile_completion_percentage }}% complete.</strong> 
-                      <span class="d-none d-sm-inline">Personalize your experience by completing your info.</span>
-                    </div>
-                    <a href="#" class="btn btn-xs btn-dark ml-auto mr-4">
-                      Complete
-                    </a>
-                  </div>
-                </div>
-              {% endif %} {% endcomment %}
-
-              {# -------- Slim Email Alert -------- #}
-              {% comment %} {% if not request.user.is_email_verified %}
-                <div class="alert alert-info alert-dismissible py-2 px-3 mb-2 shadow-sm border-0">
-                  <button type="button" class="close pt-2" data-dismiss="alert" aria-hidden="true">&times;</button>
-                  
-                  <div class="d-flex align-items-center">
-                    <i class="fas fa-envelope mr-3"></i>
-                    <div class="text-sm">
-                      <strong>Verify Email:</strong> 
-                      <span class="d-none d-md-inline">Check your inbox for <b>{{ request.user.email }}</b>.</span>
-                    </div>
-                    <a href="{% url 'account_email' %}" class="btn btn-xs btn-outline-light border-0 text-sm ml-auto mr-4">
-                      <u>Resend</u>
-                    </a>
-                  </div>
-                </div>
-              {% endif %} {% endcomment %}
-
+            <div class="col-12 col-lg-12 mx-auto">
+              {# global alerts go here #}
             </div>
           </div>
         </div>
       </section>
     {% endif %}
-
-    {# ================= Page Content ================= #}
     {% block content %}{% endblock %}
-
   </div>
-  {# /.content-wrapper #}
 
-  {# ================= Footer ================= #}
   {% include "includes/footer.html" %}
-
-  {# ================= Control Sidebar ================= #}
   {% include "includes/control_sidebar.html" %}
-
 </div>
-{# /.wrapper #}
 
 {% include "includes/scripts.html" %}
 {% include "includes/toasts.html" %}
 {% block extra_js %}{% endblock %}
-
 </body>
 </html>

@@ -2,47 +2,38 @@
 {% load i18n %}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
-  <!-- Brand Logo -->
   <a href="{% url 'pages:landing' %}" class="brand-link text-center">
     <img src="{% static 'dist/img/AdminLTELogo.png' %}"
-         alt="EMS Logo"
+         alt="{% trans 'EMS Logo' %}"
          class="brand-image img-circle elevation-3">
     <span class="brand-text font-weight-light ml-2">EMS</span>
   </a>
 
-  <!-- Sidebar -->
   <div class="sidebar">
-
-    <!-- User Panel -->
     <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
         <img src="{% static 'dist/img/user2-160x160.jpg' %}"
              class="img-circle elevation-2"
-             alt="User Image">
+             alt="{% trans 'User Image' %}">
       </div>
       <div class="info">
         <a href="#" class="d-block font-weight-bold">
           {{ user.first_name }} {{ user.last_name }}
         </a>
         {% if request.user.is_student %}
-        <small class="text-muted">
-          {{ request.user.student_profile.grade.name }}
-        </small>
+        <small class="text-muted">{{ request.user.student_profile.grade.name }}</small>
         {% else %}
-        <small class="text-muted">
-          {{ request.user.teacher_profile.grade.name }}
-        </small>
+        <small class="text-muted">{{ request.user.teacher_profile.grade.name }}</small>
         {% endif %}
       </div>
     </div>
 
-    <!-- Sidebar Search -->
     <div class="form-inline mb-2">
       <div class="input-group" data-widget="sidebar-search">
         <input class="form-control form-control-sidebar"
                type="search"
-               placeholder="Search..."
-               aria-label="Search">
+               placeholder="{% trans 'Search...' %}"
+               aria-label="{% trans 'Search' %}">
         <div class="input-group-append">
           <button class="btn btn-sidebar">
             <i class="fas fa-search fa-fw"></i>
@@ -52,47 +43,40 @@
     </div>
 
     {% with current_view=request.resolver_match.view_name %}
-    <!-- Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent"
           data-widget="treeview"
           role="menu"
           data-accordion="false">
 
-        <!-- Dashboard -->
         <li class="nav-item">
           <a href="{% url 'dashboard' %}"
              class="nav-link {% if current_view == 'dashboard' %}active{% endif %}">
             <i class="nav-icon fas fa-chart-pie"></i>
-            <p>Dashboard</p>
+            <p>{% trans "Dashboard" %}</p>
           </a>
         </li>
 
-        <!-- Subjects -->
         <li class="nav-item">
           <a href="{% url 'curriculum:grade:grade-detail' user.student_profile.grade.pk %}"
-              class="nav-link {% if current_view == 'curriculum:grade:grade-detail' %}active{% endif %}">
+             class="nav-link {% if current_view == 'curriculum:grade:grade-detail' %}active{% endif %}">
             <i class="nav-icon fas fa-book-open"></i>
-            <p>Subjects</p>
+            <p>{% trans "Subjects" %}</p>
           </a>
         </li>
 
-        <!-- Resources -->
         <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-folder-open"></i>
-            <p>
-              Resolved Resources
-            </p>
+            <p>{% trans "Resolved Resources" %}</p>
           </a>
         </li>
 
-        <!-- Sessions -->
         <li class="nav-item">
           <a href="{% url 'tutoring:student:student-sessions' %}"
              class="nav-link {% if current_view == 'tutoring:student:student-sessions' %}active{% endif %}">
             <i class="nav-icon fas fa-calendar-check"></i>
-            <p>My sessions</p>
+            <p>{% trans "My Sessions" %}</p>
           </a>
         </li>
 
@@ -100,9 +84,10 @@
           <a href="{% url 'feedback:bookmark:student-bookmarks' %}"
              class="nav-link {% if current_view == 'feedback:bookmark:student-bookmarks' %}active{% endif %}">
             <i class="nav-icon fas fa-bookmark"></i>
-            <p>My Bookmarks</p>
+            <p>{% trans "My Bookmarks" %}</p>
           </a>
         </li>
+
       </ul>
     </nav>
     {% endwith %}

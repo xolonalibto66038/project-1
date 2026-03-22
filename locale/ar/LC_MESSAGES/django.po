@@ -1,0 +1,498 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-22 01:32+0100\n"
+"PO-Revision-Date: 2026-03-22 01:40+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: .\apps\accounts\admin\custom_user.py:19 .\apps\accounts\models\student.py:51
+msgid "Student Profile"
+msgstr "ملف الطالب"
+
+#: .\apps\accounts\admin\custom_user.py:29 .\apps\accounts\models\teacher.py:68
+msgid "Teacher Profile"
+msgstr "ملف الأستاذ"
+
+#: .\apps\accounts\admin\custom_user.py:91
+msgid "Authentication"
+msgstr "التحقق من الهوية"
+
+#: .\apps\accounts\admin\custom_user.py:97
+msgid "Personal Info"
+msgstr "المعلومات الشخصية"
+
+#: .\apps\accounts\admin\custom_user.py:112
+msgid "Role & Verification"
+msgstr "الدور والتحقق"
+
+#: .\apps\accounts\admin\custom_user.py:118
+msgid "Permissions"
+msgstr "الصلاحيات"
+
+#: .\apps\accounts\admin\custom_user.py:131
+msgid "Timestamps"
+msgstr "الأختام الزمنية"
+
+#: .\apps\accounts\admin\custom_user.py:142
+msgid "Required Info"
+msgstr "المعلومات المطلوبة"
+
+#: .\apps\accounts\admin\custom_user.py:164
+#: .\apps\accounts\models\custom_user.py:51
+msgid "Avatar"
+msgstr "الصورة الرمزية"
+
+#: .\apps\accounts\admin\custom_user.py:181
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
+#: .\apps\accounts\admin\custom_user.py:185
+#: .\apps\accounts\models\custom_user.py:42
+msgid "Role"
+msgstr "الدور"
+
+#: .\apps\accounts\admin\custom_user.py:207
+msgid "Verify selected users (email)"
+msgstr "تأكيد المستخدمين المحددين (بريد إلكتروني)"
+
+#: .\apps\accounts\admin\custom_user.py:212
+msgid "Unverify selected users"
+msgstr "إلغاء تأكيد المستخدمين المحددين"
+
+#: .\apps\accounts\admin\custom_user.py:219
+msgid "Activate selected users"
+msgstr "تفعيل المستخدمين المحددين"
+
+#: .\apps\accounts\admin\custom_user.py:224
+msgid "Deactivate selected users"
+msgstr "تعطيل المستخدمين المحددين"
+
+#: .\apps\accounts\admin\custom_user.py:250
+msgid "Impersonation requires django-hijack to be installed and configured."
+msgstr "تتطلب محاكاة الهوية تثبيت وإعداد django-hijack."
+
+#: .\apps\accounts\admin\student.py:54 .\apps\accounts\admin\teacher.py:49
+msgid "User Account"
+msgstr "حساب المستخدم"
+
+#: .\apps\accounts\admin\student.py:60
+msgid "Academic Info"
+msgstr "المعلومات الأكاديمية"
+
+#: .\apps\accounts\admin\student.py:64
+msgid "Specialty is only applicable to Secondaire students."
+msgstr "التخصص ينطبق فقط على طلاب الطور الثانوي."
+
+#: .\apps\accounts\admin\student.py:69 .\apps\accounts\admin\teacher.py:72
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+#: .\apps\accounts\admin\student.py:90 .\apps\accounts\admin\teacher.py:93
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: .\apps\accounts\admin\student.py:94
+msgid "Level"
+msgstr "المستوى"
+
+#: .\apps\accounts\admin\student.py:112 .\apps\accounts\admin\teacher.py:109
+#: .\apps\accounts\models\student.py:46 .\apps\accounts\models\teacher.py:47
+msgid "Bio"
+msgstr "السيرة الذاتية"
+
+#: .\apps\accounts\admin\student.py:118
+msgid "Clear specialty for selected students"
+msgstr "مسح التخصص للطلاب المحددين"
+
+#: .\apps\accounts\admin\teacher.py:55
+msgid "Teaching Scope"
+msgstr "نطاق التدريس"
+
+#: .\apps\accounts\admin\teacher.py:59
+msgid ""
+"A teacher is scoped to a Level + Subject. The subject must belong to the "
+"selected level."
+msgstr "يتم تحديد نطاق الأستاذ حسب المستوى + المادة. يجب أن تنتمي المادة إلى المستوى المختار."
+
+#: .\apps\accounts\admin\teacher.py:65
+msgid "Verification"
+msgstr "التحقق"
+
+#: .\apps\accounts\admin\teacher.py:68
+msgid "Only verified teachers can publish resources."
+msgstr "فقط الأساتذة الموثقون يمكنهم نشر الموارد."
+
+#: .\apps\accounts\admin\teacher.py:97
+msgid "Verified"
+msgstr "موثق"
+
+#: .\apps\accounts\admin\teacher.py:115
+msgid "Verify selected teachers"
+msgstr "توثيق الأساتذة المحددين"
+
+#: .\apps\accounts\admin\teacher.py:124
+msgid "Unverify selected teachers"
+msgstr "إلغاء توثيق الأساتذة المحددين"
+
+#: .\apps\accounts\choices.py:8
+msgid "Student"
+msgstr "طالب"
+
+#: .\apps\accounts\choices.py:9
+msgid "Teacher"
+msgstr "أستاذ"
+
+#: .\apps\accounts\choices.py:13
+msgid "Male"
+msgstr "ذكر"
+
+#: .\apps\accounts\choices.py:14
+msgid "Female"
+msgstr "أنثى"
+
+# --- Algerian Wilayas ---
+#: .\apps\accounts\choices.py:18
+msgid "Adrar"
+msgstr "أدرار"
+
+#: .\apps\accounts\choices.py:19
+msgid "Chlef"
+msgstr "الشلف"
+
+#: .\apps\accounts\choices.py:20
+msgid "Laghouat"
+msgstr "الأغواط"
+
+#: .\apps\accounts\choices.py:21
+msgid "Oum El Bouaghi"
+msgstr "أم البواقي"
+
+#: .\apps\accounts\choices.py:22
+msgid "Batna"
+msgstr "باتنة"
+
+#: .\apps\accounts\choices.py:23
+msgid "Béjaïa"
+msgstr "بجاية"
+
+#: .\apps\accounts\choices.py:24
+msgid "Biskra"
+msgstr "بسكرة"
+
+#: .\apps\accounts\choices.py:25
+msgid "Béchar"
+msgstr "بشار"
+
+#: .\apps\accounts\choices.py:26
+msgid "Blida"
+msgstr "البليدة"
+
+#: .\apps\accounts\choices.py:27
+msgid "Bouira"
+msgstr "البويرة"
+
+#: .\apps\accounts\choices.py:28
+msgid "Tamanrasset"
+msgstr "تمنراست"
+
+#: .\apps\accounts\choices.py:29
+msgid "Tébessa"
+msgstr "تبسة"
+
+#: .\apps\accounts\choices.py:30
+msgid "Tlemcen"
+msgstr "تلمسان"
+
+#: .\apps\accounts\choices.py:31
+msgid "Tiaret"
+msgstr "تيارت"
+
+#: .\apps\accounts\choices.py:32
+msgid "Tizi Ouzou"
+msgstr "تيزي وزو"
+
+#: .\apps\accounts\choices.py:33
+msgid "Alger"
+msgstr "الجزائر"
+
+#: .\apps\accounts\choices.py:34
+msgid "Djelfa"
+msgstr "الجلفة"
+
+#: .\apps\accounts\choices.py:35
+msgid "Jijel"
+msgstr "جيجل"
+
+#: .\apps\accounts\choices.py:36
+msgid "Sétif"
+msgstr "سطيف"
+
+#: .\apps\accounts\choices.py:37
+msgid "Saïda"
+msgstr "سعيدة"
+
+#: .\apps\accounts\choices.py:38
+msgid "Skikda"
+msgstr "سكيكدة"
+
+#: .\apps\accounts\choices.py:39
+msgid "Sidi Bel Abbès"
+msgstr "سيدي بلعباس"
+
+#: .\apps\accounts\choices.py:40
+msgid "Annaba"
+msgstr "عنابة"
+
+#: .\apps\accounts\choices.py:41
+msgid "Guelma"
+msgstr "قالمة"
+
+#: .\apps\accounts\choices.py:42
+msgid "Constantine"
+msgstr "قسنطينة"
+
+#: .\apps\accounts\choices.py:43
+msgid "Médéa"
+msgstr "المدية"
+
+#: .\apps\accounts\choices.py:44
+msgid "Mostaganem"
+msgstr "مستغانم"
+
+#: .\apps\accounts\choices.py:45
+msgid "M'Sila"
+msgstr "المسيلة"
+
+#: .\apps\accounts\choices.py:46
+msgid "Mascara"
+msgstr "معسكر"
+
+#: .\apps\accounts\choices.py:47
+msgid "Ouargla"
+msgstr "ورقلة"
+
+#: .\apps\accounts\choices.py:48
+msgid "Oran"
+msgstr "وهران"
+
+#: .\apps\accounts\choices.py:49
+msgid "El Bayadh"
+msgstr "البيض"
+
+#: .\apps\accounts\choices.py:50
+msgid "Illizi"
+msgstr "إليزي"
+
+#: .\apps\accounts\choices.py:51
+msgid "Bordj Bou Arréridj"
+msgstr "برج بوعريريج"
+
+#: .\apps\accounts\choices.py:52
+msgid "Boumerdès"
+msgstr "بومرداس"
+
+#: .\apps\accounts\choices.py:53
+msgid "El Tarf"
+msgstr "الطارف"
+
+#: .\apps\accounts\choices.py:54
+msgid "Tindouf"
+msgstr "تندوف"
+
+#: .\apps\accounts\choices.py:55
+msgid "Tissemsilt"
+msgstr "تيسمسيلت"
+
+#: .\apps\accounts\choices.py:56
+msgid "El Oued"
+msgstr "الوادي"
+
+#: .\apps\accounts\choices.py:57
+msgid "Khenchela"
+msgstr "خنشلة"
+
+#: .\apps\accounts\choices.py:58
+msgid "Souk Ahras"
+msgstr "سوق أهراس"
+
+#: .\apps\accounts\choices.py:59
+msgid "Tipaza"
+msgstr "تيبازة"
+
+#: .\apps\accounts\choices.py:60
+msgid "Mila"
+msgstr "ميلة"
+
+#: .\apps\accounts\choices.py:61
+msgid "Aïn Defla"
+msgstr "عين الدفلة"
+
+#: .\apps\accounts\choices.py:62
+msgid "Naâma"
+msgstr "النعامة"
+
+#: .\apps\accounts\choices.py:63
+msgid "Aïn Témouchent"
+msgstr "عين تموشنت"
+
+#: .\apps\accounts\choices.py:64
+msgid "Ghardaïa"
+msgstr "غرداية"
+
+#: .\apps\accounts\choices.py:65
+msgid "Relizane"
+msgstr "غليزان"
+
+# --- Added Wilayas ---
+#: .\apps\accounts\choices.py:66
+msgid "Timimoun"
+msgstr "تيميمون"
+
+#: .\apps\accounts\choices.py:67
+msgid "Bordj Badji Mokhtar"
+msgstr "برج باجي مختار"
+
+#: .\apps\accounts\choices.py:68
+msgid "Ouled Djellal"
+msgstr "أولاد جلال"
+
+#: .\apps\accounts\choices.py:69
+msgid "Béni Abbès"
+msgstr "بني عباس"
+
+#: .\apps\accounts\choices.py:70
+msgid "In Salah"
+msgstr "عين صالح"
+
+#: .\apps\accounts\choices.py:71
+msgid "In Guezzam"
+msgstr "عين قزام"
+
+#: .\apps\accounts\choices.py:72
+msgid "Touggourt"
+msgstr "تقرت"
+
+#: .\apps\accounts\choices.py:73
+msgid "Djanet"
+msgstr "جانت"
+
+#: .\apps\accounts\choices.py:74
+msgid "El M'Ghair"
+msgstr "المغير"
+
+#: .\apps\accounts\choices.py:75
+msgid "El Ménéa"
+msgstr "المنيعة"
+
+# --- General System Messages ---
+#: .\apps\accounts\forms\student.py:33
+msgid "The selected specialty does not belong to the selected grade."
+msgstr "التخصص المختار لا ينتمي إلى السنة الدراسية المختارة."
+
+#: .\apps\accounts\managers\user.py:11
+msgid "Email address is required."
+msgstr "عنوان البريد الإلكتروني مطلوب."
+
+#: .\apps\accounts\models\custom_user.py:22
+msgid "First Name"
+msgstr "الاسم الشخصي"
+
+#: .\apps\accounts\models\custom_user.py:27
+msgid "Last Name"
+msgstr "اللقب"
+
+#: .\apps\accounts\models\custom_user.py:34
+msgid "Email Address"
+msgstr "عنوان البريد الإلكتروني"
+
+#: .\apps\accounts\models\custom_user.py:57
+msgid "Phone Number"
+msgstr "رقم الهاتف"
+
+#: .\apps\accounts\models\custom_user.py:58
+msgid "Algerian phone number (e.g. 0555 123 456)."
+msgstr "رقم هاتف جزائري (مثلاً: 0555 123 456)."
+
+#: .\apps\accounts\models\custom_user.py:63
+msgid "Date of Birth"
+msgstr "تاريخ الميلاد"
+
+#: .\apps\accounts\models\custom_user.py:70
+msgid "Gender"
+msgstr "الجنس"
+
+#: .\apps\accounts\models\custom_user.py:77
+msgid "Wilaya"
+msgstr "الولاية"
+
+#: .\apps\accounts\models\custom_user.py:84
+msgid "Is Verified"
+msgstr "تم التوثيق"
+
+#: .\apps\accounts\models\custom_user.py:94
+msgid "User"
+msgstr "مستخدم"
+
+#: .\apps\accounts\models\custom_user.py:95
+msgid "Users"
+msgstr "المستخدمون"
+
+#: .\apps\accounts\models\student.py:29
+msgid "Grade"
+msgstr "السنة الدراسية"
+
+#: .\apps\accounts\models\student.py:38
+msgid "Specialty"
+msgstr "التخصص"
+
+#: .\apps\accounts\models\teacher.py:39
+msgid "Subject"
+msgstr "المادة"
+
+#: .\apps\accounts\models\teacher.py:63
+msgid "Hourly Price"
+msgstr "السعر بالساعة"
+
+#: .\apps\assessment\admin\answer.py:109
+msgid "Correct"
+msgstr "صحيح"
+
+#: .\apps\assessment\choices.py:6
+msgid "Essay"
+msgstr "مقال"
+
+#: .\apps\assessment\choices.py:7
+msgid "Multiple Choice"
+msgstr "خيارات متعددة"
+
+#: .\apps\assessment\choices.py:8
+msgid "True / False"
+msgstr "صحيح / خطأ"
+
+#: .\apps\assessment\models\quiz.py:112
+msgid "Quiz"
+msgstr "اختبار"
+
+#: .\apps\assessment\models\quiz.py:113
+msgid "Quizzes"
+msgstr "اختبارات"
+
+#: .\apps\billing\choices.py:12
+msgid "Free"
+msgstr "مجاني"
+
+#: .\apps\billing\choices.py:14
+msgid "Premium"
+msgstr "متميز"
+
+#: .\apps\content\admin\chapter.py:84
+msgid "Courses"
+msgstr "دروس"
