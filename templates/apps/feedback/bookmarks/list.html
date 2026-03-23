@@ -1,6 +1,8 @@
 {% extends "layouts/base.html" %} 
 {% load static i18n %} 
 
+{% block title %}{% trans "My favorites" %}{% endblock title %}
+
 {% block extra_css %}
 {% endblock %} 
 
@@ -20,6 +22,52 @@
           </div>
 
           <div class="card-body">
+            <div class="card card-outline card-secondary mb-3">
+              <div class="card-body py-2">
+                <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
+
+                  {# Search in note #}
+                  <div class="input-group input-group-sm" style="width:240px;">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" name="q" value="{{ filter_q }}"
+                          class="form-control" placeholder="{% trans 'Search in notes…' %}">
+                  </div>
+
+                  {# Filter by content type #}
+                  <select name="type" class="form-control form-control-sm" style="width:180px;">
+                    <option value="">{% trans "All types" %}</option>
+                    {% for ct in allowed_types %}
+                      <option value="{{ ct }}"
+                              {% if filter_type == ct %}selected{% endif %}>
+                        {{ ct|capfirst }}
+                      </option>
+                    {% endfor %}
+                  </select>
+
+                  <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+                  </button>
+
+                  {% if filter_q or filter_type %}
+                  <a href="?" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+                  </a>
+                  {% endif %}
+
+                </form>
+              </div>
+            </div>
+
+            {# Contextual result count when filters are active #}
+            {% if filter_q or filter_type %}
+            <p class="text-muted small mb-2">
+              {% blocktrans with count=total_count %}
+                {{ count }} bookmark(s) match your filters.
+              {% endblocktrans %}
+            </p>
+            {% endif %}
 
             {% if grouped_bookmarks %}
               <div class="row">
@@ -40,27 +88,31 @@
                         <ul class="list-group list-group-flush">
 
                           {% for bookmark in items %}
-                            <li class="list-group-item">
-                              <div class="d-flex align-items-start">
+                          <li class="list-group-item">
+                            <div class="d-flex align-items-start">
 
-                                <i class="fas fa-link text-muted mr-2 mt-1"></i>
+                              <i class="fas fa-link text-muted mr-2 mt-1"></i>
 
-                                <div class="flex-grow-1">
-                                  <a
-                                    href="{{ bookmark.target_url }}"
-                                    class="font-weight-bold text-dark d-block"
-                                  >
-                                    {{ bookmark.target_name }}
-                                  </a>
+                              <div class="flex-grow-1">
+                                <a href="{{ bookmark.target_url }}"
+                                  class="font-weight-bold text-dark d-block">
+                                  {{ bookmark.target_name }}
+                                </a>
 
-                                  <small class="text-muted">
-                                    <i class="far fa-clock mr-1"></i>
-                                    {{ bookmark.created_at|date:"SHORT_DATETIME_FORMAT" }}
-                                  </small>
-                                </div>
+                                {% if bookmark.note %}
+                                <p class="text-muted small mb-1 mt-1" style="white-space: pre-line;">
+                                  <i class="fas fa-sticky-note mr-1"></i>{{ bookmark.note }}
+                                </p>
+                                {% endif %}
 
+                                <small class="text-muted">
+                                  <i class="far fa-clock mr-1"></i>
+                                  {{ bookmark.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                                </small>
                               </div>
-                            </li>
+
+                            </div>
+                          </li>
                           {% endfor %}
 
                         </ul>
@@ -92,6 +144,12 @@
             {% endif %}
 
           </div>
+          {# Pagination #}
+          {% if is_paginated %}
+          <div class="card-footer">
+            {% include "includes/pagination.html" %}
+          </div>
+          {% endif %}
         </div>
 
       </div>

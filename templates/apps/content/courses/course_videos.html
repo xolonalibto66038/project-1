@@ -291,12 +291,26 @@
               <span>{% if current_video.is_seen %}{% trans "Seen" %}{% else %}{% trans "Mark as seen" %}{% endif %}</span>
             </button>
             {# Bookmark #}
-            <button id="bookmark-video-btn"
+            {% comment %} <button id="bookmark-video-btn"
                     data-url="{% url 'feedback:bookmark:video-bookmark' pk=current_video.pk %}"
                     data-bookmarked="{{ current_video_bookmarked|yesno:'true,false' }}"
                     class="btn btn-sm {% if current_video_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
               <i class="fas fa-bookmark mr-1"></i>
               <span>{% if current_video_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}</span>
+            </button> {% endcomment %}
+            <button
+              id="bookmark-btn"
+              type="button"
+              data-toggle="modal"
+              data-target="#bookmarkModal"
+              data-url="{% url 'feedback:bookmark:video-bookmark' pk=current_video.pk %}"
+              data-bookmarked="{{ current_video_bookmarked|yesno:'true,false' }}"
+              data-note="{{ bookmark_note|default:'' }}"
+              class="btn btn-sm {% if current_video_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %}">
+              <i class="fas fa-bookmark mr-1"></i>
+              <span id="bookmark-label">
+                {% if current_video_bookmarked %}{% trans "Bookmarked" %}{% else %}{% trans "Bookmark" %}{% endif %}
+              </span>
             </button>
           </div>
           {% endif %}
@@ -323,6 +337,63 @@
 
 </div>
 </section>
+
+{# ── Bookmark modal ── #}
+{% if user.is_authenticated and user.is_student %}
+<div class="modal fade" id="bookmarkModal" tabindex="-1" role="dialog"
+     aria-labelledby="bookmarkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookmarkModalLabel">
+          <i class="fas fa-bookmark mr-2 text-warning"></i>
+          <span id="modal-title-text">{% trans "Bookmark this resource" %}</span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{% trans 'Close' %}">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group mb-0">
+          <label for="bookmark-note" class="font-weight-bold text-muted small text-uppercase mb-1">
+            <i class="fas fa-sticky-note mr-1"></i>
+            {% trans "Personal note" %}
+            <span class="font-weight-normal text-muted">({% trans "optional" %})</span>
+          </label>
+          <textarea id="bookmark-note"
+                    class="form-control"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="{% trans 'Add a note to remember why you saved this…' %}"></textarea>
+          <small class="text-muted float-right mt-1">
+            <span id="note-char-count">0</span>/500
+          </small>
+        </div>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" id="remove-bookmark-btn"
+                class="btn btn-outline-danger btn-sm"
+                style="display:none !important;">
+          <i class="fas fa-trash mr-1"></i>{% trans "Remove bookmark" %}
+        </button>
+        <div class="ml-auto" style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+            {% trans "Cancel" %}
+          </button>
+          <button type="button" id="confirm-bookmark-btn" class="btn btn-warning btn-sm">
+            <i class="fas fa-bookmark mr-1"></i>
+            <span id="confirm-label">{% trans "Save bookmark" %}</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -426,7 +497,7 @@
   }
 
   // ── Bookmark video toggle ─────────────────────────────────────
-  const bookmarkBtn = document.getElementById('bookmark-video-btn');
+  {% comment %} const bookmarkBtn = document.getElementById('bookmark-video-btn');
   if (bookmarkBtn) {
     bookmarkBtn.addEventListener('click', async () => {
       bookmarkBtn.disabled = true;
@@ -465,8 +536,115 @@
         bookmarkBtn.disabled = false;
       }
     });
+  } {% endcomment %}
+
+})();
+(function () {
+  const triggerBtn   = document.getElementById('bookmark-btn');
+  const confirmBtn   = document.getElementById('confirm-bookmark-btn');
+  const removeBtn    = document.getElementById('remove-bookmark-btn');
+  const noteArea     = document.getElementById('bookmark-note');
+  const charCount    = document.getElementById('note-char-count');
+  const label        = document.getElementById('bookmark-label');
+  const confirmLabel = document.getElementById('confirm-label');
+  const modalTitle   = document.getElementById('modal-title-text');
+
+  if (!triggerBtn || !confirmBtn) return;
+
+  const url = triggerBtn.dataset.url;
+  let isBookmarked = triggerBtn.dataset.bookmarked === 'true';
+  let currentNote  = triggerBtn.dataset.note || '';
+
+  function syncModal() {
+    noteArea.value        = currentNote;
+    charCount.textContent = currentNote.length;
+
+    if (isBookmarked) {
+      modalTitle.textContent   = '{% trans "Edit bookmark" %}';
+      confirmLabel.textContent = '{% trans "Update note" %}';
+      removeBtn.style.display  = 'inline-flex';
+    } else {
+      modalTitle.textContent   = '{% trans "Bookmark this resource" %}';
+      confirmLabel.textContent = '{% trans "Save bookmark" %}';
+      removeBtn.style.display  = 'none';
+    }
   }
 
+  function syncButton() {
+    label.textContent = isBookmarked
+      ? '{% trans "Bookmarked" %}'
+      : '{% trans "Bookmark" %}';
+    triggerBtn.classList.toggle('btn-warning', isBookmarked);
+    triggerBtn.classList.toggle('btn-outline-warning', !isBookmarked);
+    triggerBtn.dataset.bookmarked = isBookmarked ? 'true' : 'false';
+    triggerBtn.dataset.note       = currentNote;
+  }
+
+  // Character counter
+  noteArea.addEventListener('input', () => {
+    charCount.textContent = noteArea.value.length;
+  });
+
+  // Open modal — pre-fill with current note
+  triggerBtn.addEventListener('click', syncModal);
+
+  // Confirm — save or update
+  confirmBtn.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
+    const note = noteArea.value.trim();
+
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ note, action: 'save' }),
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
+
+      isBookmarked  = data.bookmarked;
+      currentNote   = data.note || '';
+      syncButton();
+      $('#bookmarkModal').modal('hide');
+
+    } catch (err) {
+      console.error('Bookmark error:', err);
+    } finally {
+      confirmBtn.disabled = false;
+    }
+  });
+
+  // Remove — POST with empty note to toggle off
+  removeBtn.addEventListener('click', async () => {
+    removeBtn.disabled = true;
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ note: '', action: 'remove' }),
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
+
+      isBookmarked = data.bookmarked;
+      currentNote  = '';
+      syncButton();
+      $('#bookmarkModal').modal('hide');
+
+    } catch (err) {
+      console.error('Remove bookmark error:', err);
+    } finally {
+      removeBtn.disabled = false;
+    }
+  });
 })();
 </script>
 {% endblock %}
