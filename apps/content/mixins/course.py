@@ -65,3 +65,33 @@ class CourseMixin:
         ]
 
         return context
+
+
+class CourseSubViewMixin:
+    """
+    Shared behaviour for course sub-page views (videos, quizzes, etc.).
+
+    Provides:
+      - is_student  resolved once in setup()
+      - get_queryset with the deep select_related needed for breadcrumbs
+      - teacher_provider wired to VideoTeacherProvider by default
+
+    Both CourseVideosView and CourseQuizzesView inherit this — DRY across
+    the two views without duplicating the queryset or is_student logic.
+    """
+
+    def setup(self, request, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self._is_student = request.user.is_authenticated and getattr(
+            request.user, "is_student", False
+        )
+
+    def get_queryset(self):
+        from ..models import Course
+
+        return Course.objects.select_related(
+            "chapter__grade_subject__grade__level",
+            "chapter__grade_subject__subject",
+            "grade_subject__grade__level",
+            "grade_subject__subject",
+        ).filter(is_active=True)

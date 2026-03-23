@@ -3,39 +3,42 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count, Q
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from apps.assessment.models import Quiz
 from apps.authentication.mixins import StudentRequiredMixin
-from apps.progress.models import ContentProgress
 
 from ..choices import DifficultyLevel, Term
-from ..consts import RESOURCE_TYPE_CONFIG
-from ..mixins.course import CourseMixin
-from ..models import Course, VideoResource
-from ..selectors import (
-    get_course_by_pk,
-    get_course_exercises,
-    get_course_resources,
-    resolve_course_breadcrumb,
-)
+from ..mixins.course import CourseMixin, CourseSubViewMixin
+from ..models import Course
+from ..selectors import get_course_by_pk, resolve_course_breadcrumb
 from ..services.course import (
+    HAS_SOLUTION_CHOICES,
+    CourseCompletionToggler,
     CourseCrumbBuilder,
     CourseProgressProvider,
+    CourseQuizFilterExtractor,
+    CourseQuizQuerysetBuilder,
+    CourseQuizzesCrumbBuilder,
+    CourseResourceCrumbBuilder,
+    CourseResourceFilterExtractor,
+    CourseResourceQuerysetBuilder,
+    CourseVideosCrumbBuilder,
     CourseVisitRecorder,
     CourseVisitRecorderProtocol,
+    CurrentVideoSelector,
+    ResourceTypeConfigResolver,
     StudentGradeMatchChecker,
+    VideoFilterExtractor,
+    VideoQuerysetBuilder,
+    VideoTeacherProvider,
 )
 
 User = get_user_model()
-
+EMPTY_COURSE_QS = Course.objects.none()
 logger = logging.getLogger(__name__)
 
 
@@ -145,50 +148,55 @@ class CourseDetailView(CourseMixin, DetailView):
             )
 
 
-class CourseExercisesView(CourseMixin, ListView):
-    template_name = "apps/content/courses/course_exercises.html"
-    context_object_name = "exercises"
-    paginate_by = 6
-
-    def get_queryset(self):
-        return get_course_exercises(
-            course=self.course,
-            filters=self.request.GET,
-            user=self.request.user,
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # preserve GET params for pagination links
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        context.update(
-            {
-                "active_tab": "exercises",
-                "difficulty_choices": DifficultyLevel.choices,
-                "has_solution_choices": [
-                    ("", "— All —"),
-                    ("1", "With Solution"),
-                    ("0", "Without Solution"),
-                ],
-                "querystring": qp.urlencode(),
-                # active filter values — re-populate form fields
-                "filter_q": self.request.GET.get("q", ""),
-                "filter_difficulty": self.request.GET.get("difficulty", ""),
-                "filter_has_solution": self.request.GET.get("has_solution", ""),
-                "filter_completed": self.request.GET.get("completed", ""),
-            }
-        )
-
-        return context
-
-
 class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
+    """
+    Displays the video player page for a course.
+
+    is_student is resolved once in setup() and flows through to
+    VideoQuerysetBuilder (controls annotation) and context — never
+    recomputed.
+
+    Responsibilities delegated:
+        - VideoFilterExtractor      → q + teacher + video param
+        - VideoQuerysetBuilder      → filter + conditional annotation
+        - VideoStudentAnnotator     → 4 subqueries (inside builder)
+        - CurrentVideoSelector      → active video from param or first
+        - VideoTeacherProvider      → sidebar teachers query
+        - CourseVideosCrumbBuilder  → null-safe optional crumb chain
+    """
+
     model = Course
     template_name = "apps/content/courses/course_videos.html"
     context_object_name = "course"
+
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        filter_extractor: VideoFilterExtractor | None = None,
+        queryset_builder: VideoQuerysetBuilder | None = None,
+        video_selector: CurrentVideoSelector | None = None,
+        teacher_provider: VideoTeacherProvider | None = None,
+        breadcrumb_builder: CourseVideosCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.filter_extractor = filter_extractor or VideoFilterExtractor()
+        self.queryset_builder = queryset_builder or VideoQuerysetBuilder()
+        self.video_selector = video_selector or CurrentVideoSelector()
+        self.teacher_provider = teacher_provider or VideoTeacherProvider()
+        self.breadcrumb_builder = breadcrumb_builder or CourseVideosCrumbBuilder()
+
+    # ── Setup — is_student resolved exactly once ──────────────────────────────
+
+    def setup(self, request, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self._is_student = request.user.is_authenticated and getattr(
+            request.user, "is_student", False
+        )
+        self._filters = self.filter_extractor.extract(request)
+
+    # ── Queryset (DetailView) ─────────────────────────────────────────────────
 
     def get_queryset(self):
         return Course.objects.select_related(
@@ -198,292 +206,115 @@ class CourseVideosView(LoginRequiredMixin, CourseMixin, DetailView):
             "grade_subject__subject",
         ).filter(is_active=True)
 
-    def get_context_data(self, **kwargs):
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        qp = self.request.GET.copy()
-        qp.pop("video", None)  # ← strip video so it doesn't duplicate
 
         course = self.object
         user = self.request.user
+        filters = self._filters
+        is_student = self._is_student
 
-        # ── Filters ──────────────────────────────────────────────────
-        q = self.request.GET.get("q", "").strip()
-        teacher_id = self.request.GET.get("teacher", "").strip()
-
-        videos = course.videos.filter(is_active=True).order_by("order")
-
-        if q:
-            videos = videos.filter(
-                Q(title__icontains=q) | Q(tags__name__icontains=q)
-            ).distinct()
-
-        if teacher_id:
-            videos = videos.filter(created_by_id=teacher_id)
-
-        # ── Annotate is_seen ─────────────────────────────────────────
-        is_student = user.is_authenticated and getattr(user, "is_student", False)
-
-        if is_student:
-            from django.contrib.contenttypes.models import ContentType
-            from django.db.models import Exists, IntegerField, OuterRef, Subquery
-
-            from apps.feedback.models import Bookmark
-            from apps.progress.models import ContentProgress, VideoWatchProgress
-
-            ct = ContentType.objects.get_for_model(VideoResource)
-            videos = videos.annotate(
-                is_seen=Exists(
-                    ContentProgress.objects.filter(
-                        student=user,
-                        content_type=ct,
-                        object_id=OuterRef("pk"),
-                        is_completed=True,
-                    )
-                ),
-                is_bookmarked=Exists(
-                    Bookmark.objects.filter(
-                        student=user,
-                        content_type=ct,
-                        object_id=OuterRef("pk"),
-                        active=True,
-                    )
-                ),
-                watched_seconds=Subquery(
-                    VideoWatchProgress.objects.filter(
-                        student=user,
-                        video=OuterRef("pk"),
-                    ).values("watched_seconds")[:1],
-                    output_field=IntegerField(),
-                ),
-                duration_seconds=Subquery(
-                    VideoWatchProgress.objects.filter(
-                        student=user,
-                        video=OuterRef("pk"),
-                    ).values("duration_seconds")[:1],
-                    output_field=IntegerField(),
-                ),
-            )
-
-        video_pk = self.request.GET.get("video")
-        current_video = (
-            videos.filter(pk=video_pk).first() if video_pk else None
-        ) or videos.first()
-
-        # ── Teachers dropdown — scoped to this course ─────────────────
-        teachers = (
-            User.objects.filter(
-                videos__course=course,
-                videos__is_active=True,
-            )
-            .distinct()
-            .only("id", "first_name", "last_name")
+        videos = self.queryset_builder.build(
+            course=course,
+            filters=filters,
+            is_student=is_student,
+            user=user,
         )
 
-        is_student = self.request.user.is_authenticated and getattr(
-            self.request.user, "is_student", False
-        )
-
-        gs = course.effective_grade_subject
-        grade = gs.grade if gs else None
-        subject = gs.subject if gs else None
-        level = grade.level if grade else None
-        specialty = gs.specialty if gs else None
-        chapter = course.chapter
-
-        grade_url = (
-            reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-            if grade
-            else "#"
-        )
-        if specialty and grade:
-            grade_url += f"?specialty={specialty.pk}"
-
-        breadcrumbs = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-        ]
-
-        if level:
-            breadcrumbs.append(
-                {
-                    "label": level.name,
-                    "url": reverse(
-                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                    ),
-                }
-            )
-
-        if grade:
-            breadcrumbs.append(
-                {
-                    "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                    "url": grade_url,
-                }
-            )
-
-        if gs and subject:
-            breadcrumbs.append(
-                {
-                    "label": subject.short_name,
-                    "url": reverse(
-                        "curriculum:grade-subject:grade-subject-detail",
-                        kwargs={"pk": gs.pk},
-                    ),
-                }
-            )
-
-        if chapter:
-            breadcrumbs.append({"label": chapter.title, "url": None})
-
-        breadcrumbs += [
-            {
-                "label": course.title,
-                "url": reverse(
-                    "content:course:course-detail", kwargs={"pk": course.pk}
-                ),
-            },
-            {"label": "Videos", "url": None},
-        ]
+        current_video = self.video_selector.select(videos, filters.video_pk)
+        teachers = self.teacher_provider.fetch(course)
 
         context.update(
             {
                 "videos": videos,
                 "current_video": current_video,
-                "is_student": is_student,
                 "videos_count": videos.count(),
+                "is_student": is_student,
                 "current_video_bookmarked": (
-                    current_video.is_bookmarked
+                    getattr(current_video, "is_bookmarked", False)
                     if is_student and current_video
                     else False
                 ),
                 "teachers": teachers,
-                "filter_q": q,
-                "filter_teacher": teacher_id,
-                "querystring": qp.urlencode(),
-                "grade": grade,
-                "subject": subject,
-                "level": level,
-                "crumbs": breadcrumbs,
+                "filter_q": filters.q or "",
+                "filter_teacher": filters.teacher_id or "",
+                "querystring": filters.querystring,
+                "grade": context.get("grade"),
+                "subject": context.get("subject"),
+                "level": context.get("level"),
+                "crumbs": self.breadcrumb_builder.build_for_videos(course),
+                "page_title": _("%(title)s — Videos") % {"title": course.title},
             }
         )
 
         return context
 
 
-class MarkCourseCompletedView(StudentRequiredMixin, View):
-
-    def post(self, request, pk):
-
-        if not request.user.is_student:
-            return redirect("content:course:course-detail", pk=pk)
-
-        course = get_object_or_404(Course, pk=pk)
-        content_type = ContentType.objects.get_for_model(Course)
-
-        progress, _ = ContentProgress.objects.get_or_create(
-            student=request.user,
-            content_type=content_type,
-            object_id=course.pk,
-        )
-
-        if progress.is_completed:
-            progress.mark_incomplete()
-        else:
-            progress.mark_completed()
-
-        fallback = reverse("content:course:course-detail", kwargs={"pk": pk})
-        return redirect(request.META.get("HTTP_REFERER") or fallback)
-
-
 class CourseResourceListView(CourseMixin, ListView):
     """
-    Generic view for all course resource types.
-    Driven by `resource_slug` URL kwarg — matches keys in RESOURCE_TYPE_CONFIG.
+    Generic resource list view driven by ``resource_slug`` URL kwarg.
 
-    URL example:
-        path('courses/<uuid:pk>/resources/<str:resource_slug>/',
-             CourseResourceListView.as_view(),
-             name='course-resources'),
+    The config is resolved once in ``setup()`` and cached as
+    ``self._config`` — both ``get_queryset`` and ``get_context_data``
+    read it from there, eliminating the double-lookup anti-pattern.
+
+    Responsibilities delegated:
+        - ResourceTypeConfigResolver      → slug → config or Http404
+        - CourseResourceFilterExtractor   → GET params → dataclass
+        - CourseResourceQuerysetBuilder   → queryset via config
+        - CourseResourceCrumbBuilder      → dynamic breadcrumb chain
     """
 
     template_name = "apps/content/courses/resource_list.html"
     context_object_name = "resources"
     paginate_by = 9
 
-    def _get_config(self):
-        slug = self.kwargs.get("resource_slug")
-        config = RESOURCE_TYPE_CONFIG.get(slug)
-        if not config:
-            raise Http404(f"Unknown resource type: {slug}")
-        return config
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        config_resolver: ResourceTypeConfigResolver | None = None,
+        filter_extractor: CourseResourceFilterExtractor | None = None,
+        queryset_builder: CourseResourceQuerysetBuilder | None = None,
+        breadcrumb_builder: CourseResourceCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.config_resolver = config_resolver or ResourceTypeConfigResolver()
+        self.filter_extractor = filter_extractor or CourseResourceFilterExtractor()
+        self.queryset_builder = queryset_builder or CourseResourceQuerysetBuilder()
+        self.breadcrumb_builder = breadcrumb_builder or CourseResourceCrumbBuilder()
+
+    # ── Setup — config resolved exactly once ─────────────────────────────────
+
+    def setup(self, request, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        # Http404 raised here if slug is unknown — before any DB work
+        self._config = self.config_resolver.resolve(self.kwargs.get("resource_slug"))
+        self._filters = self.filter_extractor.extract(request)
+
+    # ── Queryset ──────────────────────────────────────────────────────────────
 
     def get_queryset(self):
-        config = self._get_config()
-        return get_course_resources(
+        return self.queryset_builder.build(
             course=self.course,
-            resource_type=config["resource_type"],
-            filters=self.request.GET,
+            config=self._config,
+            request_GET=self.request.GET,
             user=self.request.user,
         )
 
-    def get_context_data(self, **kwargs):
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        config = self._get_config()
 
+        config = self._config
+        filters = self._filters
         course = self.course
-        gs = course.effective_grade_subject
-        grade = context["grade"]
-        level = context["level"]
-        subject = context["subject"]
-        specialty = gs.specialty if gs else None
-        chapter = course.chapter
 
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        grade_url = reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-        if specialty:
-            grade_url += f"?specialty={specialty.pk}"
-
-        breadcrumbs = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-            {
-                "label": level.name,
-                "url": reverse(
-                    "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                ),
-            },
-            {
-                "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                "url": grade_url,
-            },
-            {
-                "label": subject.short_name,
-                "url": reverse(
-                    "curriculum:grade-subject:grade-subject-detail",
-                    kwargs={"pk": gs.pk},
-                ),
-            },
-        ]
-
-        if chapter:
-            breadcrumbs.append(
-                {
-                    "label": chapter.title,
-                    "url": None,
-                }
-            )
-
-        breadcrumbs += [
-            {
-                "label": course.title,
-                "url": reverse(
-                    "content:course:course-detail", kwargs={"pk": course.pk}
-                ),
-            },
-            {"label": config["title"], "url": None},
-        ]
+        self._dispatch_messages(context)
 
         context.update(
             {
@@ -492,176 +323,167 @@ class CourseResourceListView(CourseMixin, ListView):
                 "resource_type_icon": config["icon"],
                 "resource_type": config["resource_type"],
                 "difficulty_choices": DifficultyLevel.choices,
-                "has_solution_choices": [
-                    ("", _("— All —")),
-                    ("1", _("With Solution")),
-                    ("0", _("Without Solution")),
-                ],
-                "querystring": qp.urlencode(),
-                "filter_q": self.request.GET.get("q", ""),
-                "filter_difficulty": self.request.GET.get("difficulty", ""),
-                "filter_has_solution": self.request.GET.get("has_solution", ""),
-                "filter_completed": self.request.GET.get("completed", ""),
-                "crumbs": breadcrumbs,
+                "has_solution_choices": HAS_SOLUTION_CHOICES,
+                "querystring": filters.querystring,
+                "filter_q": filters.q or "",
+                "filter_difficulty": filters.difficulty or "",
+                "filter_has_solution": filters.has_solution or "",
+                "filter_completed": filters.completed or "",
+                "crumbs": self.breadcrumb_builder.build_for_course_resources(
+                    course=course,
+                    config=config,
+                    level=context["level"],
+                    grade=context["grade"],
+                    subject=context["subject"],
+                ),
+                "page_title": config["title"],
             }
         )
 
         return context
 
+    # ── Private ───────────────────────────────────────────────────────────────
 
-class CourseQuizzesView(LoginRequiredMixin, CourseMixin, DetailView):
+    def _dispatch_messages(self, context: dict) -> None:
+        page_obj = context.get("page_obj")
+        if page_obj is not None and not page_obj.object_list:
+            messages.info(
+                self.request,
+                _("No resources found for this filter combination."),
+            )
+
+
+class CourseQuizzesView(
+    LoginRequiredMixin, CourseSubViewMixin, CourseMixin, DetailView
+):
+    """
+    Displays quizzes for a course, filtered by search, teacher,
+    auto-gradable flag, and term.
+
+    Responsibilities delegated:
+        - CourseSubViewMixin         → is_student + get_queryset
+        - CourseQuizFilterExtractor  → 4 params → dataclass
+        - CourseQuizQuerysetBuilder  → ORM + user-scoped annotations
+        - VideoTeacherProvider       → sidebar teachers (shared service)
+        - CourseQuizzesCrumbBuilder  → null-safe crumb chain (extends videos builder)
+
+    ``courses`` context key is an empty queryset — kept for template
+    compatibility with the shared quiz filter partial that expects this key.
+    """
+
     model = Course
     template_name = "apps/content/courses/quizzes.html"
     context_object_name = "course"
 
-    def get_queryset(self):
-        return Course.objects.select_related(
-            "chapter__grade_subject__grade__level",
-            "chapter__grade_subject__subject",
-            "grade_subject__grade__level",
-            "grade_subject__subject",
-        ).filter(is_active=True)
+    # ── Dependency injection ──────────────────────────────────────────────────
 
-    def _get_filters(self):
-        GET = self.request.GET
-        return {
-            "q": GET.get("q", "").strip(),
-            "teacher": GET.get("teacher", "").strip(),
-            "auto_grade": GET.get("auto_gradable", "").strip(),
-            "term": GET.get("term", "").strip(),
-        }
+    def __init__(
+        self,
+        filter_extractor: CourseQuizFilterExtractor | None = None,
+        queryset_builder: CourseQuizQuerysetBuilder | None = None,
+        teacher_provider: VideoTeacherProvider | None = None,
+        breadcrumb_builder: CourseQuizzesCrumbBuilder | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.filter_extractor = filter_extractor or CourseQuizFilterExtractor()
+        self.queryset_builder = queryset_builder or CourseQuizQuerysetBuilder()
+        self.teacher_provider = teacher_provider or VideoTeacherProvider()
+        self.breadcrumb_builder = breadcrumb_builder or CourseQuizzesCrumbBuilder()
 
-    def get_context_data(self, **kwargs):
+    # ── Setup ─────────────────────────────────────────────────────────────────
+
+    def setup(self, request, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)  # CourseSubViewMixin sets _is_student
+        self._filters = self.filter_extractor.extract(request)
+
+    # ── Context ───────────────────────────────────────────────────────────────
+
+    def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+
         course = self.object
-        f = self._get_filters()
+        user = self.request.user
+        filters = self._filters
+        is_student = self._is_student
 
-        qs = (
-            Quiz.objects.filter(
-                course=course,
-                is_published=True,
-            )
-            .select_related("created_by")
-            .annotate(
-                questions_count=Count("quiz_questions", distinct=True),
-                user_attempts_count=Count(
-                    "quiz_attempts",
-                    filter=Q(quiz_attempts__student=self.request.user),
-                    distinct=True,
-                ),
-            )
-            .order_by("-created_at")
-        )
+        quizzes = self.queryset_builder.build(course, filters, user)
+        teachers = self.teacher_provider.fetch(course)
 
-        if f["q"]:
-            qs = qs.filter(
-                Q(title__icontains=f["q"]) | Q(description__icontains=f["q"])
-            )
-        if f["teacher"]:
-            qs = qs.filter(created_by_id=f["teacher"])
-        if f["auto_grade"] == "1":
-            qs = qs.filter(is_auto_gradable_snapshot=True)
-        elif f["auto_grade"] == "0":
-            qs = qs.filter(is_auto_gradable_snapshot=False)
-        if f["term"]:
-            qs = qs.filter(term=f["term"])
-
-        # Teachers scoped to this course's quizzes
-        teachers = (
-            User.objects.filter(
-                created_quizzes__course=course,
-                created_quizzes__is_published=True,
-            )
-            .distinct()
-            .only("id", "first_name", "last_name")
-        )
-
-        is_student = self.request.user.is_authenticated and getattr(
-            self.request.user, "is_student", False
-        )
-
-        gs = course.effective_grade_subject
-        grade = gs.grade if gs else None
-        subject = gs.subject if gs else None
-        level = grade.level if grade else None
-        specialty = gs.specialty if gs else None
-        chapter = course.chapter
-
-        grade_url = (
-            reverse("curriculum:grade:grade-detail", kwargs={"pk": grade.pk})
-            if grade
-            else "#"
-        )
-        if specialty and grade:
-            grade_url += f"?specialty={specialty.pk}"
-
-        qp = self.request.GET.copy()
-        qp.pop("page", None)
-
-        breadcrumbs = [
-            {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-            {"label": "Levels", "url": reverse("curriculum:level:level-list")},
-        ]
-        if level:
-            breadcrumbs.append(
-                {
-                    "label": level.name,
-                    "url": reverse(
-                        "curriculum:level:level-detail", kwargs={"pk": level.pk}
-                    ),
-                }
-            )
-        if grade:
-            breadcrumbs.append(
-                {
-                    "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                    "url": grade_url,
-                }
-            )
-        if gs and subject:
-            breadcrumbs.append(
-                {
-                    "label": subject.short_name,
-                    "url": reverse(
-                        "curriculum:grade-subject:grade-subject-detail",
-                        kwargs={"pk": gs.pk},
-                    ),
-                }
-            )
-        if chapter:
-            breadcrumbs.append({"label": chapter.title, "url": None})
-
-        breadcrumbs += [
-            {
-                "label": course.title,
-                "url": reverse(
-                    "content:course:course-detail", kwargs={"pk": course.pk}
-                ),
-            },
-            {"label": "Quizzes", "url": None},
-        ]
+        self._dispatch_messages(quizzes)
 
         context.update(
             {
-                "quizzes": qs,
+                "quizzes": quizzes,
                 "is_student": is_student,
-                "grade_subject": gs,
-                "subject": subject,
-                "grade": grade,
-                "level": level,
+                "grade_subject": course.effective_grade_subject,
+                "subject": context.get("subject"),
+                "grade": context.get("grade"),
+                "level": context.get("level"),
                 "teachers": teachers,
                 "term_choices": Term.choices,
-                "filter_q": f["q"],
-                "filter_teacher": f["teacher"],
-                "filter_auto_grade": f["auto_grade"],
-                "filter_term": f["term"],
-                "filter_course": "",  # not applicable here — keeps template compatible
-                "courses": Course.objects.none(),  # same reason
-                "querystring": qp.urlencode(),
-                "crumbs": breadcrumbs,
+                "filter_q": filters.q or "",
+                "filter_teacher": filters.teacher_id or "",
+                "filter_auto_grade": filters.auto_grade or "",
+                "filter_term": filters.term or "",
+                "filter_course": "",
+                "courses": EMPTY_COURSE_QS,
+                "querystring": filters.querystring,
+                "active_tab": "quizzes",
+                "crumbs": self.breadcrumb_builder.build_for_quizzes(course),
+                "page_title": _("%(title)s — Quizzes") % {"title": course.title},
             }
         )
 
-        context["active_tab"] = "quizzes"
-
         return context
+
+    # ── Private ───────────────────────────────────────────────────────────────
+
+    def _dispatch_messages(self, quizzes) -> None:
+        if not quizzes.exists():
+            messages.info(
+                self.request,
+                _("No quizzes are available for this course yet."),
+            )
+
+
+class MarkCourseCompletedView(StudentRequiredMixin, View):
+    """
+    Toggles course completion state for the authenticated student.
+
+    StudentRequiredMixin enforces the student check before post() is
+    called — the redundant inline check is removed.
+
+    Responsibilities delegated:
+        - CourseCompletionToggler → get_or_create + toggle + return new state
+    """
+
+    # ── Dependency injection ──────────────────────────────────────────────────
+
+    def __init__(
+        self,
+        toggler: CourseCompletionToggler | None = None,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.toggler = toggler or CourseCompletionToggler()
+
+    # ── POST ──────────────────────────────────────────────────────────────────
+
+    def post(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        is_completed = self.toggler.toggle(request.user, course)
+
+        if is_completed:
+            messages.success(
+                request,
+                _("%(title)s marked as completed.") % {"title": course.title},
+            )
+        else:
+            messages.info(
+                request,
+                _("%(title)s marked as incomplete.") % {"title": course.title},
+            )
+
+        fallback = reverse("content:course:course-detail", kwargs={"pk": pk})
+        return redirect(request.META.get("HTTP_REFERER") or fallback)
