@@ -1,9 +1,12 @@
+import logging
+
 import stripe
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from apps.accounts.choices import UserRole
@@ -12,10 +15,13 @@ from apps.authentication.decorators import student_required
 from apps.billing.decorators import subscription_required
 from apps.billing.services import StripeService
 
+from ..decorators import teacher_level_required
 from ..models import TutoringSession
 from ..services import SessionService
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -80,10 +86,6 @@ def available_teachers(request, subject_pk=None):
                         "curriculum:level:level-detail", kwargs={"pk": level.pk}
                     ),
                 },
-                # {
-                #     "label": f"{grade.name}{' | ' + specialty.short_name if specialty else ''}",
-                #     "url": grade_url,
-                # },
                 {
                     "label": gs.subject.short_name,
                     "url": reverse(
@@ -108,11 +110,16 @@ def available_teachers(request, subject_pk=None):
 @login_required
 @student_required
 @subscription_required
+@teacher_level_required
 @require_POST
 def select_teacher(request, teacher_id):
-    print()
+    # teacher is re-fetched here — decorator already validated it exists
+    # and the level matches. A second get_object_or_404 is acceptable
+    # because select_related avoids extra queries on the hot path.
     teacher = get_object_or_404(
-        CustomUser,
+        CustomUser.objects.select_related(
+            "teacher_profile__subject__level",
+        ),
         id=teacher_id,
         role=UserRole.TEACHER,
         is_active=True,
@@ -140,8 +147,15 @@ def select_teacher(request, teacher_id):
         return redirect(checkout.url)
 
     except Exception as ex:
+        logger.exception(
+            f"Exception : {str(ex)}, select_teacher: session creation failed for "
+            "student pk=%s teacher pk=%s.",
+            request.user.pk,
+            teacher.pk,
+        )
         messages.error(
-            request, f"Unable to create session. Please try again. {str(ex)}"
+            request,
+            _("Unable to create session. Please try again."),
         )
         return redirect(
             "tutoring:student:available-teachers",
