@@ -94,9 +94,37 @@ class ProgressProviderFactory:
         self._student = student_provider or StudentProgressProvider()
         self._anonymous = anonymous_provider or AnonymousProgressStub()
 
-    def for_user(self, user: object) -> ProgressProviderProtocol:
-        is_student = user.is_authenticated and getattr(user, "is_student", False)
-        return self._student if is_student else self._anonymous
+    def for_user(
+        self,
+        user: object,
+        grade: object | None = None,  # ← new optional param
+    ) -> ProgressProviderProtocol:
+        """
+        Returns StudentProgressProvider only when:
+          1. user is authenticated and is_student
+          2. grade is None (caller doesn't need the guard)
+             OR student's enrolled grade matches the given grade
+        """
+        if not (user.is_authenticated and getattr(user, "is_student", False)):
+            return self._anonymous
+
+        if grade is not None and not self._student_belongs_to_grade(user, grade):
+            return self._anonymous
+
+        return self._student
+
+    def is_student(self, user: object) -> bool:
+        return user.is_authenticated and getattr(user, "is_student", False)
+
+    @staticmethod
+    def _student_belongs_to_grade(user: object, grade: object) -> bool:
+        profile = getattr(user, "student_profile", None)
+        if profile is None:
+            return False
+        student_grade = getattr(profile, "grade", None)
+        if student_grade is None:
+            return False
+        return student_grade.pk == grade.pk
 
 
 class GradeSubjectCountsProvider:

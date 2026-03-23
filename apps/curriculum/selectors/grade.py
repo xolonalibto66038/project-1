@@ -199,7 +199,12 @@ def build_enriched_subjects(grade, user=None, specialty=None):
     return enriched
 
 
-def build_enriched_grade_subjects(grade, user=None, specialty=None):
+def build_enriched_grade_subjects(
+    grade,
+    user=None,
+    specialty=None,
+    student_grade=None,
+):
     grade_subjects = list(get_grade_subjects_for_grade(grade, specialty=specialty))
 
     if not grade_subjects:
@@ -218,8 +223,12 @@ def build_enriched_grade_subjects(grade, user=None, specialty=None):
         and user.is_authenticated
         and getattr(user, "is_student", False)
     )
+
+    show_progress = student_grade is not None
     progress_counts = (
-        get_progress_counts_for_student(user, grade_subject_ids) if is_student else {}
+        get_progress_counts_for_student(user, grade_subject_ids)
+        if show_progress
+        else {}
     )
 
     enriched = []
@@ -242,7 +251,7 @@ def build_enriched_grade_subjects(grade, user=None, specialty=None):
                 "progress": (
                     round(completed / courses_count * 100, 1) if courses_count else 0
                 ),
-                "show_progress": is_student,
+                "show_progress": show_progress,
             }
         )
 

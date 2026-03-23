@@ -29,7 +29,32 @@ class EnrichedSubjectBuilder:
             grade=grade,
             user=user,
             specialty=specialty,
+            student_grade=self._resolve_student_grade(user, grade),
         )
+
+    @staticmethod
+    def _resolve_student_grade(user: object, grade: object) -> object | None:
+        """
+        Returns the grade object only when the student belongs to it.
+        Returns None for non-students, missing profiles, or grade mismatch.
+        """
+        if not (
+            user is not None
+            and user.is_authenticated
+            and getattr(user, "is_student", False)
+        ):
+            return None
+
+        profile = getattr(user, "student_profile", None)
+        if profile is None:
+            return None
+
+        student_grade = getattr(profile, "grade", None)
+        if student_grade is None:
+            return None
+
+        # The critical guard — only return if grades match
+        return student_grade if student_grade.pk == grade.pk else None
 
 
 @runtime_checkable

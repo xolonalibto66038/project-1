@@ -28,6 +28,7 @@ from ..services.grade_subject import (
     ResourceTabConfig,
     ResourceTermGrouper,
     ResourceTypeTitleResolver,
+    StudentProgressProvider,
     TermLabelResolver,
 )
 
@@ -88,10 +89,24 @@ class GradeSubjectDetailView(DetailView):
         counts = self.counts_provider.get_counts(pk)
         counts_by_quarter = self.counts_provider.get_by_quarter(pk)
 
-        progress_provider = self.progress_factory.for_user(user)
+        progress_provider = self.progress_factory.for_user(user, grade=gs.grade)
         progress = progress_provider.get_progress(user, pk)
 
-        self._dispatch_messages(gs, counts, progress)
+        # is_student resolved once — no double factory call
+        is_student = self.progress_factory.is_student(user)
+        # show_progress = student who belongs to THIS grade
+        show_progress = isinstance(progress_provider, StudentProgressProvider)
+
+        # Clamp progress to zero for wrong-grade students (stub already does this,
+        # but AnonymousProgressStub.get_progress doesn't know total_courses yet)
+        if not isinstance(progress_provider, StudentProgressProvider):
+            progress = {
+                "completed_courses": 0,
+                "total_courses": counts["course_count"],
+                "progress_pct": 0,
+            }
+
+        self._dispatch_messages(gs, counts, progress, is_student)
 
         context.update(
             {
@@ -99,8 +114,8 @@ class GradeSubjectDetailView(DetailView):
                 "level": gs.grade.level,
                 "subject": gs.subject,
                 "specialty": gs.specialty,
-                "is_student": self.progress_factory.for_user(user).__class__.__name__
-                == "StudentProgressProvider",
+                "is_student": is_student,
+                "show_progress": show_progress,
                 "quarters": Term.choices,
                 "current_quarter": Term.FIRST,
                 "course_count": counts["course_count"],
@@ -127,6 +142,7 @@ class GradeSubjectDetailView(DetailView):
         gs: object,
         counts: dict,
         progress: dict,
+        is_student: bool,
     ) -> None:
         if counts.get("course_count", 0) == 0:
             messages.info(
@@ -134,7 +150,7 @@ class GradeSubjectDetailView(DetailView):
                 _("No courses have been added to this subject yet."),
             )
 
-        if progress.get("progress_pct", 0) == 100:
+        if is_student and progress.get("progress_pct", 0) == 100:
             messages.success(
                 self.request,
                 _("You have completed all courses in this subject. Well done!"),

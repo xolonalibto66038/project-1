@@ -105,66 +105,6 @@ def available_teachers(request, subject_pk=None):
     return render(request, "apps/tutoring/student/available_teachers.html", context)
 
 
-# @login_required
-# @student_required
-# @subscription_required
-# def available_teachers(request, subject_pk=None):
-#     """
-#     Display list of available teachers for tutoring.
-
-#     Filters:
-#     - role = TEACHER
-#     - active users only
-#     - verified teachers only (recommended)
-#     - optional subject filter
-#     """
-
-#     # for better performance, prefetch related subjects
-#     teachers = (
-#         CustomUser.objects.filter(
-#             role=UserRole.TEACHER,
-#             is_active=True,
-#             teacher_profile__is_verified_teacher=True,
-#         )
-#         .select_related("teacher_profile")
-#         .prefetch_related("teacher_profile__subject")
-#         .only(
-#             "id",
-#             "first_name",
-#             "last_name",
-#             "avatar",
-#             # "teacher_profile__average_rating",
-#             # "teacher_profile__years_of_experience",
-#             "teacher_profile__bio",
-#         )
-#         .order_by(
-#             "last_name"
-#             # "-teacher_profile__average_rating",
-#             # "-teacher_profile__years_of_experience",
-#         )
-#     )
-
-#     # Optional: filter by subject
-#     if subject_pk:
-#         teachers = teachers.filter(teacher_profile__subject__id=subject_pk)
-
-#     free_teachers = teachers.filter(teacher_profile__hour_price=0)
-
-#     paid_teachers = teachers.filter(teacher_profile__hour_price__gt=0)
-
-#     context = {
-#         "free_teachers": free_teachers,
-#         "paid_teachers": paid_teachers,
-#         "subject_pk": subject_pk,
-#         "crumbs": [
-#             {"label": "Home", "url": reverse("pages:landing"), "icon": "fas fa-home"},
-#             {"label": "Online Teachers", "url": None},
-#         ],
-#     }
-
-#     return render(request, "apps/tutoring/student/available_teachers.html", context)
-
-
 @login_required
 @student_required
 @subscription_required

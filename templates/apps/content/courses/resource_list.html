@@ -4,9 +4,10 @@
 {% block title %}{{ course.title }} — {{ resource_type_title }}{% endblock %}
 
 {% block content %}
+{% include "apps/content/courses/_header.html" with active_tab=active_tab %}
 
 {# ── Header ── #}
-<section class="content-header">
+{% comment %} <section class="content-header">
   <div class="container-fluid">
     <div class="row align-items-center mb-2">
 
@@ -41,7 +42,7 @@
 
     </div>
   </div>
-</section>
+</section> {% endcomment %}
 
 <section class="content">
   <div class="container-fluid">
