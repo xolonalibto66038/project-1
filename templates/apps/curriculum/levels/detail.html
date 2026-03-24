@@ -1,11 +1,9 @@
 {% extends "layouts/base-full.html" %}
 {% load static i18n %}
 {% load breadcrumbs %}
-
 {% block title %}{{ level.get_name_display }}{% endblock %}
-
 {% block extra_css %}
-<style>
+  <style>
   .grade-row {
     transition: background-color 0.15s ease;
     border-radius: 6px;
@@ -32,216 +30,171 @@
   .chevron {
     transition: transform 0.25s ease;
   }
-</style>
+  </style>
 {% endblock %}
-
 {% block content %}
-
-{# ── Header ── #}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="m-0 font-weight-bold text-primary">
-          <i class="fas fa-layer-group mr-2"></i>
-          {{ level.get_name_display }}
-        </h1>
-        <small class="text-muted">
-          {% trans "Browse grades and subjects for this level" %}
-        </small>
-      </div> 
-      <div class="col-sm-6">
-        {% breadcrumb crumbs %}
+  {# ── Header ── #}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-layer-group mr-2"></i>
+            {{ level.get_name_display }}
+          </h1>
+          <small class="text-muted">{% trans "Browse grades and subjects for this level" %}</small>
+        </div>
+        <div class="col-sm-6">{% breadcrumb crumbs %}</div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="container-fluid">
-
-    {# ── Stats row ── #}
-    <div class="row mb-4">
-
-      <div class="col-lg-4 col-sm-6 mb-3">
-        <div class="info-box stat-box elevation-2 mb-0">
-          <span class="info-box-icon bg-gradient-primary">
-            <i class="fas fa-signal"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text">{% trans "Grades" %}</span>
-            <span class="info-box-number">{{ stats.grades }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4 col-sm-6 mb-3">
-        <div class="info-box stat-box elevation-2 mb-0">
-          <span class="info-box-icon bg-gradient-info">
-            <i class="fas fa-book-open"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text">{% trans "Subjects" %}</span>
-            <span class="info-box-number">{{ stats.subjects }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4 col-sm-6 mb-3">
-        <div class="info-box stat-box elevation-2 mb-0">
-          <span class="info-box-icon bg-gradient-warning">
-            <i class="fas fa-user-graduate"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text">{% trans "Students" %}</span>
-            <span class="info-box-number">{{ stats.students }}</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    {# ── Grades card ── #}
-    <div class="card card-primary card-outline elevation-2">
-      <div class="card-header">
-        <h3 class="card-title font-weight-bold">
-          <i class="fas fa-graduation-cap mr-2"></i>
-          {% trans "Grades" %}
-        </h3>
-        <div class="card-tools">
-          <span class="badge badge-primary">
-            {{ stats.grades }} {% trans "total" %}
-          </span>
-        </div>
-      </div>
-
-      <div class="card-body p-0">
-
-        {% if grade_groups %}
-        <div class="accordion" id="gradesAccordion">
-
-          {% for group in grade_groups %}
-
-            {% if group.single %}
-            {# ── Single entry — direct link, no accordion ── #}
-            {% with entry=group.entries.0 %}
-            <div class="grade-row border-bottom">
-              <a href="{% url 'curriculum:grade:grade-detail' entry.grade.pk %}{% if entry.specialty %}?specialty={{ entry.specialty.pk }}{% endif %}"
-                 class="grade-link px-4 py-3">
-                <div class="d-flex justify-content-between align-items-center">
-
-                  <div class="font-weight-bold">
-                    <i class="fas fa-graduation-cap text-primary mr-2"></i>
-                    {{ entry.grade.name }}
-                    <small class="text-muted ml-2">({{ entry.grade.short_name }})</small>
-                  </div>
-
-                  <div class="d-flex align-items-center" style="gap: 8px;">
-                    {% if group.is_student_grade %}
-                      <span class="badge badge-success my-grade-badge">
-                        <i class="fas fa-user-graduate mr-1"></i>{% trans "My Grade" %}
-                      </span>
-                    {% endif %}
-                    <i class="fas fa-arrow-right {% if group.is_student_grade %}text-success{% else %}text-muted{% endif %}"></i>
-                  </div>
-
-                </div>
-              </a>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      {# ── Stats row ── #}
+      <div class="row mb-4">
+        <div class="col-lg-4 col-sm-6 mb-3">
+          <div class="info-box stat-box elevation-2 mb-0">
+            <span class="info-box-icon bg-gradient-primary">
+              <i class="fas fa-signal"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Grades" %}</span>
+              <span class="info-box-number">{{ stats.grades }}</span>
             </div>
-            {% endwith %}
-
-            {% else %}
-            {# ── Multiple entries = grade with specialties ── #}
-            <div class="card mb-0 border-bottom rounded-0">
-
-              <div class="card-header p-0" id="heading-{{ group.order }}">
-                <button
-                  class="btn btn-link btn-block text-left font-weight-bold px-4 py-3"
-                  type="button"
-                  data-toggle="collapse"
-                  data-target="#collapse-{{ group.order }}"
-                  aria-expanded="false"
-                  aria-controls="collapse-{{ group.order }}"
-                >
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span>
-                      <i class="fas fa-layer-group text-primary mr-2"></i>
-                      {{ group.grade.name }}
-                      <small class="text-muted ml-2">({{ group.grade.short_name }})</small>
-                    </span>
-                    <span>
-                      <span class="badge badge-primary mr-2">
-                        {{ group.entries|length }} {% trans "specialties" %}
-                      </span>
-                      <i class="fas fa-chevron-down chevron"></i>
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              <div
-                id="collapse-{{ group.order }}"
-                class="collapse"
-                aria-labelledby="heading-{{ group.order }}"
-                data-parent="#gradesAccordion"
-              >
-                <div class="card-body p-0 pl-4 border-left border-primary ml-3">
-
-                  {% for entry in group.entries %}
-                  <div class="grade-row border-bottom">
-                    <a href="{% url 'curriculum:grade:grade-detail' entry.grade.pk %}?specialty={{ entry.specialty.pk }}"
-                       class="grade-link px-3 py-3">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="fas fa-code-branch {% if entry.is_student_grade %}text-success{% else %}text-secondary{% endif %} mr-2"></i>
-                          <span class="font-weight-bold">{{ entry.specialty.name }}</span>
-                          <small class="text-muted ml-2">({{ entry.specialty.short_name }})</small>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 mb-3">
+          <div class="info-box stat-box elevation-2 mb-0">
+            <span class="info-box-icon bg-gradient-info">
+              <i class="fas fa-book-open"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Subjects" %}</span>
+              <span class="info-box-number">{{ stats.subjects }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 mb-3">
+          <div class="info-box stat-box elevation-2 mb-0">
+            <span class="info-box-icon bg-gradient-warning">
+              <i class="fas fa-user-graduate"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Students" %}</span>
+              <span class="info-box-number">{{ stats.students }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {# ── Grades card ── #}
+      <div class="card card-primary card-outline elevation-2">
+        <div class="card-header">
+          <h3 class="card-title font-weight-bold">
+            <i class="fas fa-graduation-cap mr-2"></i>
+            {% trans "Grades" %}
+          </h3>
+          <div class="card-tools">
+            <span class="badge badge-primary">{{ stats.grades }} {% trans "total" %}</span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          {% if grade_groups %}
+            <div class="accordion" id="gradesAccordion">
+              {% for group in grade_groups %}
+                {% if group.single %}
+                  {# ── Single entry — direct link, no accordion ── #}
+                  {% with entry=group.entries.0 %}
+                    <div class="grade-row border-bottom">
+                      <a href="{% url 'curriculum:grade:grade-detail' entry.grade.pk %}{% if entry.specialty %}?specialty={{ entry.specialty.pk }}{% endif %}"
+                         class="grade-link px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="font-weight-bold">
+                            <i class="fas fa-graduation-cap text-primary mr-2"></i>
+                            {{ entry.grade.name }}
+                            <small class="text-muted ml-2">({{ entry.grade.short_name }})</small>
+                          </div>
+                          <div class="d-flex align-items-center" style="gap: 8px;">
+                            {% if group.is_student_grade %}
+                              <span class="badge badge-success my-grade-badge">
+                                <i class="fas fa-user-graduate mr-1"></i>{% trans "My Grade" %}
+                              </span>
+                            {% endif %}
+                            <i class="fas fa-arrow-right {% if group.is_student_grade %}text-success{% else %}text-muted{% endif %}"></i>
+                          </div>
                         </div>
-
-                        <div class="d-flex align-items-center" style="gap: 8px;">
-                          {% if entry.is_student_grade %}
-                            <span class="badge badge-success my-grade-badge">
-                              <i class="fas fa-user-graduate mr-1"></i>{% trans "My Grade" %}
-                            </span>
-                          {% endif %}
-                          <i class="fas fa-arrow-right {% if entry.is_student_grade %}text-success{% else %}text-muted{% endif %}"></i>
+                      </a>
+                    </div>
+                  {% endwith %}
+                {% else %}
+                  {# ── Multiple entries = grade with specialties ── #}
+                  <div class="card mb-0 border-bottom rounded-0">
+                    <div class="card-header p-0" id="heading-{{ group.order }}">
+                      <button class="btn btn-link btn-block text-left font-weight-bold px-4 py-3"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapse-{{ group.order }}"
+                              aria-expanded="false"
+                              aria-controls="collapse-{{ group.order }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span>
+                            <i class="fas fa-layer-group text-primary mr-2"></i>
+                            {{ group.grade.name }}
+                            <small class="text-muted ml-2">({{ group.grade.short_name }})</small>
+                          </span>
+                          <span>
+                            <span class="badge badge-primary mr-2">{{ group.entries|length }} {% trans "specialties" %}</span>
+                            <i class="fas fa-chevron-down chevron"></i>
+                          </span>
                         </div>
-
+                      </button>
+                    </div>
+                    <div id="collapse-{{ group.order }}"
+                         class="collapse"
+                         aria-labelledby="heading-{{ group.order }}"
+                         data-parent="#gradesAccordion">
+                      <div class="card-body p-0 pl-4 border-left border-primary ml-3">
+                        {% for entry in group.entries %}
+                          <div class="grade-row border-bottom">
+                            <a href="{% url 'curriculum:grade:grade-detail' entry.grade.pk %}?specialty={{ entry.specialty.pk }}"
+                               class="grade-link px-3 py-3">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                  <i class="fas fa-code-branch {% if entry.is_student_grade %}text-success{% else %}text-secondary{% endif %} mr-2"></i>
+                                  <span class="font-weight-bold">{{ entry.specialty.name }}</span>
+                                  <small class="text-muted ml-2">({{ entry.specialty.short_name }})</small>
+                                </div>
+                                <div class="d-flex align-items-center" style="gap: 8px;">
+                                  {% if entry.is_student_grade %}
+                                    <span class="badge badge-success my-grade-badge">
+                                      <i class="fas fa-user-graduate mr-1"></i>{% trans "My Grade" %}
+                                    </span>
+                                  {% endif %}
+                                  <i class="fas fa-arrow-right {% if entry.is_student_grade %}text-success{% else %}text-muted{% endif %}"></i>
+                                </div>
+                              </div>
+                            </a>
+                          </div>
+                        {% endfor %}
                       </div>
-                    </a>
+                    </div>
                   </div>
-                  {% endfor %}
-
-                </div>
-              </div>
-
+                {% endif %}
+              {% endfor %}
             </div>
-            {% endif %}
-
-          {% endfor %}
-
+          {% else %}
+            <div class="text-center py-5">
+              <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
+              <h5 class="text-muted">{% trans "No grades available yet." %}</h5>
+              <p class="text-muted small">{% trans "Grades will appear here once they are added for this level." %}</p>
+            </div>
+          {% endif %}
         </div>
-
-        {% else %}
-        <div class="text-center py-5">
-          <i class="fas fa-graduation-cap fa-4x text-muted mb-3"></i>
-          <h5 class="text-muted">{% trans "No grades available yet." %}</h5>
-          <p class="text-muted small">
-            {% trans "Grades will appear here once they are added for this level." %}
-          </p>
-        </div>
-        {% endif %}
-
       </div>
     </div>
-
-  </div>
-</section>
-
+  </section>
 {% endblock %}
-
 {% block extra_js %}
-<script>
+  <script>
   document.querySelectorAll('[data-toggle="collapse"]').forEach(btn => {
     const target  = document.querySelector(btn.getAttribute('data-target'));
     const chevron = btn.querySelector('.chevron');
@@ -249,5 +202,5 @@
     target.addEventListener('show.bs.collapse', () => chevron.style.transform = 'rotate(180deg)');
     target.addEventListener('hide.bs.collapse', () => chevron.style.transform = 'rotate(0deg)');
   });
-</script>
+  </script>
 {% endblock %}

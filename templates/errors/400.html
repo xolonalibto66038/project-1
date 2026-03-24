@@ -1,47 +1,44 @@
 {# errors/400.html #}
 {% extends "layouts/base.html" %}
 {% load static %}
-{% load i18n %} {# Make sure to load the internationalization tags #}
-
+{% load i18n %}
+{# Make sure to load the internationalization tags #}
 {% block content %}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1>{% trans "400 Error Page" %}</h1>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "400 Error Page" %}</li>
-        </ol>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>{% trans "400 Error Page" %}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "400 Error Page" %}</li>
+          </ol>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="error-page">
-    <h2 class="headline text-info">400</h2>
-
-    <div class="error-content">
-      <h3>
-        <i class="fas fa-exclamation-circle text-info"></i>
-        {% trans "Bad Request." %}
-      </h3>
-
-      <p>
-        {% trans "The server could not understand your request due to invalid syntax." %}
-        {% trans "Please check your input and try again." %}
-        {% blocktrans %}
+  </section>
+  <section class="content">
+    <div class="error-page">
+      <h2 class="headline text-info">400</h2>
+      <div class="error-content">
+        <h3>
+          <i class="fas fa-exclamation-circle text-info"></i>
+          {% trans "Bad Request." %}
+        </h3>
+        <p>
+          {% trans "The server could not understand your request due to invalid syntax." %}
+          {% trans "Please check your input and try again." %}
+          {% blocktrans %}
         Meanwhile, you may <a href="{{ home_url }}">return to home</a>.
         {% endblocktrans %}
-      </p>
+        </p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}

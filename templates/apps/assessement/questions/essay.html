@@ -1,131 +1,97 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "Essay Question" %}{% endblock title %}
-
+{% block title %}
+  {% trans "Essay Question" %}
+{% endblock title %}
 {% block content %}
-<section class="content">
-<div class="container-fluid">
-
-  <div class="card card-primary">
-    <div class="card-header">
-      <h3 class="card-title">
-        {% if object %} {% trans "Edit Essay Question" %} {% else %} {% trans "Create Essay Question" %} {% endif %}
-      </h3>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title">
+            {% if object %}
+              {% trans "Edit Essay Question" %}
+            {% else %}
+              {% trans "Create Essay Question" %}
+            {% endif %}
+          </h3>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="card-body">
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <h5 class="mb-3">{% trans "Basic Information" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Title" %}</label>
+              {{ form.title }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Question Text" %}</label>
+              {{ form.question_text }}
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Points" %}</label>
+                {{ form.points }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Difficulty" %}</label>
+                {{ form.difficulty_level }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Tags" %}</label>
+                {{ form.tags }}
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Answer Length Settings" %}</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "Minimum Length" %}</label>
+                {{ form.min_length }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "Maximum Length" %}</label>
+                {{ form.max_length }}
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Optional Content" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Sample Answer (Instructor Only)" %}</label>
+              {{ form.sample_answer }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Explanation (Shown After Submission)" %}</label>
+              {{ form.explanation }}
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Auto Grading" %}</h5>
+            <div class="form-check mb-3">
+              {{ form.is_auto_gradable }}
+              <label class="form-check-label" for="id_is_auto_gradable">{% trans "Enable Auto-Grading with Keywords" %}</label>
+            </div>
+            <div class="mb-3" id="keywords-wrapper" style="display:none;">
+              <label class="form-label">{% trans "Keywords (comma separated)" %}</label>
+              {{ form.keywords }}
+            </div>
+            <hr>
+            <div class="form-check">
+              {{ form.is_active }}
+              <label class="form-check-label">{% trans "Active (visible for quizzes)" %}</label>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="#" class="btn btn-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-primary">{% trans "Save Question" %}</button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <form method="post">
-      {% csrf_token %}
-      <div class="card-body">
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-          {{ form.non_field_errors }}
-        </div>
-        {% endif %}
-
-        <h5 class="mb-3">{% trans "Basic Information" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Title" %}</label>
-          {{ form.title }}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Question Text" %}</label>
-          {{ form.question_text }}
-        </div>
-
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Points" %}</label>
-            {{ form.points }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Difficulty" %}</label>
-            {{ form.difficulty_level }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Tags" %}</label>
-            {{ form.tags }}
-          </div>
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Answer Length Settings" %}</h5>
-
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">{% trans "Minimum Length" %}</label>
-            {{ form.min_length }}
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label class="form-label">{% trans "Maximum Length" %}</label>
-            {{ form.max_length }}
-          </div>
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Optional Content" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Sample Answer (Instructor Only)" %}</label>
-          {{ form.sample_answer }}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Explanation (Shown After Submission)" %}</label>
-          {{ form.explanation }}
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Auto Grading" %}</h5>
-
-        <div class="form-check mb-3">
-          {{ form.is_auto_gradable }}
-          <label class="form-check-label" for="id_is_auto_gradable">
-            {% trans "Enable Auto-Grading with Keywords" %}
-          </label>
-        </div>
-
-        <div class="mb-3" id="keywords-wrapper" style="display:none;">
-          <label class="form-label">{% trans "Keywords (comma separated)" %}</label>
-          {{ form.keywords }}
-        </div>
-
-        <hr>
-
-        <div class="form-check">
-          {{ form.is_active }}
-          <label class="form-check-label">
-            {% trans "Active (visible for quizzes)" %}
-          </label>
-        </div>
-
-      </div>
-
-      <div class="card-footer text-end">
-        <a href="#" class="btn btn-secondary">
-          {% trans "Cancel" %}
-        </a>
-        <button type="submit" class="btn btn-primary">
-          {% trans "Save Question" %}
-        </button>
-      </div>
-
-    </form>
-  </div>
-</div>
-</section>
+  </section>
 {% endblock content %}
-
 {% block extra_js %}
-<script>
+  <script>
   const autoGradeCheckbox = document.getElementById("id_is_auto_gradable");
   const keywordsWrapper = document.getElementById("keywords-wrapper");
 
@@ -139,5 +105,5 @@
 
   autoGradeCheckbox.addEventListener("change", toggleKeywords);
   toggleKeywords();
-</script>
+  </script>
 {% endblock extra_js %}

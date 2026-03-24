@@ -1,333 +1,318 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
 {% load breadcrumbs %}
-
 {% block title %}
   {{ subject.name }} — {{ resource_type_title }} ({{ filter_term|default:_("All Terms") }})
 {% endblock %}
-
 {% block content %}
-
-{# ── Header ── #}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row align-items-center mb-2">
-
-      <div class="col-sm-7">
-        <h1 class="font-weight-bold mb-0">
-          <i class="{{ resource_type_icon }} mr-2 text-primary"></i>
-          {{ subject.name }}
-          <span class="badge badge-primary ml-2">{{ resource_type_title }}</span>
-        </h1>
-        <small class="text-muted">
-          {% blocktrans with title=resource_type_title %}
+  {# ── Header ── #}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row align-items-center mb-2">
+        <div class="col-sm-7">
+          <h1 class="font-weight-bold mb-0">
+            <i class="{{ resource_type_icon }} mr-2 text-primary"></i>
+            {{ subject.name }}
+            <span class="badge badge-primary ml-2">{{ resource_type_title }}</span>
+          </h1>
+          <small class="text-muted">
+            {% blocktrans with title=resource_type_title %}
             Browse {{ title }} for this subject
           {% endblocktrans %}
-        </small>
+          </small>
+        </div>
+        <div class="col-sm-5">{% breadcrumb crumbs %}</div>
       </div>
-
-      <div class="col-sm-5">
-        {% breadcrumb crumbs %}
-      </div>
-
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="container-fluid">
-
-    {# ── Filters ── #}
-    <div class="card card-outline card-secondary mb-3">
-      <div class="card-body py-2">
-        <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px;">
-
-          {# Search #}
-          <div class="input-group input-group-sm" style="width:200px;">
-            <div class="input-group-prepend">
-              <span class="input-group-text"><i class="fas fa-search"></i></span>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      {# ── Filters ── #}
+      <div class="card card-outline card-secondary mb-3">
+        <div class="card-body py-2">
+          <form method="get" class="d-flex flex-wrap align-items-end" style="gap:8px">
+            {# Search #}
+            <div class="input-group input-group-sm" style="width:200px;">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+              <input type="text"
+                     name="q"
+                     value="{{ filter_q }}"
+                     class="form-control"
+                     placeholder="{% trans 'Title, content, tags…' %}">
             </div>
-            <input type="text" name="q" value="{{ filter_q }}"
-                  class="form-control" placeholder="{% trans 'Title, content, tags…' %}">
+            {# Resource type — only show when not locked by URL slug #}
+            {% if not resource_slug %}
+              <select name="resource_type"
+                      class="form-control form-control-sm"
+                      style="width:160px">
+                <option value="">{% trans "All types" %}</option>
+                {% for val, label in resource_type_choices %}
+                  <option value="{{ val }}"
+                          {% if filter_resource_type == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            {# Term — only show when not locked by URL kwarg #}
+            {% if not current_term %}
+              <select name="term" class="form-control form-control-sm" style="width:150px;">
+                <option value="">{% trans "All terms" %}</option>
+                {% for val, label in term_choices %}
+                  <option value="{{ val }}" {% if filter_term == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            {# Difficulty #}
+            <select name="difficulty"
+                    class="form-control form-control-sm"
+                    style="width:140px">
+              <option value="">{% trans "All levels" %}</option>
+              {% for val, label in difficulty_choices %}
+                <option value="{{ val }}"
+                        {% if filter_difficulty == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {# Course #}
+            <select name="course"
+                    class="form-control form-control-sm select2"
+                    style="width:170px">
+              <option value="">{% trans "All courses" %}</option>
+              {% for c in courses %}
+                <option value="{{ c.pk }}"
+                        {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.title }}</option>
+              {% endfor %}
+            </select>
+            {# Teacher #}
+            <select name="teacher"
+                    class="form-control form-control-sm"
+                    style="width:170px">
+              <option value="">{% trans "All teachers" %}</option>
+              {% for t in teachers %}
+                <option value="{{ t.pk }}"
+                        {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+                  {{ t.get_full_name }}
+                </option>
+              {% endfor %}
+            </select>
+            {# Has solution #}
+            <select name="has_solution"
+                    class="form-control form-control-sm"
+                    style="width:145px">
+              <option value="">{% trans "Solution: any" %}</option>
+              <option value="1" {% if filter_has_solution == "1" %}selected{% endif %}>{% trans "Has solution" %}</option>
+              <option value="0" {% if filter_has_solution == "0" %}selected{% endif %}>{% trans "No solution" %}</option>
+            </select>
+            {# Free / Premium #}
+            <select name="is_free"
+                    class="form-control form-control-sm"
+                    style="width:130px">
+              <option value="">{% trans "Free: any" %}</option>
+              <option value="1" {% if filter_is_free == "1" %}selected{% endif %}>{% trans "Free only" %}</option>
+              <option value="0" {% if filter_is_free == "0" %}selected{% endif %}>{% trans "Premium only" %}</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+            </button>
+            {% if filter_q or filter_difficulty or filter_term or filter_resource_type or filter_has_solution or filter_is_free or filter_course or filter_teacher %}
+              <a href="?" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+              </a>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+      {# ── Resource list ── #}
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="{{ resource_type_icon }} mr-2"></i>
+            {{ subject.name }} — {{ resource_type_title }}
+          </h3>
+          <div class="card-tools">
+            <span class="badge badge-primary">{{ page_obj.paginator.count }} {% trans "total" %}</span>
           </div>
-
-          {# Resource type — only show when not locked by URL slug #}
-          {% if not resource_slug %}
-          <select name="resource_type" class="form-control form-control-sm" style="width:160px;">
-            <option value="">{% trans "All types" %}</option>
-            {% for val, label in resource_type_choices %}
-              <option value="{{ val }}" {% if filter_resource_type == val %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-          {% endif %}
-
-          {# Term — only show when not locked by URL kwarg #}
-          {% if not current_term %}
-          <select name="term" class="form-control form-control-sm" style="width:150px;">
-            <option value="">{% trans "All terms" %}</option>
-            {% for val, label in term_choices %}
-              <option value="{{ val }}" {% if filter_term == val %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-          {% endif %}
-
-          {# Difficulty #}
-          <select name="difficulty" class="form-control form-control-sm" style="width:140px;">
-            <option value="">{% trans "All levels" %}</option>
-            {% for val, label in difficulty_choices %}
-              <option value="{{ val }}" {% if filter_difficulty == val %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-
-          {# Course #}
-          <select name="course" class="form-control form-control-sm select2" style="width:170px;">
-            <option value="">{% trans "All courses" %}</option>
-            {% for c in courses %}
-              <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
-                {{ c.title }}
-              </option>
-            {% endfor %}
-          </select>
-
-          {# Teacher #}
-          <select name="teacher" class="form-control form-control-sm" style="width:170px;">
-            <option value="">{% trans "All teachers" %}</option>
-            {% for t in teachers %}
-              <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
-                {{ t.get_full_name }}
-              </option>
-            {% endfor %}
-          </select>
-
-          {# Has solution #}
-          <select name="has_solution" class="form-control form-control-sm" style="width:145px;">
-            <option value="">{% trans "Solution: any" %}</option>
-            <option value="1" {% if filter_has_solution == "1" %}selected{% endif %}>{% trans "Has solution" %}</option>
-            <option value="0" {% if filter_has_solution == "0" %}selected{% endif %}>{% trans "No solution" %}</option>
-          </select>
-
-          {# Free / Premium #}
-          <select name="is_free" class="form-control form-control-sm" style="width:130px;">
-            <option value="">{% trans "Free: any" %}</option>
-            <option value="1" {% if filter_is_free == "1" %}selected{% endif %}>{% trans "Free only" %}</option>
-            <option value="0" {% if filter_is_free == "0" %}selected{% endif %}>{% trans "Premium only" %}</option>
-          </select>
-
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
-          </button>
-
-          {% if filter_q or filter_difficulty or filter_term or filter_resource_type or filter_has_solution or filter_is_free or filter_course or filter_teacher %}
-          <a href="?" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
-          </a>
-          {% endif %}
-
-        </form>
-      </div>
-    </div>
-
-    {# ── Resource list ── #}
-    <div class="card card-primary card-outline">
-
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="{{ resource_type_icon }} mr-2"></i>
-          {{ subject.name }} — {{ resource_type_title }}
-        </h3>
-        <div class="card-tools">
-          <span class="badge badge-primary">
-            {{ page_obj.paginator.count }} {% trans "total" %}
-          </span>
         </div>
-      </div>
-
-      <div class="card-body p-0">
-        {% if resources %}
-        <div class="list-group list-group-flush">
-          {% for resource in resources %}
-          <a href="{% if resource.is_free %}{% url 'content:resource:resource-detail' pk=resource.pk %}{% else %}{% url 'billing:pricing' %}{% endif %}"
-            class="list-group-item list-group-item-action px-4 py-3">
-
-            <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 12px;">
-
-              {# ── Left: icon + title + meta ── #}
-              <div class="d-flex align-items-start flex-grow-1" style="min-width: 0; gap: 12px;">
-
-                {# Icon bubble #}
-                <div class="flex-shrink-0 d-flex align-items-center justify-content-center"
-                    style="width:38px; height:38px; border-radius:8px; background:var(--color-background-info);">
-                  <i class="{{ resource_type_icon }} fa-2x text-primary"></i>
-                </div>
-
-                <div style="min-width: 0;">
-
-                  {# Title #}
-                  <div class="font-weight-bold text-truncate">
-                    {{ resource.title }}&nbsp;&nbsp;&nbsp;
-                    <small class="text-muted">
-                      <i class="fas fa-calendar-alt mr-1"></i>{{ resource.get_term_display }}
-                    </small>
+        <div class="card-body p-0">
+          {% if resources %}
+            <div class="list-group list-group-flush">
+              {% for resource in resources %}
+                <a href="{% if resource.is_free %}{% url 'content:resource:resource-detail' pk=resource.pk %}{% else %}{% url 'billing:pricing' %}{% endif %}"
+                   class="list-group-item list-group-item-action px-4 py-3">
+                  <div class="d-flex justify-content-between align-items-start flex-wrap"
+                       style="gap: 12px">
+                    {# ── Left: icon + title + meta ── #}
+                    <div class="d-flex align-items-start flex-grow-1"
+                         style="min-width: 0;
+                                gap: 12px">
+                      {# Icon bubble #}
+                      <div class="flex-shrink-0 d-flex align-items-center justify-content-center"
+                           style="width:38px;
+                                  height:38px;
+                                  border-radius:8px;
+                                  background:var(--color-background-info)">
+                        <i class="{{ resource_type_icon }} fa-2x text-primary"></i>
+                      </div>
+                      <div style="min-width: 0;">
+                        {# Title #}
+                        <div class="font-weight-bold text-truncate">
+                          {{ resource.title }}&nbsp;&nbsp;&nbsp;
+                          <small class="text-muted">
+                            <i class="fas fa-calendar-alt mr-1"></i>{{ resource.get_term_display }}
+                          </small>
+                        </div>
+                        {# Meta row #}
+                        <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 10px;">
+                          {% if resource.file_size %}
+                            <small class="text-muted">
+                              <i class="fas fa-file mr-1"></i>{{ resource.file_size|filesizeformat }}
+                            </small>
+                          {% endif %}
+                          {% if resource.file_extension %}
+                            <small class="text-muted text-uppercase">
+                              <i class="fas fa-paperclip mr-1"></i>{{ resource.file_extension }}
+                            </small>
+                          {% endif %}
+                          {% if resource.duration_minutes %}
+                            <small class="text-muted">
+                              <i class="far fa-clock mr-1"></i>{{ resource.duration_minutes }} {% trans "min" %}
+                            </small>
+                          {% endif %}
+                          {% if resource.total_marks %}
+                            <small class="text-muted">
+                              <i class="fas fa-star mr-1"></i>{{ resource.total_marks }} {% trans "pts" %}
+                            </small>
+                          {% endif %}
+                        </div>
+                        {# Tags row #}
+                        <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 4px;">
+                          {% for tag in resource.tags.all %}
+                            <span class="badge px-2 py-1"
+                                  style="font-size:11px;
+                                         font-weight:500;
+                                         background:#EEEDFE;
+                                         color:#3C3489;
+                                         border:0.5px solid #AFA9EC">
+                              <i class="fas fa-tag mr-1" style="font-size:10px;"></i>{{ tag.name }}
+                            </span>
+                          {% empty %}
+                            <small class="text-muted">{% trans "No tags" %}</small>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                    {# ── Right: badges + rating ── #}
+                    <div class="d-flex flex-column align-items-end flex-shrink-0"
+                         style="gap: 6px">
+                      {# Rating #}
+                      <div class="d-flex align-items-center" style="gap: 4px;">
+                        {% for star in resource.get_rating_display.stars %}
+                          <i class="fas fa-star"
+                             style="font-size:11px;
+                                    color: {% if star <= resource.get_rating_display.average %}#BA7517{% else %}#B4B2A9{% endif %}"></i>
+                        {% endfor %}
+                        <small class="text-muted ml-1">({{ resource.get_rating_display.count }})</small>
+                      </div>
+                      {# Badge row #}
+                      <div class="d-flex flex-wrap align-items-center justify-content-end"
+                           style="gap: 5px">
+                        {# Difficulty #}
+                        <span class="badge px-2 py-1"
+                              style="font-size:11px;
+                                     font-weight:500;
+                                     {% with d=resource.difficulty %} {% if d == 'easy' %}background:#EAF3DE;
+                                     color:#3B6D11;
+                                     border:0.5px solid #97C459;
+                                     {% elif d == 'medium' %}background:#FAEEDA;
+                                     color:#854F0B;
+                                     border:0.5px solid #EF9F27;
+                                     {% elif d == 'hard' %}background:#FCEBEB;
+                                     color:#A32D2D;
+                                     border:0.5px solid #F09595;
+                                     {% else %}background:#F1EFE8;
+                                     color:#5F5E5A;
+                                     border:0.5px solid #B4B2A9;
+                                     {% endif %}{% endwith %}">
+                          <i class="fas fa-signal mr-1" style="font-size:10px;"></i>
+                          {{ resource.get_difficulty_display }}
+                        </span>
+                        {# Free / Premium #}
+                        {% if resource.is_free %}
+                          <span class="badge px-2 py-1"
+                                style="font-size:11px;
+                                       font-weight:500;
+                                       background:#EAF3DE;
+                                       color:#3B6D11;
+                                       border:0.5px solid #97C459">
+                            <i class="fas fa-unlock mr-1" style="font-size:10px;"></i>{% trans "Free" %}
+                          </span>
+                        {% else %}
+                          <span class="badge px-2 py-1"
+                                style="font-size:11px;
+                                       font-weight:500;
+                                       background:#F1EFE8;
+                                       color:#5F5E5A;
+                                       border:0.5px solid #B4B2A9">
+                            <i class="fas fa-lock mr-1" style="font-size:10px;"></i>{% trans "Premium" %}
+                          </span>
+                        {% endif %}
+                        {# Solution #}
+                        {% if resource.has_solution %}
+                          <span class="badge px-2 py-1"
+                                style="font-size:11px;
+                                       font-weight:500;
+                                       background:#E6F1FB;
+                                       color:#0C447C;
+                                       border:0.5px solid #85B7EB">
+                            <i class="fas fa-check mr-1" style="font-size:10px;"></i>{% trans "Solution" %}
+                          </span>
+                        {% endif %}
+                        {# Progress (student only) #}
+                        {% if request.user.is_authenticated and request.user.is_student %}
+                          {% if resource.progress_obj %}
+                            {% if resource.progress_obj.is_completed %}
+                              <span class="badge badge-success px-2 py-1">
+                                <i class="fas fa-check-circle mr-1"></i>{% trans "Resolved" %}
+                              </span>
+                            {% else %}
+                              <span class="badge badge-warning px-2 py-1">
+                                <i class="fas fa-spinner mr-1"></i>{% trans "In progress" %}
+                              </span>
+                            {% endif %}
+                          {% else %}
+                            <span class="badge badge-secondary px-2 py-1">
+                              <i class="fas fa-circle-notch mr-1"></i>{% trans "Not resolved" %}
+                            </span>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </div>
                   </div>
-
-                  {# Meta row #}
-                  <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 10px;">
-
-                    {% if resource.file_size %}
-                    <small class="text-muted">
-                      <i class="fas fa-file mr-1"></i>{{ resource.file_size|filesizeformat }}
-                    </small>
-                    {% endif %}
-
-                    {% if resource.file_extension %}
-                    <small class="text-muted text-uppercase">
-                      <i class="fas fa-paperclip mr-1"></i>{{ resource.file_extension }}
-                    </small>
-                    {% endif %}
-
-                    {% if resource.duration_minutes %}
-                    <small class="text-muted">
-                      <i class="far fa-clock mr-1"></i>{{ resource.duration_minutes }} {% trans "min" %}
-                    </small>
-                    {% endif %}
-
-                    {% if resource.total_marks %}
-                    <small class="text-muted">
-                      <i class="fas fa-star mr-1"></i>{{ resource.total_marks }} {% trans "pts" %}
-                    </small>
-                    {% endif %}
-
-                  </div>
-
-                  {# Tags row #}
-                  <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 4px;">
-                    {% for tag in resource.tags.all %}
-                      <span class="badge px-2 py-1"
-                            style="font-size:11px; font-weight:500; background:#EEEDFE; color:#3C3489; border:0.5px solid #AFA9EC;">
-                        <i class="fas fa-tag mr-1" style="font-size:10px;"></i>{{ tag.name }}
-                      </span>
-                    {% empty %}
-                      <small class="text-muted">{% trans "No tags" %}</small>
-                    {% endfor %}
-                  </div>
-
-                </div>
-              </div>
-
-              {# ── Right: badges + rating ── #}
-              <div class="d-flex flex-column align-items-end flex-shrink-0" style="gap: 6px;">
-
-                {# Rating #}
-                <div class="d-flex align-items-center" style="gap: 4px;">
-                  {% for star in resource.get_rating_display.stars %}
-                    <i class="fas fa-star"
-                      style="font-size:11px; color: {% if star <= resource.get_rating_display.average %}#BA7517{% else %}#B4B2A9{% endif %};"></i>
-                  {% endfor %}
-                  <small class="text-muted ml-1">({{ resource.get_rating_display.count }})</small>
-                </div>
-
-                {# Badge row #}
-                <div class="d-flex flex-wrap align-items-center justify-content-end" style="gap: 5px;">
-
-                  {# Difficulty #}
-                  <span class="badge px-2 py-1"
-                        style="font-size:11px; font-weight:500;
-                          {% with d=resource.difficulty %}
-                          {% if d == 'easy' %}background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;
-                          {% elif d == 'medium' %}background:#FAEEDA; color:#854F0B; border:0.5px solid #EF9F27;
-                          {% elif d == 'hard' %}background:#FCEBEB; color:#A32D2D; border:0.5px solid #F09595;
-                          {% else %}background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;
-                          {% endif %}{% endwith %}">
-                    <i class="fas fa-signal mr-1" style="font-size:10px;"></i>
-                    {{ resource.get_difficulty_display }}
-                  </span>
-
-                  {# Free / Premium #}
-                  {% if resource.is_free %}
-                  <span class="badge px-2 py-1"
-                        style="font-size:11px; font-weight:500; background:#EAF3DE; color:#3B6D11; border:0.5px solid #97C459;">
-                    <i class="fas fa-unlock mr-1" style="font-size:10px;"></i>{% trans "Free" %}
-                  </span>
-                  {% else %}
-                  <span class="badge px-2 py-1"
-                        style="font-size:11px; font-weight:500; background:#F1EFE8; color:#5F5E5A; border:0.5px solid #B4B2A9;">
-                    <i class="fas fa-lock mr-1" style="font-size:10px;"></i>{% trans "Premium" %}
-                  </span>
-                  {% endif %}
-
-                  {# Solution #}
-                  {% if resource.has_solution %}
-                  <span class="badge px-2 py-1"
-                        style="font-size:11px; font-weight:500; background:#E6F1FB; color:#0C447C; border:0.5px solid #85B7EB;">
-                    <i class="fas fa-check mr-1" style="font-size:10px;"></i>{% trans "Solution" %}
-                  </span>
-                  {% endif %}
-
-                  {# Progress (student only) #}
-                  {% if request.user.is_authenticated and request.user.is_student %}
-                    {% if resource.progress_obj %}
-                      {% if resource.progress_obj.is_completed %}
-                      <span class="badge badge-success px-2 py-1">
-                        <i class="fas fa-check-circle mr-1"></i>{% trans "Resolved" %}
-                      </span>
-                      {% else %}
-                      <span class="badge badge-warning px-2 py-1">
-                        <i class="fas fa-spinner mr-1"></i>{% trans "In progress" %}
-                      </span>
-                      {% endif %}
-                    {% else %}
-                    <span class="badge badge-secondary px-2 py-1">
-                      <i class="fas fa-circle-notch mr-1"></i>{% trans "Not resolved" %}
-                    </span>
-                    {% endif %}
-                  {% endif %}
-
-                </div>
-              </div>
-
+                </a>
+              {% endfor %}
             </div>
-
-          </a>
-          {% endfor %}
-        </div>
-
-        {% else %}
-        <div class="p-5 text-center text-muted">
-          <i class="{{ resource_type_icon }} fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
-          <h5 class="font-weight-bold">
-            {% blocktrans with title=resource_type_title %}
+          {% else %}
+            <div class="p-5 text-center text-muted">
+              <i class="{{ resource_type_icon }} fa-3x mb-3 d-block"
+                 style="color:#dee2e6"></i>
+              <h5 class="font-weight-bold">
+                {% blocktrans with title=resource_type_title %}
               No {{ title }} available yet
             {% endblocktrans %}
-          </h5>
-          <p class="small mb-0">
-            {% trans "Resources will appear here once added." %}
-          </p>
+              </h5>
+              <p class="small mb-0">{% trans "Resources will appear here once added." %}</p>
+            </div>
+          {% endif %}
         </div>
+        {% if is_paginated %}
+          <div class="card-footer">{% include "includes/pagination.html" with querystring=querystring %}</div>
         {% endif %}
-
       </div>
-
-      {% if is_paginated %}
-      <div class="card-footer">
-        {% include "includes/pagination.html" with querystring=querystring %}
-      </div>
-      {% endif %}
-
     </div>
-
-  </div>
-</section>
-
+  </section>
 {% endblock %}
-
 {% block etxra_js %}
-<script>
+  <script>
   $(function () {
     //Initialize Select2 Elements
     $('.select2').select2()
@@ -337,5 +322,5 @@
       theme: 'bootstrap4'
     })
   })
-</script>
+  </script>
 {% endblock %}

@@ -1,55 +1,49 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{% endblock %} | WN</title>
-  <link rel="icon" href="{% static 'dist/img/favicon.ico' %}">
-  
-  {% include "includes/styles.html" %}
-  {% block extra_css %}{% endblock %}
-</head>
-
-<body class="hold-transition {% if request.user.is_authenticated %}sidebar-mini{% else %}layout-top-nav{% endif %} layout-navbar-fixed layout-fixed sidebar-collapse">
-
-<div class="wrapper">
-  {% if request.user.is_authenticated %}
-    {% include "includes/navbar.html" %}
-  {% else %}
-    {% include "includes/navbar-full.html" %}
-  {% endif %}
-
-  {% if request.user.is_authenticated %}
-    {% if request.user.is_student %}
-      {% include "includes/sidebar.html" %}
-    {% elif request.user.is_teacher %}
-      {% include "includes/teacher-sidebar.html" %}
-    {% endif %}
-  {% endif %}
-
-  <div class="content-wrapper">
-    {% if request.user.is_authenticated %}
-      <section class="content pt-2 pb-0">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12 col-lg-12 mx-auto">
-              {# global alerts go here #}
+<html lang="{{ LANGUAGE_CODE }}"
+      dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      {% block title %}{% endblock %}
+    | WN</title>
+    <link rel="icon" href="{% static 'dist/img/favicon.ico' %}">
+    {% include "includes/styles.html" %}
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="hold-transition {% if request.user.is_authenticated %}sidebar-mini{% else %}layout-top-nav{% endif %} layout-navbar-fixed layout-fixed sidebar-collapse">
+    <div class="wrapper">
+      {% if request.user.is_authenticated %}
+        {% include "includes/navbar.html" %}
+      {% else %}
+        {% include "includes/navbar-full.html" %}
+      {% endif %}
+      {% if request.user.is_authenticated %}
+        {% if request.user.is_student %}
+          {% include "includes/sidebar.html" %}
+        {% elif request.user.is_teacher %}
+          {% include "includes/teacher-sidebar.html" %}
+        {% endif %}
+      {% endif %}
+      <div class="content-wrapper">
+        {% if request.user.is_authenticated %}
+          <section class="content pt-2 pb-0">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-12 col-lg-12 mx-auto">{# global alerts go here #}</div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </div>
-
-  {% include "includes/footer.html" %}
-  {% include "includes/control_sidebar.html" %}
-</div>
-
-{% include "includes/scripts.html" %}
-{% include "includes/toasts.html" %}
-{% block extra_js %}{% endblock %}
-</body>
+          </section>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </div>
+      {% include "includes/footer.html" %}
+      {% include "includes/control_sidebar.html" %}
+    </div>
+    {% include "includes/scripts.html" %}
+    {% include "includes/toasts.html" %}
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>

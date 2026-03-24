@@ -1,138 +1,126 @@
 {% extends "layouts/base-full.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "Privacy Policy" %}{% endblock %}
-
+{% block title %}
+  {% trans "Privacy Policy" %}
+{% endblock %}
 {% block content %}
-
-{# ── Header ── #}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="font-weight-bold">
-          <i class="fas fa-user-shield text-primary mr-2"></i>
-          {{ page_title }}
-        </h1>
-        <p class="text-muted">{{ page_subtitle }}</p>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "Privacy Policy" %}</li>
-        </ol>
+  {# ── Header ── #}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="font-weight-bold">
+            <i class="fas fa-user-shield text-primary mr-2"></i>
+            {{ page_title }}
+          </h1>
+          <p class="text-muted">{{ page_subtitle }}</p>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "Privacy Policy" %}</li>
+          </ol>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-3 d-none d-md-block">
-        <div class="card card-outline card-primary sticky-top" style="top: 70px;">
-          <div class="card-header">
-            <h3 class="card-title">
-              <i class="fas fa-list mr-2"></i>{% trans "Contents" %}
-            </h3>
-          </div>
-          <div class="card-body p-0">
-            <ul class="nav flex-column">
-              {% for section in sections %}
-              <li class="nav-item">
-                <a href="#{{ section.id }}"
-                   class="nav-link py-2 toc-link text-{{ section.color }}">
-                  <i class="{{ section.icon }} mr-2"></i>
-                  {{ section.title }}
-                </a>
-              </li>
-              {% endfor %}
-            </ul>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-3 d-none d-md-block">
+          <div class="card card-outline card-primary sticky-top" style="top: 70px;">
+            <div class="card-header">
+              <h3 class="card-title">
+                <i class="fas fa-list mr-2"></i>{% trans "Contents" %}
+              </h3>
+            </div>
+            <div class="card-body p-0">
+              <ul class="nav flex-column">
+                {% for section in sections %}
+                  <li class="nav-item">
+                    <a href="#{{ section.id }}"
+                       class="nav-link py-2 toc-link text-{{ section.color }}">
+                      <i class="{{ section.icon }} mr-2"></i>
+                      {{ section.title }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="col-md-9">
-
-        {# ── Last updated banner ── #}
-        <div class="alert alert-info alert-dismissible">
-          <button type="button" class="close" data-dismiss="alert">&times;</button>
-          <i class="fas fa-calendar-alt mr-2"></i>
-          <strong>{% trans "Last Updated:" %}</strong> {{ last_updated }}
-        </div>
-
-        {# ── Intro ── #}
-        <div class="card card-outline card-primary mb-4">
-          <div class="card-body">
-            <p class="mb-0">
-              {% blocktrans %}
+        <div class="col-md-9">
+          {# ── Last updated banner ── #}
+          <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-calendar-alt mr-2"></i>
+            <strong>{% trans "Last Updated:" %}</strong> {{ last_updated }}
+          </div>
+          {# ── Intro ── #}
+          <div class="card card-outline card-primary mb-4">
+            <div class="card-body">
+              <p class="mb-0">
+                {% blocktrans %}
                 At <strong>WonderNet</strong>, we are committed to protecting your privacy.
                 This Privacy Policy explains what data we collect, how we use it,
                 and what rights you have over your information.
                 By using <b>WN</b>, you agree to the practices described in this policy.
               {% endblocktrans %}
-            </p>
+              </p>
+            </div>
+          </div>
+          {# ── Sections ── #}
+          {% for section in sections %}
+            <div class="card card-outline card-{{ section.color }} mb-4"
+                 id="{{ section.id }}">
+              <div class="card-header">
+                <h3 class="card-title font-weight-bold">
+                  <i class="{{ section.icon }} mr-2"></i>
+                  {{ forloop.counter }}. {{ section.title }}
+                </h3>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  {% for item in section.content %}
+                    <li class="mb-2 d-flex align-items-start">
+                      <i class="fas fa-check-circle text-{{ section.color }} mt-1 mr-2 flex-shrink-0"></i>
+                      <span>{{ item }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endfor %}
+          {# ── Contact ── #}
+          <div class="card bg-gradient-primary mt-2">
+            <div class="card-body text-center py-4">
+              <h4 class="font-weight-bold text-white">
+                <i class="fas fa-envelope mr-2"></i>
+                {% trans "Questions about this policy?" %}
+              </h4>
+              <p class="text-white mb-3">{% trans "Reach out to us and we'll respond within 48 hours." %}</p>
+              <a href="mailto:{{ contact_email }}" class="btn btn-light btn-lg mr-2">
+                <i class="fas fa-envelope mr-1"></i>
+                {{ contact_email }}
+              </a>
+              <a href="{% url 'pages:contact-us' %}"
+                 class="btn btn-outline-light btn-lg">
+                <i class="fas fa-paper-plane mr-1"></i>
+                {% trans "Contact Form" %}
+              </a>
+            </div>
           </div>
         </div>
-
-        {# ── Sections ── #}
-        {% for section in sections %}
-        <div class="card card-outline card-{{ section.color }} mb-4"
-             id="{{ section.id }}">
-          <div class="card-header">
-            <h3 class="card-title font-weight-bold">
-              <i class="{{ section.icon }} mr-2"></i>
-              {{ forloop.counter }}. {{ section.title }}
-            </h3>
-          </div>
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              {% for item in section.content %}
-              <li class="mb-2 d-flex align-items-start">
-                <i class="fas fa-check-circle text-{{ section.color }} mt-1 mr-2 flex-shrink-0"></i>
-                <span>{{ item }}</span>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        {% endfor %}
-
-        {# ── Contact ── #}
-        <div class="card bg-gradient-primary mt-2">
-          <div class="card-body text-center py-4">
-            <h4 class="font-weight-bold text-white">
-              <i class="fas fa-envelope mr-2"></i>
-              {% trans "Questions about this policy?" %}
-            </h4>
-            <p class="text-white mb-3">
-              {% trans "Reach out to us and we'll respond within 48 hours." %}
-            </p>
-            <a href="mailto:{{ contact_email }}"
-               class="btn btn-light btn-lg mr-2">
-              <i class="fas fa-envelope mr-1"></i>
-              {{ contact_email }}
-            </a>
-            <a href="{% url 'pages:contact-us' %}"
-               class="btn btn-outline-light btn-lg">
-              <i class="fas fa-paper-plane mr-1"></i>
-              {% trans "Contact Form" %}
-            </a>
-          </div>
-        </div>
-
       </div>
     </div>
-  </div>
-</section>
-
+  </section>
 {% endblock %}
-
 {% block extra_js %}
-<script>
+  <script>
   // ── Highlight active TOC link on scroll ──
   const sections = document.querySelectorAll('.card[id]');
   const tocLinks = document.querySelectorAll('.toc-link');
@@ -162,5 +150,5 @@
       }
     });
   });
-</script>
+  </script>
 {% endblock %}

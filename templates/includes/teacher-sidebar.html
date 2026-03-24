@@ -1,7 +1,6 @@
 {% load static %}
 {% load i18n %}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-
   <!-- Brand Logo -->
   <a href="{% url 'pages:landing' %}" class="brand-link text-center">
     <img src="{% static 'dist/img/wnlogo.png' %}"
@@ -9,38 +8,29 @@
          class="brand-image img-circle elevation-3">
     <span class="brand-text font-weight-light ml-2">WN</span>
   </a>
-
   <!-- Sidebar -->
   <div class="sidebar">
-
     <!-- User Panel -->
     <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
-        {% comment %} <img src="{% static 'dist/img/user2-160x160.jpg' %}"
-             class="img-circle elevation-2"
-             alt="{% trans 'User Image' %}"> {% endcomment %}
+        {% comment %} <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="{% trans 'User Image' %}"> {% endcomment %}
         {% if user.avatar_url %}
-        <img src="{{ user.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
-              class="img-circle elevation-2"
-              width="50"
-              height="50"
-              alt="{{ user.first_name }} {{ user.last_name }}">
+          <img src="{{ user.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+               class="img-circle elevation-2"
+               width="50"
+               height="50"
+               alt="{{ user.first_name }} {{ user.last_name }}">
         {% else %}
-        {{ user.avatar_display|safe }}
+          {{ user.avatar_display|safe }}
         {% endif %}
       </div>
       <div class="info">
-        <a href="#" class="d-block font-weight-bold">
-          {{ user.first_name }} {{ user.last_name }}
-        </a>
+        <a href="#" class="d-block font-weight-bold">{{ user.first_name }} {{ user.last_name }}</a>
         {% if request.user.is_teacher %}
-        <small class="text-muted">
-          {{ request.user.teacher_profile.grade.name }}
-        </small>
+          <small class="text-muted">{{ request.user.teacher_profile.grade.name }}</small>
         {% endif %}
       </div>
     </div>
-
     <!-- Sidebar Search -->
     <div class="form-inline mb-2">
       <div class="input-group" data-widget="sidebar-search">
@@ -55,98 +45,88 @@
         </div>
       </div>
     </div>
-
     <!-- Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column"
           data-widget="treeview"
           role="menu"
           data-accordion="false">
-
         <!-- Dashboard -->
         <li class="nav-item">
           <a href="{% if user.is_teacher %}{% url 'dashboard' %}{% endif %}"
-            class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
+             class="nav-link {% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">
             <i class="nav-icon fas fa-chart-pie"></i>
             <p>{% trans "Dashboard" %}</p>
           </a>
         </li>
-
         <!-- Resources -->
         {% if user.is_teacher %}
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-folder-open"></i>
-            <p>
-              {% trans "My Resources" %}
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="{% url 'content:resource:teacher-resource-list' %}" class="nav-link">
-                <i class="fas fa-list-ul nav-icon"></i>
-                <p>{% trans "List" %}</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'content:resource:resource-create' %}" class="nav-link">
-                <i class="fas fa-plus nav-icon"></i>
-                <p>{% trans "Create" %}</p>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-clipboard-list"></i>
-            <p>
-              {% trans "My Quizzes" %}
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="{% url 'assessment:quiz:quiz-list' %}" class="nav-link">
-                <i class="fas fa-list nav-icon"></i>
-                <p>{% trans "List" %}</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'assessment:quiz:quiz-create' %}" class="nav-link">
-                <i class="fas fa-plus nav-icon"></i>
-                <p>{% trans "Create" %}</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'assessment:question:question-list' %}" class="nav-link">
-                <i class="fas fa-question-circle nav-icon"></i>
-                <p>{% trans "Question bank" %}</p>
-              </a>
-            </li>
-          </ul>
-        </li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder-open"></i>
+              <p>
+                {% trans "My Resources" %}
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'content:resource:teacher-resource-list' %}"
+                   class="nav-link">
+                  <i class="fas fa-list-ul nav-icon"></i>
+                  <p>{% trans "List" %}</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'content:resource:resource-create' %}" class="nav-link">
+                  <i class="fas fa-plus nav-icon"></i>
+                  <p>{% trans "Create" %}</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-clipboard-list"></i>
+              <p>
+                {% trans "My Quizzes" %}
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'assessment:quiz:quiz-list' %}" class="nav-link">
+                  <i class="fas fa-list nav-icon"></i>
+                  <p>{% trans "List" %}</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'assessment:quiz:quiz-create' %}" class="nav-link">
+                  <i class="fas fa-plus nav-icon"></i>
+                  <p>{% trans "Create" %}</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'assessment:question:question-list' %}" class="nav-link">
+                  <i class="fas fa-question-circle nav-icon"></i>
+                  <p>{% trans "Question bank" %}</p>
+                </a>
+              </li>
+            </ul>
+          </li>
         {% endif %}
-
         <li class="nav-item">
-          <a href="{% url 'tutoring:teacher:teacher-sessions' %}"
-              class="nav-link">
+          <a href="{% url 'tutoring:teacher:teacher-sessions' %}" class="nav-link">
             <i class="nav-icon fas fa-calendar-check"></i>
             <p>{% trans "My sessions" %}</p>
           </a>
         </li>
-
         <li class="nav-item">
-          <a href="#"
-              class="nav-link">
+          <a href="#" class="nav-link">
             <i class="nav-icon fas fa-lightbulb"></i>
             <p>{% trans "Tips & Guidance" %}</p>
           </a>
         </li>
-
       </ul>
     </nav>
   </div>

@@ -1,178 +1,155 @@
 {% extends "layouts/base-full.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "About Us" %}{% endblock %}
-
+{% block title %}
+  {% trans "About Us" %}
+{% endblock %}
 {% block content %}
-
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1>{{ page_title }}</h1>
-        <p class="text-muted">{{ page_subtitle }}</p>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "About Us" %}</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="content">
-
-  <!-- INTRO -->
-  <div class="card card-primary card-outline">
-    <div class="card-body">
-      <div class="row align-items-center">
-        <div class="col-md-8">
-          <h3 class="font-weight-bold">
-            {% trans "Empowering Algerian Education Through Technology" %}
-          </h3>
-          <p class="mt-3">
-            <strong>Wonder<span class="text-primary">Net</span></strong>
-            {% trans "was created with one goal in mind: to make learning and teaching more effective, accessible, and engaging for Algerian students and teachers." %}
-          </p>
-          <p>
-            {% trans "We believe education should adapt to people — not the other way around. Our platform brings students and teachers together in a modern, structured, and easy-to-use learning environment." %}
-          </p>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>{{ page_title }}</h1>
+          <p class="text-muted">{{ page_subtitle }}</p>
         </div>
-        <div class="col-md-4 text-center">
-          <i class="fas fa-school fa-6x text-primary"></i>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "About Us" %}</li>
+          </ol>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- MISSION / VISION -->
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <div class="card card-outline card-info h-100">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="fas fa-bullseye mr-2"></i>{% trans "Our Mission" %}
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>
-            {% trans "Our mission is to provide a powerful yet simple educational platform that helps Algerian students succeed and teachers focus on what matters most: teaching." %}
-          </p>
-          <p>
-            {% trans "We aim to remove technical barriers and replace them with tools that support learning, collaboration, and growth." %}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card card-outline card-success h-100">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="fas fa-eye mr-2"></i>{% trans "Our Vision" %}
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>
-            {% trans "We envision a future where quality education is accessible to every Algerian student, regardless of wilaya or background." %}
-          </p>
-          <p>
-            {% trans "By combining technology with pedagogy, we strive to build a platform that evolves alongside modern education needs." %}
-          </p>
+  </section>
+  <section class="content">
+    <!-- INTRO -->
+    <div class="card card-primary card-outline">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h3 class="font-weight-bold">{% trans "Empowering Algerian Education Through Technology" %}</h3>
+            <p class="mt-3">
+              <strong>Wonder<span class="text-primary">Net</span></strong>
+              {% trans "was created with one goal in mind: to make learning and teaching more effective, accessible, and engaging for Algerian students and teachers." %}
+            </p>
+            <p>
+              {% trans "We believe education should adapt to people — not the other way around. Our platform brings students and teachers together in a modern, structured, and easy-to-use learning environment." %}
+            </p>
+          </div>
+          <div class="col-md-4 text-center">
+            <i class="fas fa-school fa-6x text-primary"></i>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- VALUES -->
-  <div class="card card-outline card-secondary">
-    <div class="card-header">
-      <h3 class="card-title">
-        <i class="fas fa-heart mr-2"></i>{% trans "Our Core Values" %}
-      </h3>
-    </div>
-    <div class="card-body">
-      <div class="row text-center">
-        <div class="col-md-3">
-          <i class="fas fa-user-check fa-3x text-info mb-2"></i>
-          <h5 class="font-weight-bold">{% trans "User-First" %}</h5>
-          <p class="text-muted">{% trans "Designed for real students and teachers." %}</p>
+    <!-- MISSION / VISION -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="card card-outline card-info h-100">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-bullseye mr-2"></i>{% trans "Our Mission" %}
+            </h3>
+          </div>
+          <div class="card-body">
+            <p>
+              {% trans "Our mission is to provide a powerful yet simple educational platform that helps Algerian students succeed and teachers focus on what matters most: teaching." %}
+            </p>
+            <p>
+              {% trans "We aim to remove technical barriers and replace them with tools that support learning, collaboration, and growth." %}
+            </p>
+          </div>
         </div>
-        <div class="col-md-3">
-          <i class="fas fa-lightbulb fa-3x text-warning mb-2"></i>
-          <h5 class="font-weight-bold">{% trans "Innovation" %}</h5>
-          <p class="text-muted">{% trans "Continuously improving the learning experience." %}</p>
-        </div>
-        <div class="col-md-3">
-          <i class="fas fa-shield-alt fa-3x text-success mb-2"></i>
-          <h5 class="font-weight-bold">{% trans "Trust" %}</h5>
-          <p class="text-muted">{% trans "Secure, reliable, and transparent." %}</p>
-        </div>
-        <div class="col-md-3">
-          <i class="fas fa-users fa-3x text-primary mb-2"></i>
-          <h5 class="font-weight-bold">{% trans "Community" %}</h5>
-          <p class="text-muted">{% trans "Learning works best together." %}</p>
+      </div>
+      <div class="col-md-6">
+        <div class="card card-outline card-success h-100">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-eye mr-2"></i>{% trans "Our Vision" %}
+            </h3>
+          </div>
+          <div class="card-body">
+            <p>
+              {% trans "We envision a future where quality education is accessible to every Algerian student, regardless of wilaya or background." %}
+            </p>
+            <p>
+              {% trans "By combining technology with pedagogy, we strive to build a platform that evolves alongside modern education needs." %}
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- BUILT FOR -->
-  <div class="row">
-
-    <div class="col-md-6 d-flex">
+    <!-- VALUES -->
+    <div class="card card-outline card-secondary">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-heart mr-2"></i>{% trans "Our Core Values" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-3">
+            <i class="fas fa-user-check fa-3x text-info mb-2"></i>
+            <h5 class="font-weight-bold">{% trans "User-First" %}</h5>
+            <p class="text-muted">{% trans "Designed for real students and teachers." %}</p>
+          </div>
+          <div class="col-md-3">
+            <i class="fas fa-lightbulb fa-3x text-warning mb-2"></i>
+            <h5 class="font-weight-bold">{% trans "Innovation" %}</h5>
+            <p class="text-muted">{% trans "Continuously improving the learning experience." %}</p>
+          </div>
+          <div class="col-md-3">
+            <i class="fas fa-shield-alt fa-3x text-success mb-2"></i>
+            <h5 class="font-weight-bold">{% trans "Trust" %}</h5>
+            <p class="text-muted">{% trans "Secure, reliable, and transparent." %}</p>
+          </div>
+          <div class="col-md-3">
+            <i class="fas fa-users fa-3x text-primary mb-2"></i>
+            <h5 class="font-weight-bold">{% trans "Community" %}</h5>
+            <p class="text-muted">{% trans "Learning works best together." %}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- BUILT FOR -->
+    <div class="row">
+      <div class="col-md-6 d-flex">
         <div class="info-box flex-fill">
-        <span class="info-box-icon bg-info">
+          <span class="info-box-icon bg-info">
             <i class="fas fa-user-graduate"></i>
-        </span>
-        <div class="info-box-content">
+          </span>
+          <div class="info-box-content">
             <span class="info-box-text">{% trans "Built for Students" %}</span>
             <span class="info-box-number">{% trans "Engaging, structured, motivating" %}</span>
-            <p class="mb-0">
-            {% trans "Clear progress tracking, interactive learning, and personalized growth." %}
-            </p>
+            <p class="mb-0">{% trans "Clear progress tracking, interactive learning, and personalized growth." %}</p>
+          </div>
         </div>
-        </div>
-    </div>
-
-    <div class="col-md-6 d-flex">
+      </div>
+      <div class="col-md-6 d-flex">
         <div class="info-box flex-fill">
-        <span class="info-box-icon bg-success">
+          <span class="info-box-icon bg-success">
             <i class="fas fa-chalkboard-teacher"></i>
-        </span>
-        <div class="info-box-content">
+          </span>
+          <div class="info-box-content">
             <span class="info-box-text">{% trans "Built for Teachers" %}</span>
             <span class="info-box-number">{% trans "Powerful, flexible, intuitive" %}</span>
-            <p class="mb-0">
-            {% trans "Course management, analytics, and meaningful student insights." %}
-            </p>
+            <p class="mb-0">{% trans "Course management, analytics, and meaningful student insights." %}</p>
+          </div>
         </div>
-        </div>
+      </div>
     </div>
-
-  </div>
-
-  <!-- CTA -->
-  <div class="card bg-gradient-primary mt-4">
-    <div class="card-body text-center py-4">
-      <h3 class="font-weight-bold text-white">
-        {% trans "Join Our Learning Community" %}
-      </h3>
-      <p class="text-white">
-        {% trans "Whether you are a student or a teacher, WonderNet is built for you." %}
-      </p>
-      <a href="{% url 'account_signup' %}" class="btn btn-light btn-lg">
-        <i class="fas fa-arrow-right mr-1"></i> {{ cta_text }}
-      </a>
+    <!-- CTA -->
+    <div class="card bg-gradient-primary mt-4">
+      <div class="card-body text-center py-4">
+        <h3 class="font-weight-bold text-white">{% trans "Join Our Learning Community" %}</h3>
+        <p class="text-white">{% trans "Whether you are a student or a teacher, WonderNet is built for you." %}</p>
+        <a href="{% url 'account_signup' %}" class="btn btn-light btn-lg">
+          <i class="fas fa-arrow-right mr-1"></i> {{ cta_text }}
+        </a>
+      </div>
     </div>
-  </div>
-
-</section>
-
+  </section>
 {% endblock %}

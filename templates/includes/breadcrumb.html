@@ -1,23 +1,16 @@
 <!-- components/breadcrumb.html -->
-
 <ol class="breadcrumb float-sm-right bg-transparent p-0 m-0">
   {% for crumb in crumbs %}
     <li class="breadcrumb-item {% if forloop.last %}active text-primary font-weight-bold{% endif %}">
-
       {% if not forloop.last %}
         <a href="{{ crumb.url }}" class="text-muted text-decoration-none">
-          {% if crumb.icon %}
-            <i class="{{ crumb.icon }}"></i>
-          {% endif %}
+          {% if crumb.icon %}<i class="{{ crumb.icon }}"></i>{% endif %}
           {{ crumb.label }}
         </a>
       {% else %}
-        {% if crumb.icon %}
-          <i class="{{ crumb.icon }}"></i>
-        {% endif %}
+        {% if crumb.icon %}<i class="{{ crumb.icon }}"></i>{% endif %}
         {{ crumb.label }}
       {% endif %}
-
     </li>
   {% endfor %}
 </ol>

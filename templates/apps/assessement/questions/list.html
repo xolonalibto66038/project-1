@@ -1,137 +1,120 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
-
 {% block content %}
-<div class="container-fluid">
-
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">{% trans "My Questions" %}</h3>
-      <div class="card-tools me-2">
-        <a href="{% url 'assessment:question:question-type-select' %}" class="btn btn-sm btn-primary">
-          <i class="fas fa-plus"></i> {% trans "Add Question" %}
-        </a>
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">{% trans "My Questions" %}</h3>
+        <div class="card-tools me-2">
+          <a href="{% url 'assessment:question:question-type-select' %}"
+             class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> {% trans "Add Question" %}
+          </a>
+        </div>
       </div>
-    </div>
-
-    <div class="card-body">
-
-      <form method="get" class="row mb-4">
-        <div class="col-md-4">
-          <input type="text"
-                 name="search"
-                 value="{{ current_search }}"
-                 class="form-control"
-                 placeholder="{% trans 'Search questions...' %}">
+      <div class="card-body">
+        <form method="get" class="row mb-4">
+          <div class="col-md-4">
+            <input type="text"
+                   name="search"
+                   value="{{ current_search }}"
+                   class="form-control"
+                   placeholder="{% trans 'Search questions...' %}">
+          </div>
+          <div class="col-md-3">
+            <select name="type" class="form-control">
+              <option value="">{% trans "All Types" %}</option>
+              <option value="essay" {% if current_type == "essay" %}selected{% endif %}>{% trans "Essay" %}</option>
+              <option value="tf" {% if current_type == "tf" %}selected{% endif %}>{% trans "True / False" %}</option>
+              <option value="mc" {% if current_type == "mcq" %}selected{% endif %}>{% trans "MCQ" %}</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+          </div>
+        </form>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Points" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Created" %}</th>
+                <th width="150">{% trans "Actions" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for question in questions %}
+                <tr>
+                  <td>{{ question.title }}</td>
+                  <td>
+                    {% if question.question_type == "essay" %}
+                      <span class="badge bg-info">{% trans "Essay" %}</span>
+                    {% elif question.question_type == "tf" %}
+                      <span class="badge bg-warning">{% trans "True/False" %}</span>
+                    {% elif question.question_type == "mcq" %}
+                      <span class="badge bg-success">{% trans "MCQ" %}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ question.points }}</td>
+                  <td>
+                    {% if question.is_active %}
+                      <span class="badge bg-success">{% trans "Active" %}</span>
+                    {% else %}
+                      <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ question.created_at|date:"Y-m-d" }}</td>
+                  <td>
+                    {% if question.question_type == "essay" %}
+                      <a href="{% url 'assessment:question:essay-update' question.pk %}"
+                         class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
+                    {% elif question.question_type == "tf" %}
+                      <a href="{% url 'assessment:question:tf-update' question.pk %}"
+                         class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
+                    {% elif question.question_type == "mcq" %}
+                      <a href="{% url 'assessment:question:mcq-update' question.pk %}"
+                         class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
+                    {% endif %}
+                    <a href="#" class="btn btn-sm btn-danger">{% trans "Delete" %}</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">{% trans "No questions found." %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        <div class="col-md-3">
-          <select name="type" class="form-control">
-            <option value="">{% trans "All Types" %}</option>
-            <option value="essay" {% if current_type == "essay" %}selected{% endif %}>{% trans "Essay" %}</option>
-            <option value="tf" {% if current_type == "tf" %}selected{% endif %}>{% trans "True / False" %}</option>
-            <option value="mc" {% if current_type == "mcq" %}selected{% endif %}>{% trans "MCQ" %}</option>
-          </select>
-        </div>
-
-        <div class="col-md-2">
-          <button type="submit" class="btn btn-primary">
-            {% trans "Filter" %}
-          </button>
-        </div>
-      </form>
-
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>{% trans "Title" %}</th>
-              <th>{% trans "Type" %}</th>
-              <th>{% trans "Points" %}</th>
-              <th>{% trans "Status" %}</th>
-              <th>{% trans "Created" %}</th>
-              <th width="150">{% trans "Actions" %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for question in questions %}
-            <tr>
-              <td>{{ question.title }}</td>
-              <td>
-                {% if question.question_type == "essay" %}
-                  <span class="badge bg-info">{% trans "Essay" %}</span>
-                {% elif question.question_type == "tf" %}
-                  <span class="badge bg-warning">{% trans "True/False" %}</span>
-                {% elif question.question_type == "mcq" %}
-                  <span class="badge bg-success">{% trans "MCQ" %}</span>
-                {% endif %}
-              </td>
-              <td>{{ question.points }}</td>
-              <td>
-                {% if question.is_active %}
-                  <span class="badge bg-success">{% trans "Active" %}</span>
-                {% else %}
-                  <span class="badge bg-danger">{% trans "Inactive" %}</span>
-                {% endif %}
-              </td>
-              <td>{{ question.created_at|date:"Y-m-d" }}</td>
-              <td>
-                {% if question.question_type == "essay" %}
-                  <a href="{% url 'assessment:question:essay-update' question.pk %}" class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
-                {% elif question.question_type == "tf" %}
-                  <a href="{% url 'assessment:question:tf-update' question.pk %}" class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
-                {% elif question.question_type == "mcq" %}
-                  <a href="{% url 'assessment:question:mcq-update' question.pk %}" class="btn btn-sm btn-primary">{% trans "Edit" %}</a>
-                {% endif %}
-                
-                <a href="#" class="btn btn-sm btn-danger">{% trans "Delete" %}</a>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6" class="text-center">
-                {% trans "No questions found." %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        {% if is_paginated %}
+          <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link"
+                     href="?page={{ page_obj.previous_page_number }}&search={{ current_search }}&type={{ current_type }}">
+                    {% trans "Previous" %}
+                  </a>
+                </li>
+              {% endif %}
+              <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+              </li>
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link"
+                     href="?page={{ page_obj.next_page_number }}&search={{ current_search }}&type={{ current_type }}">
+                    {% trans "Next" %}
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
       </div>
-
-      {% if is_paginated %}
-      <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-
-          {% if page_obj.has_previous %}
-          <li class="page-item">
-            <a class="page-link"
-               href="?page={{ page_obj.previous_page_number }}&search={{ current_search }}&type={{ current_type }}">
-              {% trans "Previous" %}
-            </a>
-          </li>
-          {% endif %}
-
-          <li class="page-item active">
-            <span class="page-link">
-              {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </span>
-          </li>
-
-          {% if page_obj.has_next %}
-          <li class="page-item">
-            <a class="page-link"
-               href="?page={{ page_obj.next_page_number }}&search={{ current_search }}&type={{ current_type }}">
-              {% trans "Next" %}
-            </a>
-          </li>
-          {% endif %}
-
-        </ul>
-      </nav>
-      {% endif %}
-
     </div>
   </div>
-
-</div>
 {% endblock %}

@@ -1,150 +1,135 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
-
-{% block title %}{{ quiz.title }} — {% trans "My Attempts" %}{% endblock %}
-
+{% block title %}
+  {{ quiz.title }} — {% trans "My Attempts" %}
+{% endblock %}
 {% block content %}
-
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row align-items-center mb-2">
-      <div class="col-sm-7">
-        <h1 class="font-weight-bold mb-0">
-          <i class="fas fa-history mr-2 text-primary"></i>
-          {{ quiz.title }}
-          <span class="badge badge-primary ml-2">{% trans "My Attempts" %}</span>
-        </h1>
-        <small class="text-muted">{% trans "All your attempts for this quiz" %}</small>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row align-items-center mb-2">
+        <div class="col-sm-7">
+          <h1 class="font-weight-bold mb-0">
+            <i class="fas fa-history mr-2 text-primary"></i>
+            {{ quiz.title }}
+            <span class="badge badge-primary ml-2">{% trans "My Attempts" %}</span>
+          </h1>
+          <small class="text-muted">{% trans "All your attempts for this quiz" %}</small>
+        </div>
+        <div class="col-sm-5">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            {% if back_url %}
+              <li class="breadcrumb-item">
+                <a href="{{ back_url }}">{% trans "Quizzes" %}</a>
+              </li>
+            {% endif %}
+            <li class="breadcrumb-item active font-weight-bold">{% trans "My Attempts" %}</li>
+          </ol>
+        </div>
       </div>
-      <div class="col-sm-5">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          {% if back_url %}
-          <li class="breadcrumb-item">
-            <a href="{{ back_url }}">{% trans "Quizzes" %}</a>
-          </li>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-history mr-2"></i>
+            {% trans "Attempts" %}
+          </h3>
+          <div class="card-tools">
+            <span class="badge badge-primary">{{ attempts|length }} / {{ quiz.max_attempts }} {% trans "used" %}</span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          {% if attempts %}
+            <table class="table table-hover mb-0">
+              <thead class="thead-light">
+                <tr>
+                  <th style="width:60px;">#</th>
+                  <th>{% trans "Date" %}</th>
+                  <th>{% trans "Time Taken" %}</th>
+                  <th>{% trans "Score" %}</th>
+                  <th>{% trans "Grade" %}</th>
+                  <th>{% trans "Status" %}</th>
+                  <th class="text-right">{% trans "Actions" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for attempt in attempts %}
+                  <tr>
+                    <td>{{ attempt.attempt_number }}</td>
+                    <td>{{ attempt.started_at|date:"d M Y, H:i" }}</td>
+                    <td>{{ attempt.time_taken_display|default:"—" }}</td>
+                    <td>
+                      <div class="d-flex align-items-center" style="gap:6px;">
+                        <div class="progress flex-grow-1" style="height:8px; min-width:80px;">
+                          <div class="progress-bar {% if attempt.is_passed %}bg-success{% else %}bg-danger{% endif %}"
+                               style="width:{{ attempt.score_percentage }}%"></div>
+                        </div>
+                        <span class="small font-weight-bold">{{ attempt.score_percentage }}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge badge-warning">{{ attempt.get_grade_letter }}</span>
+                    </td>
+                    <td>
+                      {% if not attempt.is_completed %}
+                        <span class="badge badge-info">
+                          <i class="fas fa-spinner mr-1"></i>{% trans "In Progress" %}
+                        </span>
+                      {% elif attempt.is_passed %}
+                        <span class="badge badge-success">
+                          <i class="fas fa-check mr-1"></i>{% trans "Passed" %}
+                        </span>
+                      {% else %}
+                        <span class="badge badge-danger">
+                          <i class="fas fa-times mr-1"></i>{% trans "Failed" %}
+                        </span>
+                      {% endif %}
+                      {% if attempt.is_timed_out %}
+                        <span class="badge badge-warning ml-1">
+                          <i class="fas fa-clock mr-1"></i>{% trans "Timed out" %}
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td class="text-right">
+                      {% if attempt.is_completed %}
+                        <a href="{% url 'assessment:quiz:quiz-result' attempt_id=attempt.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                          <i class="fas fa-eye mr-1"></i>{% trans "View" %}
+                        </a>
+                      {% else %}
+                        <a href="{% url 'assessment:quiz:quiz-take' grade_subject_pk=quiz.grade_subject.pk pk=quiz.pk %}"
+                           class="btn btn-sm btn-outline-info">
+                          <i class="fas fa-play mr-1"></i>{% trans "Resume" %}
+                        </a>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="p-5 text-center text-muted">
+              <i class="fas fa-history fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+              <h5 class="font-weight-bold">{% trans "No attempts yet" %}</h5>
+              <p class="small mb-0">{% trans "You haven't attempted this quiz yet." %}</p>
+            </div>
           {% endif %}
-          <li class="breadcrumb-item active font-weight-bold">
-            {% trans "My Attempts" %}
-          </li>
-        </ol>
+        </div>
+        <div class="card-footer text-right">
+          {% if back_url %}
+            <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to Quizzes" %}
+            </a>
+          {% endif %}
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-<div class="container-fluid">
-
-  <div class="card card-primary card-outline">
-
-    <div class="card-header">
-      <h3 class="card-title">
-        <i class="fas fa-history mr-2"></i>
-        {% trans "Attempts" %}
-      </h3>
-      <div class="card-tools">
-        <span class="badge badge-primary">
-          {{ attempts|length }} / {{ quiz.max_attempts }} {% trans "used" %}
-        </span>
-      </div>
-    </div>
-
-    <div class="card-body p-0">
-      {% if attempts %}
-      <table class="table table-hover mb-0">
-        <thead class="thead-light">
-          <tr>
-            <th style="width:60px;">#</th>
-            <th>{% trans "Date" %}</th>
-            <th>{% trans "Time Taken" %}</th>
-            <th>{% trans "Score" %}</th>
-            <th>{% trans "Grade" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th class="text-right">{% trans "Actions" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for attempt in attempts %}
-          <tr>
-            <td>{{ attempt.attempt_number }}</td>
-            <td>{{ attempt.started_at|date:"d M Y, H:i" }}</td>
-            <td>{{ attempt.time_taken_display|default:"—" }}</td>
-            <td>
-              <div class="d-flex align-items-center" style="gap:6px;">
-                <div class="progress flex-grow-1" style="height:8px; min-width:80px;">
-                  <div class="progress-bar {% if attempt.is_passed %}bg-success{% else %}bg-danger{% endif %}"
-                       style="width:{{ attempt.score_percentage }}%">
-                  </div>
-                </div>
-                <span class="small font-weight-bold">{{ attempt.score_percentage }}%</span>
-              </div>
-            </td>
-            <td>
-              <span class="badge badge-warning">{{ attempt.get_grade_letter }}</span>
-            </td>
-            <td>
-              {% if not attempt.is_completed %}
-                <span class="badge badge-info">
-                  <i class="fas fa-spinner mr-1"></i>{% trans "In Progress" %}
-                </span>
-              {% elif attempt.is_passed %}
-                <span class="badge badge-success">
-                  <i class="fas fa-check mr-1"></i>{% trans "Passed" %}
-                </span>
-              {% else %}
-                <span class="badge badge-danger">
-                  <i class="fas fa-times mr-1"></i>{% trans "Failed" %}
-                </span>
-              {% endif %}
-              {% if attempt.is_timed_out %}
-                <span class="badge badge-warning ml-1">
-                  <i class="fas fa-clock mr-1"></i>{% trans "Timed out" %}
-                </span>
-              {% endif %}
-            </td>
-            <td class="text-right">
-              {% if attempt.is_completed %}
-              <a href="{% url 'assessment:quiz:quiz-result' attempt_id=attempt.pk %}"
-                 class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-eye mr-1"></i>{% trans "View" %}
-              </a>
-              {% else %}
-              <a href="{% url 'assessment:quiz:quiz-take' grade_subject_pk=quiz.grade_subject.pk pk=quiz.pk %}"
-                 class="btn btn-sm btn-outline-info">
-                <i class="fas fa-play mr-1"></i>{% trans "Resume" %}
-              </a>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      {% else %}
-      <div class="p-5 text-center text-muted">
-        <i class="fas fa-history fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
-        <h5 class="font-weight-bold">{% trans "No attempts yet" %}</h5>
-        <p class="small mb-0">{% trans "You haven't attempted this quiz yet." %}</p>
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="card-footer text-right">
-      {% if back_url %}
-      <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to Quizzes" %}
-      </a>
-      {% endif %}
-    </div>
-
-  </div>
-
-</div>
-</section>
-
+  </section>
 {% endblock %}

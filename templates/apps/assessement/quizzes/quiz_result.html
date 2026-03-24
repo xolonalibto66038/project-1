@@ -1,342 +1,302 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
-
-{% block title %}{{ quiz.title }} — {% trans "Result" %}{% endblock %}
-
+{% block title %}
+  {{ quiz.title }} — {% trans "Result" %}
+{% endblock %}
 {% block content %}
-
-{# ── Header ── #}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row align-items-center mb-2">
-
-      <div class="col-sm-7">
-        <h1 class="font-weight-bold mb-0">
-          <i class="fas fa-poll mr-2 text-primary"></i>
-          {{ quiz.title }}
-          <span class="badge badge-primary ml-2">{% trans "Result" %}</span>
-        </h1>
-        <small class="text-muted">
-          {% trans "Attempt" %} #{{ attempt.attempt_number }} —
-          {{ attempt.submitted_at|date:"d M Y, H:i" }}
-        </small>
-      </div>
-
-      <div class="col-sm-5">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          {% if back_url %}
-          <li class="breadcrumb-item">
-            <a href="{{ back_url }}">{% trans "Quizzes" %}</a>
-          </li>
-          {% endif %}
-          <li class="breadcrumb-item active font-weight-bold">
-            {% trans "Result" %}
-          </li>
-        </ol>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="content">
-<div class="container-fluid">
-
-  {# ── Score card ── #}
-  <div class="row mb-4">
-
-    <div class="col-lg-3 col-md-6 mb-3">
-      <div class="small-box {% if is_passed %}bg-success{% else %}bg-danger{% endif %} mb-0">
-        <div class="inner">
-          <h3>{{ attempt.score_percentage }}%</h3>
-          <p>
-            {% if is_passed %}
-              <i class="fas fa-check-circle mr-1"></i>{% trans "Passed" %}
-            {% else %}
-              <i class="fas fa-times-circle mr-1"></i>{% trans "Failed" %}
+  {# ── Header ── #}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row align-items-center mb-2">
+        <div class="col-sm-7">
+          <h1 class="font-weight-bold mb-0">
+            <i class="fas fa-poll mr-2 text-primary"></i>
+            {{ quiz.title }}
+            <span class="badge badge-primary ml-2">{% trans "Result" %}</span>
+          </h1>
+          <small class="text-muted">
+            {% trans "Attempt" %} #{{ attempt.attempt_number }} —
+            {{ attempt.submitted_at|date:"d M Y, H:i" }}
+          </small>
+        </div>
+        <div class="col-sm-5">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            {% if back_url %}
+              <li class="breadcrumb-item">
+                <a href="{{ back_url }}">{% trans "Quizzes" %}</a>
+              </li>
             {% endif %}
-          </p>
+            <li class="breadcrumb-item active font-weight-bold">{% trans "Result" %}</li>
+          </ol>
         </div>
-        <div class="icon"><i class="fas fa-trophy"></i></div>
       </div>
     </div>
-
-    <div class="col-lg-3 col-md-6 mb-3">
-      <div class="small-box bg-info mb-0">
-        <div class="inner">
-          <h3>{{ attempt.total_points_earned }} / {{ attempt.total_points_possible }}</h3>
-          <p>{% trans "Points Earned" %}</p>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      {# ── Score card ── #}
+      <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+          <div class="small-box {% if is_passed %}bg-success{% else %}bg-danger{% endif %} mb-0">
+            <div class="inner">
+              <h3>{{ attempt.score_percentage }}%</h3>
+              <p>
+                {% if is_passed %}
+                  <i class="fas fa-check-circle mr-1"></i>{% trans "Passed" %}
+                {% else %}
+                  <i class="fas fa-times-circle mr-1"></i>{% trans "Failed" %}
+                {% endif %}
+              </p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-trophy"></i>
+            </div>
+          </div>
         </div>
-        <div class="icon"><i class="fas fa-star"></i></div>
+        <div class="col-lg-3 col-md-6 mb-3">
+          <div class="small-box bg-info mb-0">
+            <div class="inner">
+              <h3>{{ attempt.total_points_earned }} / {{ attempt.total_points_possible }}</h3>
+              <p>{% trans "Points Earned" %}</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-star"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+          <div class="small-box bg-warning mb-0">
+            <div class="inner">
+              <h3>{{ grade_letter }}</h3>
+              <p>{% trans "Grade" %}</p>
+            </div>
+            <div class="icon">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+          <div class="small-box bg-secondary mb-0">
+            <div class="inner">
+              <h3>{{ attempt.time_taken_display|default:"—" }}</h3>
+              <p>{% trans "Time Taken" %}</p>
+            </div>
+            <div class="icon">
+              <i class="far fa-clock"></i>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-3">
-      <div class="small-box bg-warning mb-0">
-        <div class="inner">
-          <h3>{{ grade_letter }}</h3>
-          <p>{% trans "Grade" %}</p>
-        </div>
-        <div class="icon"><i class="fas fa-graduation-cap"></i></div>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-3">
-      <div class="small-box bg-secondary mb-0">
-        <div class="inner">
-          <h3>{{ attempt.time_taken_display|default:"—" }}</h3>
-          <p>{% trans "Time Taken" %}</p>
-        </div>
-        <div class="icon"><i class="far fa-clock"></i></div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="row">
-
-    {# ── Left: summary ── #}
-    <div class="col-lg-3 mb-4">
-      <div class="card card-primary card-outline">
-
-        <div class="card-header">
-          <h3 class="card-title font-weight-bold">
-            <i class="fas fa-info-circle mr-2"></i>
-            {% trans "Summary" %}
-          </h3>
-        </div>
-
-        <div class="card-body">
-
-          <dl class="row mb-0">
-
-            <dt class="col-7 text-muted small">{% trans "Quiz" %}</dt>
-            <dd class="col-5 small font-weight-bold">{{ quiz.title }}</dd>
-
-            <dt class="col-7 text-muted small">{% trans "Attempt" %}</dt>
-            <dd class="col-5 small">#{{ attempt.attempt_number }}</dd>
-
-            <dt class="col-7 text-muted small">{% trans "Started" %}</dt>
-            <dd class="col-5 small">{{ attempt.started_at|date:"H:i" }}</dd>
-
-            <dt class="col-7 text-muted small">{% trans "Submitted" %}</dt>
-            <dd class="col-5 small">{{ attempt.submitted_at|date:"H:i" }}</dd>
-
-            <dt class="col-7 text-muted small">{% trans "Passing score" %}</dt>
-            <dd class="col-5 small">{{ quiz.passing_score }}%</dd>
-
-            <dt class="col-7 text-muted small">{% trans "Auto-submitted" %}</dt>
-            <dd class="col-5 small">
-              {% if attempt.is_timed_out %}
-                <span class="badge badge-warning">{% trans "Yes" %}</span>
-              {% else %}
-                <span class="badge badge-secondary">{% trans "No" %}</span>
-              {% endif %}
-            </dd>
-
-            <dt class="col-7 text-muted small">{% trans "Graded" %}</dt>
-            <dd class="col-5 small">
-              {% if attempt.is_graded %}
-                <span class="badge badge-success">{% trans "Yes" %}</span>
-              {% else %}
-                <span class="badge badge-warning">{% trans "Pending" %}</span>
-              {% endif %}
-            </dd>
-
-          </dl>
-
-          <hr>
-
-          {# Score progress bar #}
-          <div class="mb-2">
-            <small class="text-muted">{% trans "Score" %}</small>
-            <div class="progress mt-1" style="height:10px; border-radius:5px;">
-              <div class="progress-bar {% if is_passed %}bg-success{% else %}bg-danger{% endif %}"
-                   style="width:{{ attempt.score_percentage }}%"
-                   role="progressbar"
-                   aria-valuenow="{{ attempt.score_percentage }}"
-                   aria-valuemin="0"
-                   aria-valuemax="100">
+      <div class="row">
+        {# ── Left: summary ── #}
+        <div class="col-lg-3 mb-4">
+          <div class="card card-primary card-outline">
+            <div class="card-header">
+              <h3 class="card-title font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i>
+                {% trans "Summary" %}
+              </h3>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-7 text-muted small">{% trans "Quiz" %}</dt>
+                <dd class="col-5 small font-weight-bold">
+                  {{ quiz.title }}
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Attempt" %}</dt>
+                <dd class="col-5 small">
+                  #{{ attempt.attempt_number }}
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Started" %}</dt>
+                <dd class="col-5 small">
+                  {{ attempt.started_at|date:"H:i" }}
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Submitted" %}</dt>
+                <dd class="col-5 small">
+                  {{ attempt.submitted_at|date:"H:i" }}
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Passing score" %}</dt>
+                <dd class="col-5 small">
+                  {{ quiz.passing_score }}%
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Auto-submitted" %}</dt>
+                <dd class="col-5 small">
+                  {% if attempt.is_timed_out %}
+                    <span class="badge badge-warning">{% trans "Yes" %}</span>
+                  {% else %}
+                    <span class="badge badge-secondary">{% trans "No" %}</span>
+                  {% endif %}
+                </dd>
+                <dt class="col-7 text-muted small">{% trans "Graded" %}</dt>
+                <dd class="col-5 small">
+                  {% if attempt.is_graded %}
+                    <span class="badge badge-success">{% trans "Yes" %}</span>
+                  {% else %}
+                    <span class="badge badge-warning">{% trans "Pending" %}</span>
+                  {% endif %}
+                </dd>
+              </dl>
+              <hr>
+              {# Score progress bar #}
+              <div class="mb-2">
+                <small class="text-muted">{% trans "Score" %}</small>
+                <div class="progress mt-1" style="height:10px; border-radius:5px;">
+                  <div class="progress-bar {% if is_passed %}bg-success{% else %}bg-danger{% endif %}"
+                       style="width:{{ attempt.score_percentage }}%"
+                       role="progressbar"
+                       aria-valuenow="{{ attempt.score_percentage }}"
+                       aria-valuemin="0"
+                       aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted d-flex justify-content-between mt-1">
+                  <span>0%</span>
+                  <span class="font-weight-bold">{{ attempt.score_percentage }}%</span>
+                  <span>100%</span>
+                </small>
               </div>
             </div>
-            <small class="text-muted d-flex justify-content-between mt-1">
-              <span>0%</span>
-              <span class="font-weight-bold">{{ attempt.score_percentage }}%</span>
-              <span>100%</span>
-            </small>
-          </div>
-
-        </div>
-
-        <div class="card-footer">
-          {% if back_url %}
-          <a href="{{ back_url }}" class="btn btn-outline-secondary btn-block btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to Quizzes" %}
-          </a>
-          {% endif %}
-        </div>
-
-      </div>
-    </div>
-
-    {# ── Right: question review ── #}
-    <div class="col-lg-9">
-      <div class="card card-outline card-primary">
-
-        <div class="card-header">
-          <h3 class="card-title font-weight-bold">
-            <i class="fas fa-list mr-2"></i>
-            {% trans "Question Review" %}
-          </h3>
-          <div class="card-tools">
-            <span class="badge badge-primary">
-              {{ question_results|length }} {% trans "questions" %}
-            </span>
+            <div class="card-footer">
+              {% if back_url %}
+                <a href="{{ back_url }}"
+                   class="btn btn-outline-secondary btn-block btn-sm">
+                  <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to Quizzes" %}
+                </a>
+              {% endif %}
+            </div>
           </div>
         </div>
-
-        <div class="card-body p-0">
-          {% for r in question_results %}
-          <div class="px-4 py-3 border-bottom">
-
-            {# ── Question header ── #}
-            <div class="d-flex justify-content-between align-items-start mb-2">
-
-              <div class="d-flex align-items-start">
-                {# Correct / incorrect indicator #}
-                {% if r.is_correct is None %}
-                  <span class="badge badge-warning mr-2 mt-1">
-                    <i class="fas fa-hourglass-half mr-1"></i>{% trans "Pending" %}
-                  </span>
-                {% elif r.is_correct %}
-                  <span class="badge badge-success mr-2 mt-1">
-                    <i class="fas fa-check mr-1"></i>{% trans "Correct" %}
-                  </span>
-                {% else %}
-                  <span class="badge badge-danger mr-2 mt-1">
-                    <i class="fas fa-times mr-1"></i>{% trans "Incorrect" %}
-                  </span>
-                {% endif %}
-
-                <div>
-                  <span class="font-weight-bold">
-                    Q{{ r.order }}. {{ r.question.title }}
-                  </span>
-                  <div class="text-muted small mt-1">
-                    {{ r.question.question_text }}
+        {# ── Right: question review ── #}
+        <div class="col-lg-9">
+          <div class="card card-outline card-primary">
+            <div class="card-header">
+              <h3 class="card-title font-weight-bold">
+                <i class="fas fa-list mr-2"></i>
+                {% trans "Question Review" %}
+              </h3>
+              <div class="card-tools">
+                <span class="badge badge-primary">{{ question_results|length }} {% trans "questions" %}</span>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              {% for r in question_results %}
+                <div class="px-4 py-3 border-bottom">
+                  {# ── Question header ── #}
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-start">
+                      {# Correct / incorrect indicator #}
+                      {% if r.is_correct is None %}
+                        <span class="badge badge-warning mr-2 mt-1">
+                          <i class="fas fa-hourglass-half mr-1"></i>{% trans "Pending" %}
+                        </span>
+                      {% elif r.is_correct %}
+                        <span class="badge badge-success mr-2 mt-1">
+                          <i class="fas fa-check mr-1"></i>{% trans "Correct" %}
+                        </span>
+                      {% else %}
+                        <span class="badge badge-danger mr-2 mt-1">
+                          <i class="fas fa-times mr-1"></i>{% trans "Incorrect" %}
+                        </span>
+                      {% endif %}
+                      <div>
+                        <span class="font-weight-bold">Q{{ r.order }}. {{ r.question.title }}</span>
+                        <div class="text-muted small mt-1">{{ r.question.question_text }}</div>
+                      </div>
+                    </div>
+                    <div class="text-right ml-3" style="white-space:nowrap;">
+                      <span class="font-weight-bold text-primary">{{ r.points_earned }} / {{ r.effective_points }}</span>
+                      <div class="small text-muted">{% trans "pts" %}</div>
+                    </div>
+                  </div>
+                  {# ── Answer display ── #}
+                  <div class="ml-4 pl-2">
+                    {# True / False #}
+                    {% if r.question_type == 'tf' %}
+                      <div class="mb-1">
+                        <small class="text-muted">{% trans "Your answer" %}:</small>
+                        {% if r.answer_boolean is None %}
+                          <span class="badge badge-secondary ml-1">{% trans "No answer" %}</span>
+                        {% elif r.answer_boolean %}
+                          <span class="badge badge-info ml-1">{% trans "True" %}</span>
+                        {% else %}
+                          <span class="badge badge-info ml-1">{% trans "False" %}</span>
+                        {% endif %}
+                      </div>
+                      <div>
+                        <small class="text-muted">{% trans "Correct answer" %}:</small>
+                        <span class="badge badge-success ml-1">
+                          {% if r.question.correct_answer %}
+                            {% trans "True" %}
+                          {% else %}
+                            {% trans "False" %}
+                          {% endif %}
+                        </span>
+                      </div>
+                      {# MCQ #}
+                    {% elif r.question_type == 'mcq' %}
+                      <div class="mb-1">
+                        <small class="text-muted d-block mb-1">{% trans "Choices" %}:</small>
+                        {% for choice in r.question.choices.all %}
+                          <div class="d-flex align-items-center mb-1">
+                            {% if choice.is_correct %}
+                              <i class="fas fa-check-circle text-success mr-2"></i>
+                            {% else %}
+                              <i class="far fa-circle text-muted mr-2"></i>
+                            {% endif %}
+                            <span class="{% if choice in r.selected_choices %}font-weight-bold{% endif %} {% if choice.is_correct %}text-success{% endif %}">
+                              {{ choice.text }}
+                            </span>
+                            {% if choice in r.selected_choices and not choice.is_correct %}
+                              <span class="badge badge-danger ml-2 small">{% trans "Your choice" %}</span>
+                            {% elif choice in r.selected_choices and choice.is_correct %}
+                              <span class="badge badge-success ml-2 small">{% trans "Your choice" %}</span>
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      </div>
+                      {# Essay #}
+                    {% else %}
+                      <div class="mb-1">
+                        <small class="text-muted">{% trans "Your answer" %}:</small>
+                        {% if r.answer_text %}
+                          <div class="mt-1 p-2 bg-light rounded small">{{ r.answer_text }}</div>
+                        {% else %}
+                          <span class="badge badge-secondary ml-1">{% trans "No answer" %}</span>
+                        {% endif %}
+                      </div>
+                      {% if r.question.sample_answer %}
+                        <div class="mt-2">
+                          <small class="text-muted">{% trans "Sample answer" %}:</small>
+                          <div class="mt-1 p-2 border-left border-success small text-muted">{{ r.question.sample_answer }}</div>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                    {# Feedback / explanation #}
+                    {% if r.answer and r.answer.feedback %}
+                      <div class="mt-2">
+                        <small class="text-muted">
+                          <i class="fas fa-comment-alt mr-1"></i>{% trans "Feedback" %}:
+                        </small>
+                        <span class="small">{{ r.answer.feedback }}</span>
+                      </div>
+                    {% endif %}
                   </div>
                 </div>
-              </div>
-
-              <div class="text-right ml-3" style="white-space:nowrap;">
-                <span class="font-weight-bold text-primary">
-                  {{ r.points_earned }} / {{ r.effective_points }}
-                </span>
-                <div class="small text-muted">{% trans "pts" %}</div>
-              </div>
-
+              {% empty %}
+                <div class="p-5 text-center text-muted">
+                  <i class="fas fa-question-circle fa-3x mb-3 d-block"
+                     style="color:#dee2e6"></i>
+                  <p class="mb-0">{% trans "No questions found." %}</p>
+                </div>
+              {% endfor %}
             </div>
-
-            {# ── Answer display ── #}
-            <div class="ml-4 pl-2">
-
-              {# True / False #}
-              {% if r.question_type == 'tf' %}
-              <div class="mb-1">
-                <small class="text-muted">{% trans "Your answer" %}:</small>
-                {% if r.answer_boolean is None %}
-                  <span class="badge badge-secondary ml-1">{% trans "No answer" %}</span>
-                {% elif r.answer_boolean %}
-                  <span class="badge badge-info ml-1">{% trans "True" %}</span>
-                {% else %}
-                  <span class="badge badge-info ml-1">{% trans "False" %}</span>
-                {% endif %}
-              </div>
-              <div>
-                <small class="text-muted">{% trans "Correct answer" %}:</small>
-                <span class="badge badge-success ml-1">
-                  {% if r.question.correct_answer %}{% trans "True" %}{% else %}{% trans "False" %}{% endif %}
-                </span>
-              </div>
-
-              {# MCQ #}
-              {% elif r.question_type == 'mcq' %}
-              <div class="mb-1">
-                <small class="text-muted d-block mb-1">{% trans "Choices" %}:</small>
-                {% for choice in r.question.choices.all %}
-                <div class="d-flex align-items-center mb-1">
-                  {% if choice.is_correct %}
-                    <i class="fas fa-check-circle text-success mr-2"></i>
-                  {% else %}
-                    <i class="far fa-circle text-muted mr-2"></i>
-                  {% endif %}
-                  <span class="{% if choice in r.selected_choices %}font-weight-bold{% endif %}
-                               {% if choice.is_correct %}text-success{% endif %}">
-                    {{ choice.text }}
-                  </span>
-                  {% if choice in r.selected_choices and not choice.is_correct %}
-                    <span class="badge badge-danger ml-2 small">{% trans "Your choice" %}</span>
-                  {% elif choice in r.selected_choices and choice.is_correct %}
-                    <span class="badge badge-success ml-2 small">{% trans "Your choice" %}</span>
-                  {% endif %}
-                </div>
-                {% endfor %}
-              </div>
-
-              {# Essay #}
-              {% else %}
-              <div class="mb-1">
-                <small class="text-muted">{% trans "Your answer" %}:</small>
-                {% if r.answer_text %}
-                <div class="mt-1 p-2 bg-light rounded small">
-                  {{ r.answer_text }}
-                </div>
-                {% else %}
-                <span class="badge badge-secondary ml-1">{% trans "No answer" %}</span>
-                {% endif %}
-              </div>
-              {% if r.question.sample_answer %}
-              <div class="mt-2">
-                <small class="text-muted">{% trans "Sample answer" %}:</small>
-                <div class="mt-1 p-2 border-left border-success small text-muted">
-                  {{ r.question.sample_answer }}
-                </div>
-              </div>
-              {% endif %}
-              {% endif %}
-
-              {# Feedback / explanation #}
-              {% if r.answer and r.answer.feedback %}
-              <div class="mt-2">
-                <small class="text-muted">
-                  <i class="fas fa-comment-alt mr-1"></i>{% trans "Feedback" %}:
-                </small>
-                <span class="small">{{ r.answer.feedback }}</span>
-              </div>
-              {% endif %}
-
-            </div>
-
           </div>
-          {% empty %}
-          <div class="p-5 text-center text-muted">
-            <i class="fas fa-question-circle fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
-            <p class="mb-0">{% trans "No questions found." %}</p>
-          </div>
-          {% endfor %}
         </div>
-
       </div>
     </div>
-
-  </div>
-
-</div>
-</section>
-
+  </section>
 {% endblock %}

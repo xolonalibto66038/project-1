@@ -1,295 +1,182 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
 {% load breadcrumbs %}
-
-{% block title %}{% trans "Select an Online Teacher" %}{% endblock %}
-
+{% block title %}
+  {% trans "Select an Online Teacher" %}
+{% endblock %}
 {% block content %}
-
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1>
-          <i class="fas fa-chalkboard-teacher text-primary mr-2"></i>
-          {% trans "Online Teachers" %}
-        </h1>
-        <p class="text-muted mb-0">
-          {% trans "Choose a teacher for your tutoring session" %}
-        </p>
-      </div>
-      <div class="col-sm-6">
-        {% breadcrumb crumbs %}
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<section class="content">
-  <div class="container-fluid">
-
-    <div class="card card-warning card-outline">
-
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="fas fa-users mr-2"></i>
-          {% trans "Available Premium Teachers" %}
-        </h3>
-      </div>
-
-      <div class="card-body p-0">
-
-        {% if paid_teachers %}
-
-        <ul class="list-group list-group-flush">
-
-          {% for teacher in paid_teachers %}
-
-          <li class="list-group-item">
-
-            <div class="row align-items-center">
-
-              <!-- Avatar -->
-              <div class="col-auto">
-                {% if teacher.avatar_url %}
-                <img src="{{ teacher.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
-                     class="img-circle elevation-2"
-                     width="50"
-                     height="50"
-                     alt="Teacher Avatar">
-                {% else %}
-                {{ teacher.avatar_display|safe }}
-                {% endif %}
-              </div>
-
-              <!-- Teacher Info -->
-              <div class="col d-flex justify-content-between align-items-start">
-
-                <div>
-
-                  <strong>
-                    {{ teacher.get_full_name }}
-                  </strong>
-
-                  <br>
-
-                  <small class="text-muted">
-                    <span class="h6 font-weight-bold text-primary">
-                      ${{ teacher.teacher_profile.hour_price }} / {% trans "hour" %}
-                    </span>
-                  </small>
-
-                  <br>
-
-                  {% if teacher.teacher_profile.is_online %}
-                    <span class="badge badge-success">
-                      <i class="fas fa-circle"></i>
-                      {% trans "Online" %}
-                    </span>
-                  {% else %}
-                    <span class="badge badge-secondary">
-                      <i class="fas fa-circle"></i>
-                      {% trans "Offline" %}
-                    </span>
-                  {% endif %}
-
-                </div>
-
-              </div>
-
-            
-              <div class="col-auto">
-
-                {% if teacher.session and teacher.session.zoom_join_url %}
-
-                  <a href="{{ teacher.session.zoom_join_url }}"
-                    class="btn btn-success btn-sm"
-                    target="_blank">
-
-                    <i class="fas fa-video mr-1"></i>
-                    {% trans "Join Video Call" %}
-
-                  </a>
-
-                {% else %}
-
-                  <form method="post"
-                        action="{% url 'tutoring:student:select-teacher' teacher.id %}">
-
-                    {% csrf_token %}
-
-                    <button type="submit"
-                            class="btn btn-primary btn-sm">
-
-                      <i class="fas fa-check mr-1"></i>
-                      {% trans "Select" %}
-
-                    </button>
-
-                  </form>
-
-                {% endif %}
-
-              </div>
-
-            </div>
-
-          </li>
-
-          {% endfor %}
-
-        </ul>
-
-        {% else %}
-
-        <div class="text-center p-4 text-muted">
-
-          <i class="fas fa-user-slash fa-2x mb-2"></i>
-
-          <p class="mb-0">
-            {% trans "No Premium teachers available right now" %}
-          </p>
-
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>
+            <i class="fas fa-chalkboard-teacher text-primary mr-2"></i>
+            {% trans "Online Teachers" %}
+          </h1>
+          <p class="text-muted mb-0">{% trans "Choose a teacher for your tutoring session" %}</p>
         </div>
-
-        {% endif %}
-
+        <div class="col-sm-6">{% breadcrumb crumbs %}</div>
       </div>
-
     </div>
-
-    <div class="card card-primary card-outline">
-
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="fas fa-users mr-2"></i>
-          {% trans "Available Free Teachers" %}
-        </h3>
-      </div>
-
-      <div class="card-body p-0">
-
-        {% if free_teachers %}
-
-        <ul class="list-group list-group-flush">
-
-          {% for teacher in free_teachers %}
-
-          <li class="list-group-item">
-
-            <div class="row align-items-center">
-
-              <!-- Avatar -->
-              <div class="col-auto">
-                {% if teacher.avatar_url %}
-                <img src="{{ teacher.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
-                     class="img-circle elevation-2"
-                     width="50"
-                     height="50"
-                     alt="Teacher Avatar">
-                {% else %}
-                {{ teacher.avatar_display|safe }}
-                {% endif %}
-              </div>
-
-              <!-- Teacher Info -->
-              <div class="col d-flex justify-content-between align-items-start">
-
-                <div>
-
-                  <strong>
-                    {{ teacher.get_full_name }}
-                  </strong>
-
-                  <br>
-
-                  <small class="text-muted">
-                    <span class="h6 font-weight-bold text-primary">
-                      ${{ teacher.teacher_profile.hour_price }} / {% trans "hour" %}
-                    </span>
-                  </small>
-
-                  <br>
-
-                  {% if teacher.teacher_profile.is_online %}
-                    <span class="badge badge-success">
-                      <i class="fas fa-circle"></i>
-                      {% trans "Online" %}
-                    </span>
-                  {% else %}
-                    <span class="badge badge-secondary">
-                      <i class="fas fa-circle"></i>
-                      {% trans "Offline" %}
-                    </span>
-                  {% endif %}
-
-                </div>
-
-              </div>
-
-            
-              <div class="col-auto">
-
-                {% if teacher.session and teacher.session.zoom_join_url %}
-
-                  <a href="{{ teacher.session.zoom_join_url }}"
-                    class="btn btn-success btn-sm"
-                    target="_blank">
-
-                    <i class="fas fa-video mr-1"></i>
-                    {% trans "Join Video Call" %}
-
-                  </a>
-
-                {% else %}
-
-                  <form method="post"
-                        action="{% url 'tutoring:student:select-teacher' teacher.id %}">
-
-                    {% csrf_token %}
-
-                    <button type="submit"
-                            class="btn btn-primary btn-sm">
-
-                      <i class="fas fa-check mr-1"></i>
-                      {% trans "Select" %}
-
-                    </button>
-
-                  </form>
-
-                {% endif %}
-
-              </div>
-
-            </div>
-
-          </li>
-
-          {% endfor %}
-
-        </ul>
-
-        {% else %}
-
-        <div class="text-center p-4 text-muted">
-
-          <i class="fas fa-user-slash fa-2x mb-2"></i>
-
-          <p class="mb-0">
-            {% trans "No teachers available right now" %}
-          </p>
-
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-warning card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-users mr-2"></i>
+            {% trans "Available Premium Teachers" %}
+          </h3>
         </div>
-
-        {% endif %}
-
+        <div class="card-body p-0">
+          {% if paid_teachers %}
+            <ul class="list-group list-group-flush">
+              {% for teacher in paid_teachers %}
+                <li class="list-group-item">
+                  <div class="row align-items-center">
+                    <!-- Avatar -->
+                    <div class="col-auto">
+                      {% if teacher.avatar_url %}
+                        <img src="{{ teacher.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+                             class="img-circle elevation-2"
+                             width="50"
+                             height="50"
+                             alt="Teacher Avatar">
+                      {% else %}
+                        {{ teacher.avatar_display|safe }}
+                      {% endif %}
+                    </div>
+                    <!-- Teacher Info -->
+                    <div class="col d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>{{ teacher.get_full_name }}</strong>
+                        <br>
+                        <small class="text-muted">
+                          <span class="h6 font-weight-bold text-primary">${{ teacher.teacher_profile.hour_price }} / {% trans "hour" %}</span>
+                        </small>
+                        <br>
+                        {% if teacher.teacher_profile.is_online %}
+                          <span class="badge badge-success">
+                            <i class="fas fa-circle"></i>
+                            {% trans "Online" %}
+                          </span>
+                        {% else %}
+                          <span class="badge badge-secondary">
+                            <i class="fas fa-circle"></i>
+                            {% trans "Offline" %}
+                          </span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      {% if teacher.session and teacher.session.zoom_join_url %}
+                        <a href="{{ teacher.session.zoom_join_url }}"
+                           class="btn btn-success btn-sm"
+                           target="_blank">
+                          <i class="fas fa-video mr-1"></i>
+                          {% trans "Join Video Call" %}
+                        </a>
+                      {% else %}
+                        <form method="post"
+                              action="{% url 'tutoring:student:select-teacher' teacher.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-check mr-1"></i>
+                            {% trans "Select" %}
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-center p-4 text-muted">
+              <i class="fas fa-user-slash fa-2x mb-2"></i>
+              <p class="mb-0">{% trans "No Premium teachers available right now" %}</p>
+            </div>
+          {% endif %}
+        </div>
       </div>
-
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-users mr-2"></i>
+            {% trans "Available Free Teachers" %}
+          </h3>
+        </div>
+        <div class="card-body p-0">
+          {% if free_teachers %}
+            <ul class="list-group list-group-flush">
+              {% for teacher in free_teachers %}
+                <li class="list-group-item">
+                  <div class="row align-items-center">
+                    <!-- Avatar -->
+                    <div class="col-auto">
+                      {% if teacher.avatar_url %}
+                        <img src="{{ teacher.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+                             class="img-circle elevation-2"
+                             width="50"
+                             height="50"
+                             alt="Teacher Avatar">
+                      {% else %}
+                        {{ teacher.avatar_display|safe }}
+                      {% endif %}
+                    </div>
+                    <!-- Teacher Info -->
+                    <div class="col d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>{{ teacher.get_full_name }}</strong>
+                        <br>
+                        <small class="text-muted">
+                          <span class="h6 font-weight-bold text-primary">${{ teacher.teacher_profile.hour_price }} / {% trans "hour" %}</span>
+                        </small>
+                        <br>
+                        {% if teacher.teacher_profile.is_online %}
+                          <span class="badge badge-success">
+                            <i class="fas fa-circle"></i>
+                            {% trans "Online" %}
+                          </span>
+                        {% else %}
+                          <span class="badge badge-secondary">
+                            <i class="fas fa-circle"></i>
+                            {% trans "Offline" %}
+                          </span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      {% if teacher.session and teacher.session.zoom_join_url %}
+                        <a href="{{ teacher.session.zoom_join_url }}"
+                           class="btn btn-success btn-sm"
+                           target="_blank">
+                          <i class="fas fa-video mr-1"></i>
+                          {% trans "Join Video Call" %}
+                        </a>
+                      {% else %}
+                        <form method="post"
+                              action="{% url 'tutoring:student:select-teacher' teacher.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-check mr-1"></i>
+                            {% trans "Select" %}
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="text-center p-4 text-muted">
+              <i class="fas fa-user-slash fa-2x mb-2"></i>
+              <p class="mb-0">{% trans "No teachers available right now" %}</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
-
-  </div>
-</section>
-
+  </section>
 {% endblock %}

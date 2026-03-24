@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 import environ
-from celery.schedules import crontab
+from django.utils.translation import gettext_lazy as _
 
 # from .logging import LOGGING
 
@@ -158,9 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 LANGUAGES = [
-    ("en", "English"),
-    ("ar", "العربية"),
-    ("fr", "Français"),
+    ("en", _("English")),
+    ("ar", _("Arabic")),
+    ("fr", _("French")),
 ]
 
 LOCALE_PATHS = [BASE_DIR / "locale"]

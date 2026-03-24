@@ -1,94 +1,72 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "True/False" %}{% endblock title %}
-
+{% block title %}
+  {% trans "True/False" %}
+{% endblock title %}
 {% block content %}
-<section class="content">
-<div class="container-fluid">
-
-  <div class="card card-success">
-    <div class="card-header">
-      <h3 class="card-title">
-        {% if object %} {% trans "Update True / False Question" %} {% else %} {% trans "Create True / False Question" %} {% endif %}
-      </h3>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-success">
+        <div class="card-header">
+          <h3 class="card-title">
+            {% if object %}
+              {% trans "Update True / False Question" %}
+            {% else %}
+              {% trans "Create True / False Question" %}
+            {% endif %}
+          </h3>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="card-body">
+            <h5 class="mb-3">{% trans "Basic Information" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Title" %}</label>
+              {{ form.title }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Question Statement" %}</label>
+              {{ form.question_text }}
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Points" %}</label>
+                {{ form.points }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Difficulty" %}</label>
+                {{ form.difficulty_level }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Tags" %}</label>
+                {{ form.tags }}
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Correct Answer" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Select Correct Answer" %}</label>
+              {{ form.correct_answer }}
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Explanation (Optional)" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Explanation shown after answering" %}</label>
+              {{ form.explanation }}
+            </div>
+            <hr>
+            <div class="form-check">
+              {{ form.is_active }}
+              <label class="form-check-label">{% trans "Active (visible for quizzes)" %}</label>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'assessment:question:question-list' %}"
+               class="btn btn-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-success">{% trans "Save Question" %}</button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <form method="post">
-      {% csrf_token %}
-
-      <div class="card-body">
-
-        <h5 class="mb-3">{% trans "Basic Information" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Title" %}</label>
-          {{ form.title }}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Question Statement" %}</label>
-          {{ form.question_text }}
-        </div>
-
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Points" %}</label>
-            {{ form.points }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Difficulty" %}</label>
-            {{ form.difficulty_level }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Tags" %}</label>
-            {{ form.tags }}
-          </div>
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Correct Answer" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Select Correct Answer" %}</label>
-          {{ form.correct_answer }}
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Explanation (Optional)" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Explanation shown after answering" %}</label>
-          {{ form.explanation }}
-        </div>
-
-        <hr>
-
-        <div class="form-check">
-          {{ form.is_active }}
-          <label class="form-check-label">
-            {% trans "Active (visible for quizzes)" %}
-          </label>
-        </div>
-
-      </div>
-
-      <div class="card-footer text-end">
-        <a href="{% url 'assessment:question:question-list' %}" class="btn btn-secondary">
-          {% trans "Cancel" %}
-        </a>
-        <button type="submit" class="btn btn-success">
-          {% trans "Save Question" %}
-        </button>
-      </div>
-
-    </form>
-
-  </div>
-</div>
-</section>
+  </section>
 {% endblock content %}

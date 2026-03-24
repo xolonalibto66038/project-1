@@ -1,28 +1,28 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}WN{% endblock %}</title>
-
-  <!-- Favicon -->
-  <link rel="icon" href="{% static 'dist/img/favicon.ico' %}">
-
-  {% include "includes/styles.html" %}
-  {% block extra_css %}{% endblock extra_css %}
-</head>
-
-<body class="hold-transition {% block body_class %}register-page{% endblock body_class %}">
-
-<div class="auth-wrapper">
-    {% block auth_card %}{% endblock auth_card %}
-</div>
-
-{% include "includes/scripts.html" %}
-{% include "includes/toasts.html" %}
-{% block extra_js %}{% endblock extra_js %}
-
-</body>
+<html lang="{{ LANGUAGE_CODE }}"
+      dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      {% block title %}WN{% endblock %}
+    </title>
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'dist/img/favicon.ico' %}">
+    {% include "includes/styles.html" %}
+    {% block extra_css %}
+    {% endblock extra_css %}
+  </head>
+  <body class="hold-transition {% block body_class %}register-page{% endblock body_class %}">
+    <div class="auth-wrapper">
+      {% block auth_card %}
+      {% endblock auth_card %}
+    </div>
+    {% include "includes/scripts.html" %}
+    {% include "includes/toasts.html" %}
+    {% block extra_js %}
+    {% endblock extra_js %}
+  </body>
 </html>

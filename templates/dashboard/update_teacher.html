@@ -1,148 +1,115 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
+{% block title %}
+  {% trans "Teacher Profile" %}
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-
-  <div class="row">
-    
-    <div class="col-md-3">
-      <div class="card card-primary card-outline">
-        <div class="card-body box-profile text-center">
-
-          <h3 class="profile-username text-center">
-            {{ request.user.get_full_name }}
-          </h3>
-
-          <p class="text-muted text-center">
-            {{ profile.subject }} - {{ profile.level }}
-          </p>
-
-          {% if profile.is_verified_teacher %}
-            <span class="badge badge-success">
-              <i class="fas fa-check-circle"></i> {% trans "Verified" %}
-            </span>
-          {% else %}
-            <span class="badge badge-warning">
-              {% trans "Pending Verification" %}
-            </span>
-          {% endif %}
-
-          <hr>
-
-          <strong><i class="fas fa-money-bill-wave mr-1"></i> {% trans "Hour Price" %}</strong>
-          <p class="text-muted">
-            {{ profile.hour_price|floatformat:2 }} {% trans "DA" %}
-          </p>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-9">
-
-      {% if profile.is_verified_teacher and profile.hour_price == 0 %}
-        <div class="alert alert-warning">
-          <i class="fas fa-exclamation-triangle mr-2"></i>
-          {% trans "You are offering free tutoring sessions." %}
-        </div>
-      {% elif profile.is_verified_teacher %}
-        <div class="alert alert-success">
-          <i class="fas fa-check-circle mr-2"></i>
-          {% trans "Your account is verified." %}
-        </div>
-      {% endif %}
-
-      <div class="card card-primary">
-        <div class="card-header">
-          <h3 class="card-title">{% trans "Update Profile" %}</h3>
-        </div>
-
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-
-          <div class="card-body">
-
-            <h5 class="mb-3">{% trans "Account Info" %}</h5>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.first_name.label_tag }}
-                {{ user_form.first_name }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.last_name.label_tag }}
-                {{ user_form.last_name }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.gender.label_tag }}
-                {{ user_form.gender }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.date_of_birth.label_tag }}
-                {{ user_form.date_of_birth }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.wilaya.label_tag }}
-                {{ user_form.wilaya }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.phone.label_tag }}
-                {{ user_form.phone }}
-              </div>
-            </div>
-
-            <div class="form-group mt-3">
-              {{ user_form.avatar.label_tag }}
-              {{ user_form.avatar }}
-            </div>
-
-            <hr>
-
-            <h5 class="mb-3">{% trans "Teaching Info" %}</h5>
-
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card card-primary card-outline">
+          <div class="card-body box-profile text-center">
+            <h3 class="profile-username text-center">{{ request.user.get_full_name }}</h3>
+            <p class="text-muted text-center">{{ profile.subject }} - {{ profile.level }}</p>
             {% if profile.is_verified_teacher %}
-              <div class="alert alert-info">
-                {% trans "Level and subject are locked after verification." %}
-              </div>
+              <span class="badge badge-success">
+                <i class="fas fa-check-circle"></i> {% trans "Verified" %}
+              </span>
+            {% else %}
+              <span class="badge badge-warning">{% trans "Pending Verification" %}</span>
             {% endif %}
-
-            <div class="row">
-              <div class="col-md-6">
-                {{ profile_form.level.label_tag }}
-                {{ profile_form.level }}
-              </div>
-              <div class="col-md-6">
-                {{ profile_form.subject.label_tag }}
-                {{ profile_form.subject }}
-              </div>
-            </div>
-
-            <div class="form-group mt-3">
-              {{ profile_form.hour_price.label_tag }}
-              {{ profile_form.hour_price }}
-            </div>
-
-            <div class="form-group">
-              {{ profile_form.bio.label_tag }}
-              {{ profile_form.bio }}
-            </div>
-
+            <hr>
+            <strong><i class="fas fa-money-bill-wave mr-1"></i> {% trans "Hour Price" %}</strong>
+            <p class="text-muted">{{ profile.hour_price|floatformat:2 }} {% trans "DA" %}</p>
           </div>
-
-          <div class="card-footer text-right">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save"></i> {% trans "Save Changes" %}
-            </button>
-          </div>
-
-        </form>
+        </div>
       </div>
-
+      <div class="col-md-9">
+        {% if profile.is_verified_teacher and profile.hour_price == 0 %}
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {% trans "You are offering free tutoring sessions." %}
+          </div>
+        {% elif profile.is_verified_teacher %}
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle mr-2"></i>
+            {% trans "Your account is verified." %}
+          </div>
+        {% endif %}
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">{% trans "Update Profile" %}</h3>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="mb-3">{% trans "Account Info" %}</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.first_name.label_tag }}
+                  {{ user_form.first_name }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.last_name.label_tag }}
+                  {{ user_form.last_name }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.gender.label_tag }}
+                  {{ user_form.gender }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.date_of_birth.label_tag }}
+                  {{ user_form.date_of_birth }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.wilaya.label_tag }}
+                  {{ user_form.wilaya }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.phone.label_tag }}
+                  {{ user_form.phone }}
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                {{ user_form.avatar.label_tag }}
+                {{ user_form.avatar }}
+              </div>
+              <hr>
+              <h5 class="mb-3">{% trans "Teaching Info" %}</h5>
+              {% if profile.is_verified_teacher %}
+                <div class="alert alert-info">{% trans "Level and subject are locked after verification." %}</div>
+              {% endif %}
+              <div class="row">
+                <div class="col-md-6">
+                  {{ profile_form.level.label_tag }}
+                  {{ profile_form.level }}
+                </div>
+                <div class="col-md-6">
+                  {{ profile_form.subject.label_tag }}
+                  {{ profile_form.subject }}
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                {{ profile_form.hour_price.label_tag }}
+                {{ profile_form.hour_price }}
+              </div>
+              <div class="form-group">
+                {{ profile_form.bio.label_tag }}
+                {{ profile_form.bio }}
+              </div>
+            </div>
+            <div class="card-footer text-right">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% trans "Save Changes" %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 {% endblock %}

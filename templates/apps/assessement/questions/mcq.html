@@ -1,175 +1,119 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "MCQ" %}{% endblock title %}
-
+{% block title %}
+  {% trans "MCQ" %}
+{% endblock title %}
 {% block content %}
-<section class="content">
-<div class="container-fluid">
-
-  <div class="card card-info">
-    <div class="card-header">
-      <h3 class="card-title">
-        {% if object %} {% trans "Update" %} {% else %} {% trans "Create" %} {% endif %}
-        {% trans "Multiple Choice Question" %}
-      </h3>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-info">
+        <div class="card-header">
+          <h3 class="card-title">
+            {% if object %}
+              {% trans "Update" %}
+            {% else %}
+              {% trans "Create" %}
+            {% endif %}
+            {% trans "Multiple Choice Question" %}
+          </h3>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          {{ formset.management_form }}
+          <div class="card-body">
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+            <h5 class="mb-3">{% trans "Basic Information" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Title" %}</label>
+              {{ form.title }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Question Text" %}</label>
+              {{ form.question_text }}
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Points" %}</label>
+                {{ form.points }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Difficulty" %}</label>
+                {{ form.difficulty_level }}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Tags" %}</label>
+                {{ form.tags }}
+              </div>
+            </div>
+            <div class="form-check mb-3">
+              {{ form.allow_multiple }}
+              <label class="form-check-label">{% trans "Allow Multiple Correct Answers" %}</label>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Explanation" %}</label>
+              {{ form.explanation }}
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Choices" %}</h5>
+            <div id="choices-container">
+              {% for choice_form in formset %}
+                <div class="card mb-3 choice-item">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-md-6">
+                        <label class="form-label">{% trans "Choice Text" %}</label>
+                        {{ choice_form.text }}
+                      </div>
+                      <div class="col-md-2 text-center">
+                        <label>{% trans "Correct" %}</label>
+                        <br>
+                        {{ choice_form.is_correct }}
+                      </div>
+                      <div class="col-md-2">
+                        <label>{% trans "Order" %}</label>
+                        {{ choice_form.order }}
+                      </div>
+                      <div class="col-md-2 text-end">
+                        {% if choice_form.instance.pk %}<div class="d-none">{{ choice_form.DELETE }}</div>{% endif %}
+                        <button type="button" class="btn btn-danger btn-sm remove-choice">{% trans "Remove" %}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div id="empty-form" class="d-none">
+              <div class="card mb-3 choice-item">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-md-6">{{ formset.empty_form.text }}</div>
+                    <div class="col-md-2 text-center">{{ formset.empty_form.is_correct }}</div>
+                    <div class="col-md-2">{{ formset.empty_form.order }}</div>
+                    <div class="col-md-2 text-end">
+                      {{ formset.empty_form.DELETE }}
+                      <button type="button" class="btn btn-danger btn-sm remove-choice">{% trans "Remove" %}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="add-choice">
+              <i class="fas fa-plus"></i> {% trans "Add Choice" %}
+            </button>
+            <hr>
+            <div class="form-check">
+              {{ form.is_active }}
+              <label class="form-check-label">{% trans "Active" %}</label>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'assessment:question:question-list' %}"
+               class="btn btn-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-info">{% trans "Save Question" %}</button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <form method="post">
-      {% csrf_token %}
-      {{ formset.management_form }}
-
-      <div class="card-body">
-
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger">
-            {{ form.non_field_errors }}
-          </div>
-        {% endif %}
-
-        {% if formset.non_form_errors %}
-          <div class="alert alert-danger">
-            {{ formset.non_form_errors }}
-          </div>
-        {% endif %}
-
-        <h5 class="mb-3">{% trans "Basic Information" %}</h5>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Title" %}</label>
-          {{ form.title }}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Question Text" %}</label>
-          {{ form.question_text }}
-        </div>
-
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Points" %}</label>
-            {{ form.points }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Difficulty" %}</label>
-            {{ form.difficulty_level }}
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">{% trans "Tags" %}</label>
-            {{ form.tags }}
-          </div>
-        </div>
-
-        <div class="form-check mb-3">
-          {{ form.allow_multiple }}
-          <label class="form-check-label">
-            {% trans "Allow Multiple Correct Answers" %}
-          </label>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">{% trans "Explanation" %}</label>
-          {{ form.explanation }}
-        </div>
-
-        <hr>
-
-        <h5 class="mb-3">{% trans "Choices" %}</h5>
-
-        <div id="choices-container">
-          {% for choice_form in formset %}
-          <div class="card mb-3 choice-item">
-            <div class="card-body">
-              <div class="row align-items-center">
-
-                <div class="col-md-6">
-                  <label class="form-label">{% trans "Choice Text" %}</label>
-                  {{ choice_form.text }}
-                </div>
-
-                <div class="col-md-2 text-center">
-                  <label>{% trans "Correct" %}</label><br>
-                  {{ choice_form.is_correct }}
-                </div>
-
-                <div class="col-md-2">
-                  <label>{% trans "Order" %}</label>
-                  {{ choice_form.order }}
-                </div>
-
-                <div class="col-md-2 text-end">
-                  {% if choice_form.instance.pk %}
-                    <div class="d-none">{{ choice_form.DELETE }}</div>
-                  {% endif %}
-                  <button type="button" class="btn btn-danger btn-sm remove-choice">
-                    {% trans "Remove" %}
-                  </button>
-                </div>
-
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-
-        <div id="empty-form" class="d-none">
-          <div class="card mb-3 choice-item">
-            <div class="card-body">
-              <div class="row align-items-center">
-
-                <div class="col-md-6">
-                  {{ formset.empty_form.text }}
-                </div>
-
-                <div class="col-md-2 text-center">
-                  {{ formset.empty_form.is_correct }}
-                </div>
-
-                <div class="col-md-2">
-                  {{ formset.empty_form.order }}
-                </div>
-
-                <div class="col-md-2 text-end">
-                  {{ formset.empty_form.DELETE }}
-                  <button type="button" class="btn btn-danger btn-sm remove-choice">
-                    {% trans "Remove" %}
-                  </button>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button type="button" class="btn btn-outline-primary" id="add-choice">
-          <i class="fas fa-plus"></i> {% trans "Add Choice" %}
-        </button>
-
-        <hr>
-
-        <div class="form-check">
-          {{ form.is_active }}
-          <label class="form-check-label">
-            {% trans "Active" %}
-          </label>
-        </div>
-
-      </div>
-
-      <div class="card-footer text-end">
-        <a href="{% url 'assessment:question:question-list' %}" class="btn btn-secondary">
-          {% trans "Cancel" %}
-        </a>
-        <button type="submit" class="btn btn-info">
-          {% trans "Save Question" %}
-        </button>
-      </div>
-
-    </form>
-
-  </div>
-</div>
-</section>
+  </section>
 {% endblock content %}

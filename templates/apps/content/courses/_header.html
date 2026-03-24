@@ -1,34 +1,23 @@
 {# templates/content/courses/_header.html #}
 {% load i18n %}
 {% load breadcrumbs %}
-
 <section class="content-header">
   <div class="container-fluid">
-
     <div class="row mb-2 align-items-center">
-
       <div class="col-sm-6">
         <h1 class="font-weight-bold mb-0">
           <i class="fas fa-book-open mr-2 text-primary"></i>
           {% trans "Course" %} : {{ course.title }}
         </h1>
         <small class="text-muted">
-          {% if chapter %}
-            {{ chapter.title }} —
-          {% endif %}
+          {% if chapter %}{{ chapter.title }} —{% endif %}
           {{ subject.name }} · {{ grade.short_name }} · {{ level.name }}
         </small>
-      </div> 
-
-      <div class="col-sm-6">
-        {% breadcrumb crumbs %}
       </div>
-
+      <div class="col-sm-6">{% breadcrumb crumbs %}</div>
     </div>
-
     {# ── Tabs ── #}
     <ul class="nav nav-tabs mt-3">
-
       <li class="nav-item">
         <a class="nav-link {% if active_tab == 'details' %}active{% endif %}"
            href="{% url 'content:course:course-detail' course.pk %}">
@@ -36,18 +25,16 @@
           {% trans "Details" %}
         </a>
       </li>
-      
       {% for slug, label, icon, count in resource_tabs %}
-      <li class="nav-item">
-        <a class="nav-link {% if active_tab == slug %}active{% endif %}"
-          href="{% url 'content:course:course-resources' pk=course.pk resource_slug=slug %}">
-          <i class="{{ icon }} mr-1"></i>
-          {% trans label %}
-          <span class="badge badge-secondary ml-1">{{ count }}</span>
-        </a>
-      </li>
+        <li class="nav-item">
+          <a class="nav-link {% if active_tab == slug %}active{% endif %}"
+             href="{% url 'content:course:course-resources' pk=course.pk resource_slug=slug %}">
+            <i class="{{ icon }} mr-1"></i>
+            {% trans label %}
+            <span class="badge badge-secondary ml-1">{{ count }}</span>
+          </a>
+        </li>
       {% endfor %}
-
       <li class="nav-item">
         <a class="nav-link {% if active_tab == 'videos' %}active{% endif %}"
            href="{% url 'content:course:course-videos' course.pk %}">
@@ -56,7 +43,6 @@
           <span class="badge badge-secondary ml-1">{{ course.videos_count }}</span>
         </a>
       </li>
-
       <li class="nav-item">
         <a class="nav-link {% if active_tab == 'quizzes' %}active{% endif %}"
            href="{% url 'content:course:course-quizzes-list' course.pk %}">
@@ -65,8 +51,6 @@
           <span class="badge badge-secondary ml-1">{{ course.quizzes_count }}</span>
         </a>
       </li>
-
     </ul>
-
   </div>
 </section>

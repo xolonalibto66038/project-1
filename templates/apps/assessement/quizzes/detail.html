@@ -1,135 +1,109 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
-
 {% block content %}
-<div class="container-fluid">
-
-  <div class="card card-primary">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h3 class="card-title">{{ quiz.title }}</h3>
-
-      <div>
-        <a href="{% url 'assessment:quiz:quiz-add-question' quiz.pk %}"
-           class="btn btn-sm btn-info">
-          <i class="fas fa-plus"></i> {% trans "Add Question" %}
-        </a>
-
-        <a href="{% url 'assessment:quiz:quiz-list' %}"
-           class="btn btn-sm btn-secondary">
-          {% trans "Back" %}
-        </a>
+  <div class="container-fluid">
+    <div class="card card-primary">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">{{ quiz.title }}</h3>
+        <div>
+          <a href="{% url 'assessment:quiz:quiz-add-question' quiz.pk %}"
+             class="btn btn-sm btn-info">
+            <i class="fas fa-plus"></i> {% trans "Add Question" %}
+          </a>
+          <a href="{% url 'assessment:quiz:quiz-list' %}"
+             class="btn btn-sm btn-secondary">{% trans "Back" %}</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>{{ quiz.description|default:_("No description provided.") }}</p>
+        {% if quiz.instructions %}
+          <div class="alert alert-light border">
+            <strong>{% trans "Instructions" %}:</strong>
+            <br>
+            {{ quiz.instructions }}
+          </div>
+        {% endif %}
+        <div class="row mt-3">
+          <div class="col-md-3">
+            <strong>{% trans "Questions" %}:</strong> {{ quiz.question_count }}
+          </div>
+          <div class="col-md-3">
+            <strong>{% trans "Total Points" %}:</strong> {{ quiz.total_points }}
+          </div>
+          <div class="col-md-3">
+            <strong>{% trans "Max Attempts" %}:</strong> {{ quiz.max_attempts }}
+          </div>
+          <div class="col-md-3">
+            <strong>{% trans "Passing Score" %}:</strong> {{ quiz.passing_score }}%
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-4">
+            <strong>{% trans "Time Limit" %}:</strong>
+            {% if quiz.time_limit %}
+              {{ quiz.time_limit }} {% trans "minutes" %}
+            {% else %}
+              {% trans "No limit" %}
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <strong>{% trans "Published" %}:</strong>
+            {% if quiz.is_published %}
+              <span class="badge bg-success">{% trans "Yes" %}</span>
+            {% else %}
+              <span class="badge bg-secondary">{% trans "No" %}</span>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <strong>{% trans "Status" %}:</strong>
+            {% if quiz.is_available %}
+              <span class="badge bg-success">{% trans "Open" %}</span>
+            {% else %}
+              <span class="badge bg-danger">{% trans "Closed" %}</span>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="card-body">
-
-      <p>{{ quiz.description|default:_("No description provided.") }}</p>
-
-      {% if quiz.instructions %}
-        <div class="alert alert-light border">
-          <strong>{% trans "Instructions" %}:</strong><br>
-          {{ quiz.instructions }}
-        </div>
-      {% endif %}
-
-      <div class="row mt-3">
-        <div class="col-md-3">
-          <strong>{% trans "Questions" %}:</strong> {{ quiz.question_count }}
-        </div>
-
-        <div class="col-md-3">
-          <strong>{% trans "Total Points" %}:</strong> {{ quiz.total_points }}
-        </div>
-
-        <div class="col-md-3">
-          <strong>{% trans "Max Attempts" %}:</strong> {{ quiz.max_attempts }}
-        </div>
-
-        <div class="col-md-3">
-          <strong>{% trans "Passing Score" %}:</strong> {{ quiz.passing_score }}%
-        </div>
+    <div class="card card-outline card-secondary">
+      <div class="card-header">
+        <h3 class="card-title">{% trans "Quiz Questions" %}</h3>
       </div>
-
-      <div class="row mt-3">
-        <div class="col-md-4">
-          <strong>{% trans "Time Limit" %}:</strong>
-          {% if quiz.time_limit %}
-            {{ quiz.time_limit }} {% trans "minutes" %}
-          {% else %}
-            {% trans "No limit" %}
-          {% endif %}
-        </div>
-
-        <div class="col-md-4">
-          <strong>{% trans "Published" %}:</strong>
-          {% if quiz.is_published %}
-            <span class="badge bg-success">{% trans "Yes" %}</span>
-          {% else %}
-            <span class="badge bg-secondary">{% trans "No" %}</span>
-          {% endif %}
-        </div>
-
-        <div class="col-md-4">
-          <strong>{% trans "Status" %}:</strong>
-          {% if quiz.is_available %}
-            <span class="badge bg-success">{% trans "Open" %}</span>
-          {% else %}
-            <span class="badge bg-danger">{% trans "Closed" %}</span>
-          {% endif %}
-        </div>
+      <div class="card-body p-0">
+        {% if quiz_questions %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>{% trans "Order" %}</th>
+                  <th>{% trans "Title" %}</th>
+                  <th>{% trans "Type" %}</th>
+                  <th>{% trans "Points" %}</th>
+                  <th class="text-end">{% trans "Actions" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for qq in quiz_questions %}
+                  <tr>
+                    <td>{{ qq.order }}</td>
+                    <td>{{ qq.question.title|default:_("Untitled Question") }}</td>
+                    <td>
+                      <span class="badge bg-primary">{{ qq.question.get_question_type_display|upper }}</span>
+                    </td>
+                    <td>{{ qq.effective_points }}</td>
+                    <td class="text-end">
+                      <a href="#" class="btn btn-sm btn-warning">{% trans "Edit" %}</a>
+                      <a href="#" class="btn btn-sm btn-danger">{% trans "Remove" %}</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="p-4 text-center text-muted">{% trans "No questions added to this quiz yet." %}</div>
+        {% endif %}
       </div>
-
     </div>
   </div>
-
-
-  <div class="card card-outline card-secondary">
-    <div class="card-header">
-      <h3 class="card-title">{% trans "Quiz Questions" %}</h3>
-    </div>
-
-    <div class="card-body p-0">
-
-      {% if quiz_questions %}
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th>{% trans "Order" %}</th>
-                <th>{% trans "Title" %}</th>
-                <th>{% trans "Type" %}</th>
-                <th>{% trans "Points" %}</th>
-                <th class="text-end">{% trans "Actions" %}</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for qq in quiz_questions %}
-              <tr>
-                <td>{{ qq.order }}</td>
-                <td>{{ qq.question.title|default:_("Untitled Question") }}</td>
-                <td>
-                  <span class="badge bg-primary">
-                    {{ qq.question.get_question_type_display|upper }}
-                  </span>
-                </td>
-                <td>{{ qq.effective_points }}</td>
-                <td class="text-end">
-                  <a href="#" class="btn btn-sm btn-warning">{% trans "Edit" %}</a>
-                  <a href="#" class="btn btn-sm btn-danger">{% trans "Remove" %}</a>
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="p-4 text-center text-muted">
-          {% trans "No questions added to this quiz yet." %}
-        </div>
-      {% endif %}
-
-    </div>
-  </div>
-
-</div>
 {% endblock %}

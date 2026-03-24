@@ -1,42 +1,39 @@
 {% load static %}
 {% load i18n %}
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-
   <a href="{% url 'pages:landing' %}" class="brand-link text-center">
     <img src="{% static 'dist/img/wnlogo.png' %}"
          alt="{% trans 'WN Logo' %}"
          class="brand-image img-circle elevation-3">
     <span class="brand-text font-weight-light ml-2">WonderNet</span>
   </a>
-
   <div class="sidebar">
     <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
-        {% comment %} <img src="{% static 'dist/img/user2-160x160.jpg' %}"
-             class="img-circle elevation-2"
-             alt="{% trans 'User Image' %}"> {% endcomment %}
+        {% comment %} <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="{% trans 'User Image' %}"> {% endcomment %}
         {% if user.avatar_url %}
-        <img src="{{ user.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
-              class="img-circle elevation-2"
-              width="50"
-              height="50"
-              alt="{{ user.first_name }} {{ user.last_name }}">
+          <img src="{{ user.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+               class="img-circle elevation-2"
+               width="50"
+               height="50"
+               alt="{{ user.first_name }} {{ user.last_name }}">
         {% else %}
-        {{ user.avatar_display|safe }}
+          {{ user.avatar_display|safe }}
         {% endif %}
       </div>
       <div class="info">
         <a href="#" class="d-block font-weight-bold">
-          {{ user.first_name }} <br> {{ user.last_name }}
+          {{ user.first_name }}
+          <br>
+          {{ user.last_name }}
         </a>
         {% if request.user.is_student %}
-        <small class="text-muted">{{ request.user.student_profile.grade.name }}</small>
+          <small class="text-muted">{{ request.user.student_profile.grade.name }}</small>
         {% else %}
-        <small class="text-muted">{{ request.user.teacher_profile.grade.name }}</small>
+          <small class="text-muted">{{ request.user.teacher_profile.grade.name }}</small>
         {% endif %}
       </div>
     </div>
-
     <div class="form-inline mb-2">
       <div class="input-group" data-widget="sidebar-search">
         <input class="form-control form-control-sidebar"
@@ -50,55 +47,48 @@
         </div>
       </div>
     </div>
-
     {% with current_view=request.resolver_match.view_name %}
-    <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent"
-          data-widget="treeview"
-          role="menu"
-          data-accordion="false">
-
-        <li class="nav-item">
-          <a href="{% url 'dashboard' %}"
-             class="nav-link {% if current_view == 'dashboard' %}active{% endif %}">
-            <i class="nav-icon fas fa-chart-pie"></i>
-            <p>{% trans "Dashboard" %}</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{% url 'curriculum:grade:grade-detail' user.student_profile.grade.pk %}"
-             class="nav-link {% if current_view == 'curriculum:grade:grade-detail' %}active{% endif %}">
-            <i class="nav-icon fas fa-book-open"></i>
-            <p>{% trans "Subjects" %}</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-folder-open"></i>
-            <p>{% trans "Resolved Resources" %}</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{% url 'tutoring:student:student-sessions' %}"
-             class="nav-link {% if current_view == 'tutoring:student:student-sessions' %}active{% endif %}">
-            <i class="nav-icon fas fa-calendar-check"></i>
-            <p>{% trans "My Sessions" %}</p>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{% url 'feedback:bookmark:student-bookmarks' %}"
-             class="nav-link {% if current_view == 'feedback:bookmark:student-bookmarks' %}active{% endif %}">
-            <i class="nav-icon fas fa-bookmark"></i>
-            <p>{% trans "My Bookmarks" %}</p>
-          </a>
-        </li>
-
-      </ul>
-    </nav>
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent"
+            data-widget="treeview"
+            role="menu"
+            data-accordion="false">
+          <li class="nav-item">
+            <a href="{% url 'dashboard' %}"
+               class="nav-link {% if current_view == 'dashboard' %}active{% endif %}">
+              <i class="nav-icon fas fa-chart-pie"></i>
+              <p>{% trans "Dashboard" %}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'curriculum:grade:grade-detail' user.student_profile.grade.pk %}"
+               class="nav-link {% if current_view == 'curriculum:grade:grade-detail' %}active{% endif %}">
+              <i class="nav-icon fas fa-book-open"></i>
+              <p>{% trans "Subjects" %}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder-open"></i>
+              <p>{% trans "Resolved Resources" %}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'tutoring:student:student-sessions' %}"
+               class="nav-link {% if current_view == 'tutoring:student:student-sessions' %}active{% endif %}">
+              <i class="nav-icon fas fa-calendar-check"></i>
+              <p>{% trans "My Sessions" %}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'feedback:bookmark:student-bookmarks' %}"
+               class="nav-link {% if current_view == 'feedback:bookmark:student-bookmarks' %}active{% endif %}">
+              <i class="nav-icon fas fa-bookmark"></i>
+              <p>{% trans "My Bookmarks" %}</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
     {% endwith %}
   </div>
 </aside>

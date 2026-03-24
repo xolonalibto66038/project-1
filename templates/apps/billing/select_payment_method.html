@@ -1,172 +1,168 @@
 {% extends "layouts/base-full.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Choose Payment Method" %}{% endblock %}
-
-{% block content %}
-
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1><i class="fas fa-credit-card"></i> {% trans "Choose Payment Method" %}</h1>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}"><i class="fas fa-home"></i> {% trans "Home" %}</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="{% url 'billing:pricing' %}">{% trans "Pricing" %}</a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "Payment" %}</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="container-fluid">
-    <div class="row justify-content-center">
-      <div class="col-lg-6 col-md-8">
-
-        {# ── Plan summary card ── #}
-        <div class="card card-outline
-          {% if plan.offer.tier == 'standard' %}card-primary
-          {% else %}card-warning{% endif %}
-          mb-4">
-          <div class="card-header">
-            <h3 class="card-title font-weight-bold">
-              {% if plan.offer.tier == 'standard' %}
-                <i class="fas fa-graduation-cap text-primary mr-1"></i>
-              {% else %}
-                <i class="fas fa-crown text-warning mr-1"></i>
-              {% endif %}
-              {% trans "Your selected plan" %}
-            </h3>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <div class="font-weight-bold" style="font-size:1.1rem;">
-                  {{ plan.offer.name }}
-                </div>
-                <div class="text-muted" style="font-size:.875rem;">
-                  {{ plan.get_interval_display }}
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="font-weight-bold" style="font-size:1.4rem;">
-                  €{{ plan.price }}
-                </div>
-                {% if plan.original_price %}
-                <div class="text-muted" style="font-size:.8rem; text-decoration:line-through;">
-                  €{{ plan.original_price }}
-                </div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {# ── Payment method selection ── #}
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title font-weight-bold">
-              <i class="fas fa-credit-card mr-1"></i>
-              {% trans "Select a payment method" %}
-            </h3>
-          </div>
-          <div class="card-body p-0">
-
-            {# Bank card #}
-            <div class="payment-option border-bottom" data-method="card">
-              <div class="d-flex align-items-center p-3" style="gap:16px; cursor:pointer;">
-                <div class="payment-icon-wrap">
-                  <i class="fas fa-credit-card fa-2x text-primary"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <div class="font-weight-bold">{% trans "Credit / Debit Card" %}</div>
-                  <div class="text-muted" style="font-size:.8rem;">
-                    Visa, Mastercard, American Express
-                  </div>
-                  <div class="mt-1" style="display:flex; gap:5px; flex-wrap:wrap;">
-                    <span style="background:#1a1f71; color:#fff; font-size:.65rem; font-weight:800;
-                                padding:2px 7px; border-radius:3px; letter-spacing:.03em;">VISA</span>
-                    <span style="background:#eb001b; color:#fff; font-size:.65rem; font-weight:800;
-                                padding:2px 7px; border-radius:3px; letter-spacing:.03em;">MC</span>
-                    <span style="background:#2e77bc; color:#fff; font-size:.65rem; font-weight:800;
-                                padding:2px 7px; border-radius:3px; letter-spacing:.03em;">AMEX</span>
-                  </div>
-                </div>
-                <div>
-                  <span class="badge badge-success">{% trans "Recommended" %}</span>
-                </div>
-                <div>
-                  <i class="fas fa-chevron-right text-muted"></i>
-                </div>
-              </div>
-            </div>
-
-            {# PayPal #}
-            <div class="payment-option border-bottom" data-method="paypal">
-              <div class="d-flex align-items-center p-3" style="gap:16px; cursor:pointer;">
-                <div class="payment-icon-wrap">
-                  <i class="fab fa-paypal fa-2x" style="color:#003087;"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <div class="font-weight-bold">PayPal</div>
-                  <div class="text-muted" style="font-size:.8rem;">
-                    {% trans "Pay with your PayPal balance or linked card" %}
-                  </div>
-                </div>
-                <div>
-                  <i class="fas fa-chevron-right text-muted"></i>
-                </div>
-              </div>
-            </div>
-
-            {# Google Pay #}
-            <div class="payment-option" data-method="google_pay">
-              <div class="d-flex align-items-center p-3" style="gap:16px; cursor:pointer;">
-                <div class="payment-icon-wrap">
-                  <i class="fab fa-google fa-2x" style="color:#4285F4;"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <div class="font-weight-bold">Google Pay</div>
-                  <div class="text-muted" style="font-size:.8rem;">
-                    {% trans "Fast checkout with your Google account" %}
-                  </div>
-                </div>
-                <div>
-                  <i class="fas fa-chevron-right text-muted"></i>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {# Trust note #}
-        <p class="text-center text-muted mt-3" style="font-size:.8rem;">
-          <i class="fas fa-lock mr-1"></i>
-          {% trans "All payments are secured and encrypted via Stripe." %}
-        </p>
-
-        <a href="{% url 'billing:pricing' %}" class="btn btn-link btn-block text-muted">
-          <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to pricing" %}
-        </a>
-
-      </div>
-    </div>
-  </div>
-</section>
-
+{% block title %}
+  {% trans "Choose Payment Method" %}
 {% endblock %}
-
+{% block content %}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>
+            <i class="fas fa-credit-card"></i> {% trans "Choose Payment Method" %}
+          </h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}"><i class="fas fa-home"></i> {% trans "Home" %}</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="{% url 'billing:pricing' %}">{% trans "Pricing" %}</a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "Payment" %}</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+          {# ── Plan summary card ── #}
+          <div class="card card-outline {% if plan.offer.tier == 'standard' %}card-primary {% else %}card-warning{% endif %} mb-4">
+            <div class="card-header">
+              <h3 class="card-title font-weight-bold">
+                {% if plan.offer.tier == 'standard' %}
+                  <i class="fas fa-graduation-cap text-primary mr-1"></i>
+                {% else %}
+                  <i class="fas fa-crown text-warning mr-1"></i>
+                {% endif %}
+                {% trans "Your selected plan" %}
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="font-weight-bold" style="font-size:1.1rem;">{{ plan.offer.name }}</div>
+                  <div class="text-muted" style="font-size:.875rem;">{{ plan.get_interval_display }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-weight-bold" style="font-size:1.4rem;">€{{ plan.price }}</div>
+                  {% if plan.original_price %}
+                    <div class="text-muted"
+                         style="font-size:.8rem;
+                                text-decoration:line-through">€{{ plan.original_price }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {# ── Payment method selection ── #}
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title font-weight-bold">
+                <i class="fas fa-credit-card mr-1"></i>
+                {% trans "Select a payment method" %}
+              </h3>
+            </div>
+            <div class="card-body p-0">
+              {# Bank card #}
+              <div class="payment-option border-bottom" data-method="card">
+                <div class="d-flex align-items-center p-3"
+                     style="gap:16px;
+                            cursor:pointer">
+                  <div class="payment-icon-wrap">
+                    <i class="fas fa-credit-card fa-2x text-primary"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="font-weight-bold">{% trans "Credit / Debit Card" %}</div>
+                    <div class="text-muted" style="font-size:.8rem;">Visa, Mastercard, American Express</div>
+                    <div class="mt-1" style="display:flex; gap:5px; flex-wrap:wrap;">
+                      <span style="background:#1a1f71;
+                                   color:#fff;
+                                   font-size:.65rem;
+                                   font-weight:800;
+                                   padding:2px 7px;
+                                   border-radius:3px;
+                                   letter-spacing:.03em">VISA</span>
+                      <span style="background:#eb001b;
+                                   color:#fff;
+                                   font-size:.65rem;
+                                   font-weight:800;
+                                   padding:2px 7px;
+                                   border-radius:3px;
+                                   letter-spacing:.03em">MC</span>
+                      <span style="background:#2e77bc;
+                                   color:#fff;
+                                   font-size:.65rem;
+                                   font-weight:800;
+                                   padding:2px 7px;
+                                   border-radius:3px;
+                                   letter-spacing:.03em">AMEX</span>
+                    </div>
+                  </div>
+                  <div>
+                    <span class="badge badge-success">{% trans "Recommended" %}</span>
+                  </div>
+                  <div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+              {# PayPal #}
+              <div class="payment-option border-bottom" data-method="paypal">
+                <div class="d-flex align-items-center p-3"
+                     style="gap:16px;
+                            cursor:pointer">
+                  <div class="payment-icon-wrap">
+                    <i class="fab fa-paypal fa-2x" style="color:#003087;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="font-weight-bold">PayPal</div>
+                    <div class="text-muted" style="font-size:.8rem;">{% trans "Pay with your PayPal balance or linked card" %}</div>
+                  </div>
+                  <div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+              {# Google Pay #}
+              <div class="payment-option" data-method="google_pay">
+                <div class="d-flex align-items-center p-3"
+                     style="gap:16px;
+                            cursor:pointer">
+                  <div class="payment-icon-wrap">
+                    <i class="fab fa-google fa-2x" style="color:#4285F4;"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="font-weight-bold">Google Pay</div>
+                    <div class="text-muted" style="font-size:.8rem;">{% trans "Fast checkout with your Google account" %}</div>
+                  </div>
+                  <div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {# Trust note #}
+          <p class="text-center text-muted mt-3" style="font-size:.8rem;">
+            <i class="fas fa-lock mr-1"></i>
+            {% trans "All payments are secured and encrypted via Stripe." %}
+          </p>
+          <a href="{% url 'billing:pricing' %}"
+             class="btn btn-link btn-block text-muted">
+            <i class="fas fa-arrow-left mr-1"></i>{% trans "Back to pricing" %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
 {% block extra_js %}
-<script>
+  <script>
 (function () {
   const CSRF    = '{{ csrf_token }}';
   const planPk  = '{{ plan.pk }}';
@@ -227,5 +223,5 @@
     });
   });
 })();
-</script>
+  </script>
 {% endblock %}

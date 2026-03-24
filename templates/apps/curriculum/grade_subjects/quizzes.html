@@ -1,255 +1,210 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
 {% load breadcrumbs %}
-
-{% block title %}{{ subject.name }} — {% trans "Quizzes" %}{% endblock %}
-
+{% block title %}
+  {{ subject.name }} — {% trans "Quizzes" %}
+{% endblock %}
 {% block content %}
-
-{# ── Header ── #}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row align-items-center mb-2">
-
-      <div class="col-sm-7">
-        <h1 class="font-weight-bold mb-0">
-          <i class="fas fa-brain mr-2 text-primary"></i>
-          {{ subject.name }}
-          <span class="badge badge-primary ml-2">{% trans "Quizzes" %}</span>
-        </h1>
-        <small class="text-muted">
-          {% trans "Browse quizzes for this subject" %}
-        </small>
-      </div>
-      <div class="col-sm-5">
-        {% breadcrumb crumbs %}
-      </div>
-
-    </div>
-  </div>
-</section> 
-
-<section class="content">
-  <div class="container-fluid">
-
-    {# ── Filters ── #}
-    <div class="card card-outline card-secondary mb-3">
-      <div class="card-body py-2">
-        <form method="get" class="d-flex flex-wrap align-items-end" style="gap: 8px;">
-
-          {# Search #}
-          <div class="form-group mb-0 flex-grow-1" style="min-width: 200px;">
-            <label class="small text-muted mb-1">{% trans "Search" %}</label>
-            <div class="input-group input-group-sm">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-              </div>
-              <input type="text" name="q" value="{{ filter_q }}"
-                    class="form-control" placeholder="{% trans 'Title or description…' %}">
-            </div>
-          </div>
-
-          {# Course #}
-          <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
-            <label class="small text-muted mb-1">{% trans "Course" %}</label>
-            <select name="course" class="form-control form-control-sm w-100">
-              <option value="">{% trans "All courses" %}</option>
-              {% for c in courses %}
-                <option value="{{ c.pk }}" {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>
-                  {{ c.title }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          {# Teacher #}
-          <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
-            <label class="small text-muted mb-1">{% trans "Teacher" %}</label>
-            <select name="teacher" class="form-control form-control-sm w-100">
-              <option value="">{% trans "All teachers" %}</option>
-              {% for t in teachers %}
-                <option value="{{ t.pk }}" {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
-                  {{ t.get_full_name }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          {# Auto-gradable #}
-          <div class="form-group mb-0 flex-grow-1" style="min-width: 140px;">
-            <label class="small text-muted mb-1">{% trans "Gradable" %}</label>
-            <select name="auto_gradable" class="form-control form-control-sm w-100">
-              <option value="">{% trans "Any type" %}</option>
-              <option value="1" {% if filter_auto_grade == "1" %}selected{% endif %}>{% trans "Auto-gradable" %}</option>
-              <option value="0" {% if filter_auto_grade == "0" %}selected{% endif %}>{% trans "Manual grading" %}</option>
-            </select>
-          </div>
-
-          {# Actions — pinned to the right, never grow #}
-          <div class="form-group mb-0 d-flex" style="gap: 4px; flex-shrink: 0;">
-            <button type="submit" class="btn btn-primary btn-sm">
-              <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
-            </button>
-            {% if filter_q or filter_course or filter_teacher or filter_auto_grade %}
-            <a href="?" class="btn btn-outline-secondary btn-sm">
-              <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
-            </a>
-            {% endif %}
-          </div>
-
-        </form>
-      </div>
-    </div>
-
-    {# ── Quiz list ── #}
-    <div class="card card-primary card-outline">
-
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="fas fa-brain mr-2"></i>
-          {{ subject.name }} — {% trans "Quizzes" %}
-        </h3>
-        <div class="card-tools">
-          <span class="badge badge-primary">
-            {{ page_obj.paginator.count }} {% trans "total" %}
-          </span>
+  {# ── Header ── #}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row align-items-center mb-2">
+        <div class="col-sm-7">
+          <h1 class="font-weight-bold mb-0">
+            <i class="fas fa-brain mr-2 text-primary"></i>
+            {{ subject.name }}
+            <span class="badge badge-primary ml-2">{% trans "Quizzes" %}</span>
+          </h1>
+          <small class="text-muted">{% trans "Browse quizzes for this subject" %}</small>
         </div>
+        <div class="col-sm-5">{% breadcrumb crumbs %}</div>
       </div>
-
-      <div class="card-body p-0">
-
-        {% if quizzes %}
-        <div class="list-group list-group-flush">
-
-          {% for quiz in quizzes %}
-          <a href="{% url 'assessment:quiz:quiz-take' grade_subject_pk=grade_subject.pk pk=quiz.pk %}"
-             class="list-group-item list-group-item-action px-4 py-3">
-
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-
-              {# ── Left: title + meta ── #}
-              <div class="d-flex align-items-center flex-grow-1 mr-3">
-                <i class="fas fa-brain text-primary mr-3"></i>
-                <div>
-                  <div class="font-weight-bold">{{ quiz.title }}</div>
-                  <small class="text-muted d-flex flex-wrap mt-1" style="gap:8px;">
-
-                    {# Questions count #}
-                    <span>
-                      <i class="fas fa-list mr-1"></i>
-                      {{ quiz.questions_count }} {% trans "questions" %}
-                    </span>
-
-                    {# Time limit #}
-                    {% if quiz.time_limit %}
-                    <span>
-                      <i class="far fa-clock mr-1"></i>
-                      {{ quiz.time_limit }} {% trans "min" %}
-                    </span>
-                    {% endif %}
-
-                    {# Max attempts #}
-                    <span>
-                      <i class="fas fa-redo mr-1"></i>
-                      {{ quiz.max_attempts }} {% trans "attempt(s)" %}
-                    </span>
-
-                    {# Passing score #}
-                    <span>
-                      <i class="fas fa-trophy mr-1"></i>
-                      {{ quiz.passing_score }}% {% trans "to pass" %}
-                    </span>
-
-                    {# Availability dates #}
-                    {% if quiz.start_date %}
-                    <span>
-                      <i class="fas fa-calendar-alt mr-1"></i>
-                      {% trans "From" %} {{ quiz.start_date|date:"d M Y" }}
-                    </span>
-                    {% endif %}
-
-                    {% if quiz.end_date %}
-                    <span>
-                      <i class="fas fa-calendar-times mr-1"></i>
-                      {% trans "Until" %} {{ quiz.end_date|date:"d M Y" }}
-                    </span>
-                    {% endif %}
-
-                  </small>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      {# ── Filters ── #}
+      <div class="card card-outline card-secondary mb-3">
+        <div class="card-body py-2">
+          <form method="get"
+                class="d-flex flex-wrap align-items-end"
+                style="gap: 8px">
+            {# Search #}
+            <div class="form-group mb-0 flex-grow-1" style="min-width: 200px;">
+              <label class="small text-muted mb-1">{% trans "Search" %}</label>
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fas fa-search"></i></span>
                 </div>
+                <input type="text"
+                       name="q"
+                       value="{{ filter_q }}"
+                       class="form-control"
+                       placeholder="{% trans 'Title or description…' %}">
               </div>
-
-              {# ── Right: badges ── #}
-              <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
-
-                {# Available / Closed #}
-                {% if quiz.is_available %}
-                <span class="badge badge-success">
-                  <i class="fas fa-circle mr-1" style="font-size:.5rem;"></i>
-                  {% trans "Open" %}
-                </span>
-                {% else %}
-                <span class="badge badge-danger">
-                  <i class="fas fa-lock mr-1"></i>{% trans "Closed" %}
-                </span>
-                {% endif %}
-
-                {# Randomized #}
-                {% if quiz.randomize_questions %}
-                <span class="badge badge-info">
-                  <i class="fas fa-random mr-1"></i>{% trans "Randomized" %}
-                </span>
-                {% endif %}
-
-                {# Student: attempt status #}
-                {% if is_student %}
-                  {% if quiz.user_attempts_count %}
-                  <span class="badge badge-warning">
-                    <i class="fas fa-history mr-1"></i>
-                    {{ quiz.user_attempts_count }}/{{ quiz.max_attempts }}
-                    {% trans "attempts" %}
-                  </span>
-                  {% else %}
-                  <span class="badge badge-secondary">
-                    <i class="fas fa-circle-notch mr-1"></i>
-                    {% trans "Not attempted" %}
-                  </span>
-                  {% endif %}
-                {% endif %}
-
-                {# Arrow #}
-                <i class="fas fa-chevron-right text-muted ml-2"></i>
-
-              </div>
-
             </div>
-
-          </a>
-          {% endfor %}
-
+            {# Course #}
+            <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
+              <label class="small text-muted mb-1">{% trans "Course" %}</label>
+              <select name="course" class="form-control form-control-sm w-100">
+                <option value="">{% trans "All courses" %}</option>
+                {% for c in courses %}
+                  <option value="{{ c.pk }}"
+                          {% if filter_course == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {# Teacher #}
+            <div class="form-group mb-0 flex-grow-1" style="min-width: 160px;">
+              <label class="small text-muted mb-1">{% trans "Teacher" %}</label>
+              <select name="teacher" class="form-control form-control-sm w-100">
+                <option value="">{% trans "All teachers" %}</option>
+                {% for t in teachers %}
+                  <option value="{{ t.pk }}"
+                          {% if filter_teacher == t.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ t.get_full_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            {# Auto-gradable #}
+            <div class="form-group mb-0 flex-grow-1" style="min-width: 140px;">
+              <label class="small text-muted mb-1">{% trans "Gradable" %}</label>
+              <select name="auto_gradable" class="form-control form-control-sm w-100">
+                <option value="">{% trans "Any type" %}</option>
+                <option value="1" {% if filter_auto_grade == "1" %}selected{% endif %}>{% trans "Auto-gradable" %}</option>
+                <option value="0" {% if filter_auto_grade == "0" %}selected{% endif %}>{% trans "Manual grading" %}</option>
+              </select>
+            </div>
+            {# Actions — pinned to the right, never grow #}
+            <div class="form-group mb-0 d-flex" style="gap: 4px; flex-shrink: 0;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter mr-1"></i>{% trans "Filter" %}
+              </button>
+              {% if filter_q or filter_course or filter_teacher or filter_auto_grade %}
+                <a href="?" class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-times mr-1"></i>{% trans "Clear" %}
+                </a>
+              {% endif %}
+            </div>
+          </form>
         </div>
-
-        {% else %}
-        <div class="p-5 text-center text-muted">
-          <i class="fas fa-brain fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
-          <h5 class="font-weight-bold">{% trans "No quizzes available yet" %}</h5>
-          <p class="small mb-0">
-            {% trans "Quizzes will appear here once added." %}
-          </p>
+      </div>
+      {# ── Quiz list ── #}
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-brain mr-2"></i>
+            {{ subject.name }} — {% trans "Quizzes" %}
+          </h3>
+          <div class="card-tools">
+            <span class="badge badge-primary">{{ page_obj.paginator.count }} {% trans "total" %}</span>
+          </div>
         </div>
+        <div class="card-body p-0">
+          {% if quizzes %}
+            <div class="list-group list-group-flush">
+              {% for quiz in quizzes %}
+                <a href="{% url 'assessment:quiz:quiz-take' grade_subject_pk=grade_subject.pk pk=quiz.pk %}"
+                   class="list-group-item list-group-item-action px-4 py-3">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    {# ── Left: title + meta ── #}
+                    <div class="d-flex align-items-center flex-grow-1 mr-3">
+                      <i class="fas fa-brain text-primary mr-3"></i>
+                      <div>
+                        <div class="font-weight-bold">{{ quiz.title }}</div>
+                        <small class="text-muted d-flex flex-wrap mt-1" style="gap:8px;">
+                          {# Questions count #}
+                          <span>
+                            <i class="fas fa-list mr-1"></i>
+                            {{ quiz.questions_count }} {% trans "questions" %}
+                          </span>
+                          {# Time limit #}
+                          {% if quiz.time_limit %}
+                            <span>
+                              <i class="far fa-clock mr-1"></i>
+                              {{ quiz.time_limit }} {% trans "min" %}
+                            </span>
+                          {% endif %}
+                          {# Max attempts #}
+                          <span>
+                            <i class="fas fa-redo mr-1"></i>
+                            {{ quiz.max_attempts }} {% trans "attempt(s)" %}
+                          </span>
+                          {# Passing score #}
+                          <span>
+                            <i class="fas fa-trophy mr-1"></i>
+                            {{ quiz.passing_score }}% {% trans "to pass" %}
+                          </span>
+                          {# Availability dates #}
+                          {% if quiz.start_date %}
+                            <span>
+                              <i class="fas fa-calendar-alt mr-1"></i>
+                              {% trans "From" %} {{ quiz.start_date|date:"d M Y" }}
+                            </span>
+                          {% endif %}
+                          {% if quiz.end_date %}
+                            <span>
+                              <i class="fas fa-calendar-times mr-1"></i>
+                              {% trans "Until" %} {{ quiz.end_date|date:"d M Y" }}
+                            </span>
+                          {% endif %}
+                        </small>
+                      </div>
+                    </div>
+                    {# ── Right: badges ── #}
+                    <div class="d-flex align-items-center flex-wrap" style="gap:6px;">
+                      {# Available / Closed #}
+                      {% if quiz.is_available %}
+                        <span class="badge badge-success">
+                          <i class="fas fa-circle mr-1" style="font-size:.5rem;"></i>
+                          {% trans "Open" %}
+                        </span>
+                      {% else %}
+                        <span class="badge badge-danger">
+                          <i class="fas fa-lock mr-1"></i>{% trans "Closed" %}
+                        </span>
+                      {% endif %}
+                      {# Randomized #}
+                      {% if quiz.randomize_questions %}
+                        <span class="badge badge-info">
+                          <i class="fas fa-random mr-1"></i>{% trans "Randomized" %}
+                        </span>
+                      {% endif %}
+                      {# Student: attempt status #}
+                      {% if is_student %}
+                        {% if quiz.user_attempts_count %}
+                          <span class="badge badge-warning">
+                            <i class="fas fa-history mr-1"></i>
+                            {{ quiz.user_attempts_count }}/{{ quiz.max_attempts }}
+                            {% trans "attempts" %}
+                          </span>
+                        {% else %}
+                          <span class="badge badge-secondary">
+                            <i class="fas fa-circle-notch mr-1"></i>
+                            {% trans "Not attempted" %}
+                          </span>
+                        {% endif %}
+                      {% endif %}
+                      {# Arrow #}
+                      <i class="fas fa-chevron-right text-muted ml-2"></i>
+                    </div>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="p-5 text-center text-muted">
+              <i class="fas fa-brain fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+              <h5 class="font-weight-bold">{% trans "No quizzes available yet" %}</h5>
+              <p class="small mb-0">{% trans "Quizzes will appear here once added." %}</p>
+            </div>
+          {% endif %}
+        </div>
+        {% if is_paginated %}
+          <div class="card-footer">{% include "includes/pagination.html" with querystring=querystring %}</div>
         {% endif %}
-
       </div>
-
-      {% if is_paginated %}
-      <div class="card-footer">
-        {% include "includes/pagination.html" with querystring=querystring %}
-      </div>
-      {% endif %}
-
     </div>
-
-  </div>
-</section>
-
+  </section>
 {% endblock %}

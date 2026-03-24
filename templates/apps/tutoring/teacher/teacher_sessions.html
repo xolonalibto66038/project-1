@@ -1,293 +1,171 @@
 {% extends "layouts/base.html" %}
 {% load i18n %}
 {% load static %}
-
-{% block title %}{% trans "Tutoring Sessions" %}{% endblock %}
-
+{% block title %}
+  {% trans "Tutoring Sessions" %}
+{% endblock %}
 {% block content %}
-
-<section class="content-header">
-  <div class="container-fluid">
-
-    <div class="row mb-2">
-      <div class="col-sm-6">
-
-        <h1>
-          <i class="fas fa-video text-primary mr-2"></i>
-          {% trans "Tutoring Sessions" %}
-        </h1>
-
-        <p class="text-muted mb-0">
-          {% trans "Manage and confirm student tutoring sessions" %}
-        </p>
-
-      </div>
-    </div>
-
-  </div>
-</section>
-
-
-<section class="content">
-  <div class="container-fluid">
-
-    <div class="card card-primary card-outline">
-
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="fas fa-clock mr-2"></i>
-          {% trans "All Sessions" %}
-        </h3>
-      </div>
-
-
-      <div class="card-body p-0">
-
-        {% if sessions %}
-
-        <table class="table table-hover align-middle">
-
-          <thead>
-            <tr>
-
-              <th>{% trans "Student" %}</th>
-
-              <th>{% trans "Requested At" %}</th>
-
-              <th>{% trans "Scheduled At" %}</th>
-
-              <th>{% trans "Status" %}</th>
-
-              <th class="text-right">{% trans "Actions" %}</th>
-
-            </tr>
-          </thead>
-
-
-          <tbody>
-
-            {% for session in sessions %}
-
-            <tr>
-
-              <!-- Student -->
-              <td>
-                <div class="d-flex align-items-center">
-
-                  <img
-                    src="{% static 'dist/img/avatar.png' %}"
-                    class="img-circle elevation-2 mr-2"
-                    width="40"
-                    height="40"
-                    alt="avatar"
-                  >
-
-                  <div>
-
-                    <strong>
-                      {{ session.student.get_full_name }}
-                    </strong>
-
-                    <br>
-
-                    <small class="text-muted">
-                      {{ session.student.email }}
-                    </small>
-
-                  </div>
-
-                </div>
-              </td>
-
-
-              <!-- Requested -->
-              <td>
-                <span class="text-muted">
-                  {{ session.created_at|date:"M d, Y H:i" }}
-                </span>
-              </td>
-
-
-              <!-- Scheduled -->
-              <td>
-
-                {% if session.scheduled_at %}
-                  {{ session.scheduled_at|date:"M d, Y H:i" }}
-                {% else %}
-                  <span class="text-muted">
-                    {% trans "Not scheduled" %}
-                  </span>
-                {% endif %}
-
-              </td>
-
-
-              <!-- Status -->
-              <td>
-
-                {% if session.status == "pending_payment" %}
-
-                  <span class="badge badge-secondary">
-                    <i class="fas fa-credit-card mr-1"></i>
-                    {% trans "Awaiting Payment" %}
-                  </span>
-
-                {% elif session.status == "payment_authorized" %}
-
-                  <span class="badge badge-warning">
-                    <i class="fas fa-clock mr-1"></i>
-                    {% trans "Ready to confirm" %}
-                  </span>
-
-                {% elif session.status == "confirmed" %}
-
-                  <span class="badge badge-success">
-                    <i class="fas fa-check mr-1"></i>
-                    {% trans "Confirmed" %}
-                  </span>
-
-                {% elif session.status == "in_progress" %}
-
-                  <span class="badge badge-primary">
-                    <i class="fas fa-video mr-1"></i>
-                    {% trans "In Progress" %}
-                  </span>
-
-                {% elif session.status == "completed" %}
-
-                  <span class="badge badge-dark">
-                    <i class="fas fa-check-double mr-1"></i>
-                    {% trans "Completed" %}
-                  </span>
-
-                {% elif session.status == "canceled" %}
-
-                  <span class="badge badge-dark">
-                    <i class="fas fa-check-double mr-1"></i>
-                    {% trans "Canceled by " %} : {{ session.canceled_by }}
-                  </span>
-
-                {% else %}
-
-                  <span class="badge badge-light">
-                    {{ session.status }}
-                  </span>
-
-                {% endif %}
-
-              </td>
-
-
-              <!-- Actions -->
-              <td class="text-right">
-
-
-                {# Confirm session ONLY if payment authorized #}
-                {% if session.status == "payment_authorized" %}
-
-                <form
-                  method="post"
-                  action="{% url 'tutoring:teacher:confirm-session' session.id %}"
-                  class="d-inline-flex align-items-center"
-                >
-
-                  {% csrf_token %}
-
-                  <input
-                    type="datetime-local"
-                    name="scheduled_at"
-                    required
-                    class="form-control mr-2"
-                  >
-
-                  <button
-                    type="submit"
-                    class="btn btn-success"
-                  >
-                    {% comment %} <i class="fas fa-check mr-1"></i> {% endcomment %}
-                    {% trans "Confirm" %}
-                  </button>
-
-                </form>
-
-                {% endif %}
-
-
-                {# Start meeting #}
-                {% if session.status == "confirmed" %}
-
-                  <a
-                    href="{{ session.zoom_start_url }}"
-                    target="_blank"
-                    class="btn btn-primary btn-sm"
-                  >
-                    <i class="fas fa-video mr-1"></i>
-                    {% trans "Start Meeting" %}
-                  </a>
-
-                {% endif %}
-
-
-                {# View meeting #}
-                {% if session.status == "in_progress" or session.status == "completed" %}
-
-                  <a
-                    href="{{ session.zoom_join_url }}"
-                    target="_blank"
-                    class="btn btn-outline-primary btn-sm"
-                  >
-                    <i class="fas fa-external-link-alt mr-1"></i>
-                    {% trans "View Meeting" %}
-                  </a>
-
-                {% endif %}
-
-                {% if session.status == "confirmed" or session.status == "payment_authorized" %}
-                  <form
-                    method="post"
-                    action="{% url 'tutoring:teacher:cancel-session-confirm' session.id %}"
-                    class="d-inline-block ml-2"
-                    onsubmit="return confirm('{% trans "Are you sure you want to cancel this session?" %}')"
-                  >
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                      <i class="fas fa-times mr-1"></i>
-                      {% trans "Cancel" %}
-                    </button>
-                  </form>
-                {% endif %}
-
-
-              </td>
-
-
-            </tr>
-
-            {% endfor %}
-
-          </tbody>
-
-        </table>
-
-        {% else %}
-
-        <div class="text-center p-5 text-muted">
-
-          <i class="fas fa-inbox fa-2x mb-3"></i>
-
-          <p>
-            {% trans "No tutoring sessions found" %}
-          </p>
-
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>
+            <i class="fas fa-video text-primary mr-2"></i>
+            {% trans "Tutoring Sessions" %}
+          </h1>
+          <p class="text-muted mb-0">{% trans "Manage and confirm student tutoring sessions" %}</p>
         </div>
-
-        {% endif %}
-
       </div>
-
     </div>
-
-  </div>
-</section>
-
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-primary card-outline">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-clock mr-2"></i>
+            {% trans "All Sessions" %}
+          </h3>
+        </div>
+        <div class="card-body p-0">
+          {% if sessions %}
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>{% trans "Student" %}</th>
+                  <th>{% trans "Requested At" %}</th>
+                  <th>{% trans "Scheduled At" %}</th>
+                  <th>{% trans "Status" %}</th>
+                  <th class="text-right">{% trans "Actions" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for session in sessions %}
+                  <tr>
+                    <!-- Student -->
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <img src="{% static 'dist/img/avatar.png' %}"
+                             class="img-circle elevation-2 mr-2"
+                             width="40"
+                             height="40"
+                             alt="avatar">
+                        <div>
+                          <strong>{{ session.student.get_full_name }}</strong>
+                          <br>
+                          <small class="text-muted">{{ session.student.email }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <!-- Requested -->
+                    <td>
+                      <span class="text-muted">{{ session.created_at|date:"M d, Y H:i" }}</span>
+                    </td>
+                    <!-- Scheduled -->
+                    <td>
+                      {% if session.scheduled_at %}
+                        {{ session.scheduled_at|date:"M d, Y H:i" }}
+                      {% else %}
+                        <span class="text-muted">{% trans "Not scheduled" %}</span>
+                      {% endif %}
+                    </td>
+                    <!-- Status -->
+                    <td>
+                      {% if session.status == "pending_payment" %}
+                        <span class="badge badge-secondary">
+                          <i class="fas fa-credit-card mr-1"></i>
+                          {% trans "Awaiting Payment" %}
+                        </span>
+                      {% elif session.status == "payment_authorized" %}
+                        <span class="badge badge-warning">
+                          <i class="fas fa-clock mr-1"></i>
+                          {% trans "Ready to confirm" %}
+                        </span>
+                      {% elif session.status == "confirmed" %}
+                        <span class="badge badge-success">
+                          <i class="fas fa-check mr-1"></i>
+                          {% trans "Confirmed" %}
+                        </span>
+                      {% elif session.status == "in_progress" %}
+                        <span class="badge badge-primary">
+                          <i class="fas fa-video mr-1"></i>
+                          {% trans "In Progress" %}
+                        </span>
+                      {% elif session.status == "completed" %}
+                        <span class="badge badge-dark">
+                          <i class="fas fa-check-double mr-1"></i>
+                          {% trans "Completed" %}
+                        </span>
+                      {% elif session.status == "canceled" %}
+                        <span class="badge badge-dark">
+                          <i class="fas fa-check-double mr-1"></i>
+                          {% trans "Canceled by " %} : {{ session.canceled_by }}
+                        </span>
+                      {% else %}
+                        <span class="badge badge-light">{{ session.status }}</span>
+                      {% endif %}
+                    </td>
+                    <!-- Actions -->
+                    <td class="text-right">
+                      {# Confirm session ONLY if payment authorized #}
+                      {% if session.status == "payment_authorized" %}
+                        <form method="post"
+                              action="{% url 'tutoring:teacher:confirm-session' session.id %}"
+                              class="d-inline-flex align-items-center">
+                          {% csrf_token %}
+                          <input type="datetime-local"
+                                 name="scheduled_at"
+                                 required
+                                 class="form-control mr-2">
+                          <button type="submit" class="btn btn-success">
+                            {% comment %} <i class="fas fa-check mr-1"></i> {% endcomment %}
+                            {% trans "Confirm" %}
+                          </button>
+                        </form>
+                      {% endif %}
+                      {# Start meeting #}
+                      {% if session.status == "confirmed" %}
+                        <a href="{{ session.zoom_start_url }}"
+                           target="_blank"
+                           class="btn btn-primary btn-sm">
+                          <i class="fas fa-video mr-1"></i>
+                          {% trans "Start Meeting" %}
+                        </a>
+                      {% endif %}
+                      {# View meeting #}
+                      {% if session.status == "in_progress" or session.status == "completed" %}
+                        <a href="{{ session.zoom_join_url }}"
+                           target="_blank"
+                           class="btn btn-outline-primary btn-sm">
+                          <i class="fas fa-external-link-alt mr-1"></i>
+                          {% trans "View Meeting" %}
+                        </a>
+                      {% endif %}
+                      {% if session.status == "confirmed" or session.status == "payment_authorized" %}
+                        <form method="post"
+                              action="{% url 'tutoring:teacher:cancel-session-confirm' session.id %}"
+                              class="d-inline-block ml-2"
+                              onsubmit="return confirm('{% trans "Are you sure you want to cancel this session?" %}')">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times mr-1"></i>
+                            {% trans "Cancel" %}
+                          </button>
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="text-center p-5 text-muted">
+              <i class="fas fa-inbox fa-2x mb-3"></i>
+              <p>{% trans "No tutoring sessions found" %}</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
 {% endblock %}

@@ -1,59 +1,53 @@
 {# errors/403.html #}
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "403 — Access Denied" %}{% endblock %}
-
+{% block title %}
+  {% trans "403 — Access Denied" %}
+{% endblock %}
 {% block content %}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1>{% trans "403 Error Page" %}</h1>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item">
-            <a href="{% url 'pages:landing' %}">
-              <i class="fas fa-home mr-1"></i>{% trans "Home" %}
-            </a>
-          </li>
-          <li class="breadcrumb-item active">{% trans "403 Error Page" %}</li>
-        </ol>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>{% trans "403 Error Page" %}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}">
+                <i class="fas fa-home mr-1"></i>{% trans "Home" %}
+              </a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "403 Error Page" %}</li>
+          </ol>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="error-page">
-    <h2 class="headline text-danger">403</h2>
-
-    <div class="error-content">
-      <h3>
-        <i class="fas fa-lock text-danger"></i>
-        {% trans "Access Denied." %}
-        {% if exception %}
-          <small class="text-muted">{{ exception }}</small>
-        {% endif %}
-      </h3>
-
-      <p>
-        {% trans "You do not have permission to access this page." %}
-        {% trans "If you believe this is a mistake, please contact your administrator." %}
-      </p>
-
-      <p>
-        {% url 'curriculum:level:level-list' as home_url %}
-        {% blocktrans with home_url=home_url %}
+  </section>
+  <section class="content">
+    <div class="error-page">
+      <h2 class="headline text-danger">403</h2>
+      <div class="error-content">
+        <h3>
+          <i class="fas fa-lock text-danger"></i>
+          {% trans "Access Denied." %}
+          {% if exception %}<small class="text-muted">{{ exception }}</small>{% endif %}
+        </h3>
+        <p>
+          {% trans "You do not have permission to access this page." %}
+          {% trans "If you believe this is a mistake, please contact your administrator." %}
+        </p>
+        <p>
+          {% url 'curriculum:level:level-list' as home_url %}
+          {% blocktrans with home_url=home_url %}
           Meanwhile, you may <a href="{{ home_url }}">return to home</a>.
         {% endblocktrans %}
-      </p>
-
-      <a href="{% url 'curriculum:level:level-list' %}" class="btn btn-danger btn-sm mt-2">
-        <i class="fas fa-home mr-1"></i>{% trans "Back to Home" %}
-      </a>
+        </p>
+        <a href="{% url 'curriculum:level:level-list' %}"
+           class="btn btn-danger btn-sm mt-2">
+          <i class="fas fa-home mr-1"></i>{% trans "Back to Home" %}
+        </a>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}

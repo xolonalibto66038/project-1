@@ -1,74 +1,56 @@
 {% extends "layouts/base-full.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Session booked successfully" %}{% endblock %}
-
+{% block title %}
+  {% trans "Session booked successfully" %}
+{% endblock %}
 {% block content %}
-
-<section class="content">
-  <div class="container">
-    <div class="row justify-content-center" style="min-height:70vh; align-items:center;">
-      <div class="col-lg-5 col-md-7 text-center">
-        <div class="card border-0 shadow-lg" style="border-radius:20px;">
-          <div class="card-body p-5">
-
-            <div class="mb-4">
-              <div style="
-                width:80px; height:80px;
-                background:linear-gradient(135deg,#1e88e5,#42a5f5);
-                border-radius:50%;
-                display:inline-flex;
-                align-items:center;
-                justify-content:center;
-              ">
-                <i class="fas fa-video text-white" style="font-size:2rem;"></i>
+  <section class="content">
+    <div class="container">
+      <div class="row justify-content-center"
+           style="min-height:70vh;
+                  align-items:center">
+        <div class="col-lg-5 col-md-7 text-center">
+          <div class="card border-0 shadow-lg" style="border-radius:20px;">
+            <div class="card-body p-5">
+              <div class="mb-4">
+                <div style="width:80px;
+                            height:80px;
+                            background:linear-gradient(135deg,#1e88e5,#42a5f5);
+                            border-radius:50%;
+                            display:inline-flex;
+                            align-items:center;
+                            justify-content:center">
+                  <i class="fas fa-video text-white" style="font-size:2rem;"></i>
+                </div>
               </div>
+              <h2 class="font-weight-bold mb-2">{% trans "Session booked!" %}</h2>
+              <p class="text-muted mb-4">
+                {% trans "Your tutoring session payment was successful. You can now access your session details and connect with your teacher." %}
+              </p>
+              {% if session %}
+                <div class="alert alert-info border-0 mb-4" style="border-radius:12px;">
+                  <div class="font-weight-bold">{{ session.teacher.get_full_name }}</div>
+                  <div class="small text-muted">{{ session.teacher.teacher_profile.subject.name }}</div>
+                  <div class="small mt-2 text-muted">{% trans "Session status" %}: {{ session.get_status_display }}</div>
+                </div>
+              {% endif %}
+              <a href="{% if session %}{% url 'tutoring:student:session-detail' session_id=session.id %}{% else %}{% url 'tutoring:student:student-sessions' %}{% endif %}"
+                 class="btn btn-primary btn-block btn-lg mb-3"
+                 style="border-radius:50px">
+                <i class="fas fa-video mr-2"></i>
+                {% if session %}
+                  {% trans "Open session" %}
+                {% else %}
+                  {% trans "My sessions" %}
+                {% endif %}
+              </a>
+              <a href="{% url 'pages:landing' %}"
+                 class="btn btn-outline-secondary btn-block"
+                 style="border-radius:50px">{% trans "Go to home" %}</a>
             </div>
-
-            <h2 class="font-weight-bold mb-2">
-              {% trans "Session booked!" %}
-            </h2>
-
-            <p class="text-muted mb-4">
-              {% trans "Your tutoring session payment was successful. You can now access your session details and connect with your teacher." %}
-            </p>
-
-            {% if session %}
-            <div class="alert alert-info border-0 mb-4" style="border-radius:12px;">
-              
-              <div class="font-weight-bold">
-                {{ session.teacher.get_full_name }}
-              </div>
-
-              <div class="small text-muted">
-                {{ session.teacher.teacher_profile.subject.name }}
-              </div>
-
-              <div class="small mt-2 text-muted">
-                {% trans "Session status" %}: {{ session.get_status_display }}
-              </div>
-
-            </div>
-            {% endif %}
-
-            <a href="{% if session %}{% url 'tutoring:student:session-detail' session_id=session.id %}{% else %}{% url 'tutoring:student:student-sessions' %}{% endif %}"
-              class="btn btn-primary btn-block btn-lg mb-3"
-              style="border-radius:50px;">
-              <i class="fas fa-video mr-2"></i>
-              {% if session %}{% trans "Open session" %}{% else %}{% trans "My sessions" %}{% endif %}
-              
-            </a>
-
-            <a href="{% url 'pages:landing' %}"
-              class="btn btn-outline-secondary btn-block"
-              style="border-radius:50px;">
-              {% trans "Go to home" %}
-            </a>
-
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}

@@ -1,72 +1,52 @@
 {% extends "layouts/auth.html" %}
 {% load static i18n allauth account socialaccount %}
-
-{% block title %}{% trans "Sign Out" %} | WN{% endblock title %}
-
+{% block title %}
+  {% trans "Sign Out" %} | WN
+{% endblock title %}
 {% block auth_card %}
-<div class="login-box">
-
-  <!-- Logo -->
-  <div class="login-logo">
-    <a href="/"><b>W</b>onder<b>N</b>et</a>
-  </div>
-
-  <!-- Logout Card -->
-  <div class="card card-outline card-danger shadow-sm">
-
-    <div class="card-body login-card-body text-center">
-
-      <!-- Icon -->
-      <div class="mb-3">
-        <i class="fas fa-sign-out-alt fa-3x text-danger"></i>
-      </div>
-
-      <!-- Title -->
-      <h4 class="mb-2 font-weight-bold">
-        {% trans "Sign Out" %}
-      </h4>
-
-      <!-- Description -->
-      <p class="text-muted mb-4">
-        {% trans "Are you sure you want to sign out of your account?" %}
-      </p>
-
-      {% url 'account_logout' as action_url %}
-      <form method="post" action="{{ action_url }}">
-        {% csrf_token %}
-        {{ redirect_field }}
-
-        <div class="row">
-
-          <!-- Cancel -->
-          <div class="col-6">
-            <a href="/"
-               class="btn btn-outline-secondary btn-block">
-
-              <i class="fas fa-arrow-left mr-1"></i>
-              {% trans "Cancel" %}
-
-            </a>
-          </div>
-
-          <!-- Confirm -->
-          <div class="col-6">
-            <button type="submit"
-                    class="btn btn-danger btn-block">
-
-              <i class="fas fa-sign-out-alt mr-1"></i>
-              {% trans "Sign Out" %}
-
-            </button>
-          </div>
-
-        </div>
-
-      </form>
-
+  <div class="login-box">
+    <!-- Logo -->
+    <div class="login-logo">
+      <a href="{% url 'pages:landing' %}" class="nav-link">
+        <img src="{% static 'dist/img/wnlogo_red.png' %}"
+             alt="{% trans 'WN Logo' %}"
+             class="brand-image img-circle elevation-3">
+      </a>
+      <a href="/"><b>W</b>onder<b>N</b>et</a>
     </div>
-
+    <!-- Logout Card -->
+    <div class="card card-outline card-danger shadow-sm">
+      <div class="card-body login-card-body text-center">
+        <!-- Icon -->
+        <div class="mb-3">
+          <i class="fas fa-sign-out-alt fa-3x text-danger"></i>
+        </div>
+        <!-- Title -->
+        <h4 class="mb-2 font-weight-bold">{% trans "Sign Out" %}</h4>
+        <!-- Description -->
+        <p class="text-muted mb-4">{% trans "Are you sure you want to sign out of your account?" %}</p>
+        {% url 'account_logout' as action_url %}
+        <form method="post" action="{{ action_url }}">
+          {% csrf_token %}
+          {{ redirect_field }}
+          <div class="row">
+            <!-- Cancel -->
+            <div class="col-6">
+              <a href="/" class="btn btn-outline-secondary btn-block">
+                <i class="fas fa-arrow-left mr-1"></i>
+                {% trans "Cancel" %}
+              </a>
+            </div>
+            <!-- Confirm -->
+            <div class="col-6">
+              <button type="submit" class="btn btn-danger btn-block">
+                <i class="fas fa-sign-out-alt mr-1"></i>
+                {% trans "Sign Out" %}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-
-</div>
 {% endblock auth_card %}

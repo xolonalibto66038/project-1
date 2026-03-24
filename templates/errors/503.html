@@ -3,11 +3,11 @@
 {# the DB may be down and base.html likely queries it for navigation #}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>503 — Service Unavailable</title>
-  <style>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>503 — Service Unavailable</title>
+    <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -63,29 +63,26 @@
       margin-bottom: 1rem;
       display: block;
     }
-  </style>
-</head>
-<body>
-  <div class="error-page">
-    <div class="headline">503</div>
-
-    <h3>Service Unavailable</h3>
-
-    <p>
-      We are currently down for scheduled maintenance or experiencing
-      unexpected technical difficulties.
-    </p>
-
-    <p>
-      Our team is working hard to restore service as quickly as possible.
-      We apologize for the inconvenience.
-    </p>
-
-    {% if maintenance_end %}
-    <p><strong>Expected back online: {{ maintenance_end }}</strong></p>
-    {% endif %}
-
-    <a href="/" class="home-link">Try Again</a>
-  </div>
-</body>
+    </style>
+  </head>
+  <body>
+    <div class="error-page">
+      <div class="headline">503</div>
+      <h3>Service Unavailable</h3>
+      <p>
+        We are currently down for scheduled maintenance or experiencing
+        unexpected technical difficulties.
+      </p>
+      <p>
+        Our team is working hard to restore service as quickly as possible.
+        We apologize for the inconvenience.
+      </p>
+      {% if maintenance_end %}
+        <p>
+          <strong>Expected back online: {{ maintenance_end }}</strong>
+        </p>
+      {% endif %}
+      <a href="/" class="home-link">Try Again</a>
+    </div>
+  </body>
 </html>

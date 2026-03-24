@@ -1,114 +1,90 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
+{% block title %}
+  {% trans "Student Profile" %}
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-  <div class="row">
-
-    <div class="col-md-3">
-      <div class="card card-primary card-outline">
-        <div class="card-body box-profile text-center">
-
-          <h3 class="profile-username text-center">
-            {{ request.user.get_full_name }}
-          </h3>
-
-          <p class="text-muted text-center">
-            {{ profile.grade }}
-          </p>
-
-          <hr>
-
-          <strong><i class="fas fa-layer-group mr-1"></i> {% trans "Specialty" %}</strong>
-          <p class="text-muted">
-            {{ profile.specialty|default:_("Not specified") }}
-          </p>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-9">
-
-      <div class="card card-primary">
-        <div class="card-header">
-          <h3 class="card-title">{% trans "Update Profile" %}</h3>
-        </div>
-
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
-
-          <div class="card-body">
-
-            <h5>{% trans "Account Info" %}</h5>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.first_name.label_tag }}
-                {{ user_form.first_name }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.last_name.label_tag }}
-                {{ user_form.last_name }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.gender.label_tag }}
-                {{ user_form.gender }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.date_of_birth.label_tag }}
-                {{ user_form.date_of_birth }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                {{ user_form.wilaya.label_tag }}
-                {{ user_form.wilaya }}
-              </div>
-              <div class="col-md-6">
-                {{ user_form.phone.label_tag }}
-                {{ user_form.phone }}
-              </div>
-            </div>
-
-            <div class="form-group mt-3">
-              {{ user_form.avatar.label_tag }}
-              {{ user_form.avatar }}
-            </div>
-
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card card-primary card-outline">
+          <div class="card-body box-profile text-center">
+            <h3 class="profile-username text-center">{{ request.user.get_full_name }}</h3>
+            <p class="text-muted text-center">{{ profile.grade }}</p>
             <hr>
-
-            <h5>{% trans "Student Info" %}</h5>
-
-            <div class="row">
-              <div class="col-md-6">
-                {{ profile_form.grade.label_tag }}
-                {{ profile_form.grade }}
-              </div>
-              <div class="col-md-6">
-                {{ profile_form.specialty.label_tag }}
-                {{ profile_form.specialty }}
-              </div>
-            </div>
-
-            <div class="form-group mt-3">
-              {{ profile_form.bio.label_tag }}
-              {{ profile_form.bio }}
-            </div>
-
+            <strong><i class="fas fa-layer-group mr-1"></i> {% trans "Specialty" %}</strong>
+            <p class="text-muted">{{ profile.specialty|default:_("Not specified") }}</p>
           </div>
-
-          <div class="card-footer text-right">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-save"></i> {% trans "Save Changes" %}
-            </button>
-          </div>
-
-        </form>
+        </div>
       </div>
-
+      <div class="col-md-9">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">{% trans "Update Profile" %}</h3>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5>{% trans "Account Info" %}</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.first_name.label_tag }}
+                  {{ user_form.first_name }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.last_name.label_tag }}
+                  {{ user_form.last_name }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.gender.label_tag }}
+                  {{ user_form.gender }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.date_of_birth.label_tag }}
+                  {{ user_form.date_of_birth }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ user_form.wilaya.label_tag }}
+                  {{ user_form.wilaya }}
+                </div>
+                <div class="col-md-6">
+                  {{ user_form.phone.label_tag }}
+                  {{ user_form.phone }}
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                {{ user_form.avatar.label_tag }}
+                {{ user_form.avatar }}
+              </div>
+              <hr>
+              <h5>{% trans "Student Info" %}</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  {{ profile_form.grade.label_tag }}
+                  {{ profile_form.grade }}
+                </div>
+                <div class="col-md-6">
+                  {{ profile_form.specialty.label_tag }}
+                  {{ profile_form.specialty }}
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                {{ profile_form.bio.label_tag }}
+                {{ profile_form.bio }}
+              </div>
+            </div>
+            <div class="card-footer text-right">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% trans "Save Changes" %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 {% endblock %}

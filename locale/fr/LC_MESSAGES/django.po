@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-23 00:43+0100\n"
+"POT-Creation-Date: 2026-03-24 13:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,11 +20,13 @@ msgstr ""
 
 #: .\apps\accounts\admin\custom_user.py:19
 #: .\apps\accounts\models\student.py:51
+#: .\templates\dashboard\update_student.html:4
 msgid "Student Profile"
 msgstr "Profil de l'étudiant"
 
 #: .\apps\accounts\admin\custom_user.py:29
 #: .\apps\accounts\models\teacher.py:68
+#: .\templates\dashboard\update_teacher.html:4
 msgid "Teacher Profile"
 msgstr "Profil d'enseignant"
 
@@ -108,9 +110,9 @@ msgid "Specialty is only applicable to Secondaire students."
 msgstr "La spécialité ne s'applique qu'aux élèves du secondaire."
 
 #: .\apps\accounts\admin\student.py:69 .\apps\accounts\admin\teacher.py:72
-#: .\templates\includes\navbar-full.html:97
-#: .\templates\includes\navbar-full.html:101
-#: .\templates\includes\navbar.html:103 .\templates\includes\navbar.html:107
+#: .\templates\includes\navbar-full.html:95
+#: .\templates\includes\navbar-full.html:99
+#: .\templates\includes\navbar.html:95 .\templates\includes\navbar.html:99
 msgid "Profile"
 msgstr "Profil"
 
@@ -126,7 +128,7 @@ msgstr "E-mail"
 #: .\apps\curriculum\models\grade.py:13 .\apps\curriculum\models\level.py:34
 #: .\apps\curriculum\models\subject.py:13
 #: .\templates\account\onboarding_teacher.html:26
-#: .\templates\apps\curriculum\grade_subjects\detail.html:164
+#: .\templates\apps\curriculum\grade_subjects\detail.html:165
 #: .\templates\apps\curriculum\subjects\detail.html:178
 #: .\templates\dashboard\student.html:38 .\templates\dashboard\teacher.html:37
 msgid "Level"
@@ -163,7 +165,7 @@ msgstr "Seuls les enseignants vérifiés peuvent publier des ressources."
 
 #: .\apps\accounts\admin\teacher.py:97 .\templates\account\email.html:73
 #: .\templates\dashboard\teacher.html:57 .\templates\dashboard\teacher.html:61
-#: .\templates\dashboard\update_teacher.html:23
+#: .\templates\dashboard\update_teacher.html:26
 msgid "Verified"
 msgstr "Vérifié"
 
@@ -555,7 +557,7 @@ msgstr "Classe actuelle dans laquelle l'élève est inscrit."
 #: .\apps\curriculum\models\subject_grade.py:29
 #: .\templates\account\onboarding_student.html:34
 #: .\templates\dashboard\student.html:59
-#: .\templates\dashboard\update_student.html:22
+#: .\templates\dashboard\update_student.html:24
 msgid "Specialty"
 msgstr "Spécialité"
 
@@ -989,7 +991,7 @@ msgstr ""
 #: .\templates\apps\assessement\questions\mcq.html:60
 #: .\templates\apps\assessement\questions\tf.html:46
 #: .\templates\apps\content\resources\exam_detail.html:372
-#: .\templates\apps\content\resources\exercise_detail.html:309
+#: .\templates\apps\content\resources\exercise_detail.html:325
 #: .\templates\apps\content\resources\lesson_detail.html:357
 #: .\templates\apps\content\resources\test_detail.html:303
 msgid "Tags"
@@ -1009,15 +1011,15 @@ msgstr "Les ressources gratuites sont accessibles aux utilisateurs invités."
 msgid "Quiz"
 msgstr "Questionnaire"
 
-#: .\apps\assessment\models\quiz.py:113
-#: .\apps\curriculum\services\grade_subject.py:571
+#: .\apps\assessment\models\quiz.py:113 .\apps\content\services\course.py:715
+#: .\apps\curriculum\services\grade_subject.py:599
 #: .\templates\apps\assessement\quizzes\attempts.html:28
 #: .\templates\apps\assessement\quizzes\quiz_result.html:34
 #: .\templates\apps\content\courses\_header.html:64
 #: .\templates\apps\content\courses\detail.html:172
 #: .\templates\apps\content\courses\quizzes.html:5
 #: .\templates\apps\content\courses\quizzes.html:97
-#: .\templates\apps\curriculum\grade_subjects\detail.html:246
+#: .\templates\apps\curriculum\grade_subjects\detail.html:247
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:5
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:18
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:110
@@ -1074,7 +1076,7 @@ msgstr "Votre compte enseignant est en attente de vérification."
 msgid "Staff access only."
 msgstr "Accès réservé au personnel."
 
-#: .\apps\authentication\forms.py:46 .\templates\account\signup.html:29
+#: .\apps\authentication\forms.py:46 .\templates\account\signup.html:34
 msgid "I am a"
 msgstr "je suis un"
 
@@ -1168,7 +1170,7 @@ msgstr "12 mois"
 #: .\templates\apps\assessement\quizzes\create.html:172
 #: .\templates\apps\content\courses\course_exercises.html:214
 #: .\templates\apps\content\courses\quizzes.html:175
-#: .\templates\apps\content\courses\resource_list.html:166
+#: .\templates\apps\content\courses\resource_list.html:168
 #: .\templates\apps\content\resources\detail.html:78
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:255
 #: .\templates\apps\curriculum\subjects\resource_list.html:197
@@ -1181,7 +1183,7 @@ msgstr "Standard"
 
 #: .\apps\billing\choices.py:14
 #: .\templates\apps\content\courses\quizzes.html:180
-#: .\templates\apps\content\courses\resource_list.html:171
+#: .\templates\apps\content\courses\resource_list.html:173
 #: .\templates\apps\content\resources\detail.html:82
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:260
 #: .\templates\apps\curriculum\subjects\resource_list.html:201
@@ -1235,7 +1237,7 @@ msgstr "Visibilité"
 #: .\apps\content\admin\chapter.py:84 .\apps\content\models\course.py:90
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:6
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:92
-#: .\templates\apps\curriculum\grade_subjects\detail.html:232
+#: .\templates\apps\curriculum\grade_subjects\detail.html:233
 #: .\templates\apps\curriculum\grades\detail.html:134
 #: .\templates\apps\curriculum\subjects\detail.html:87
 #: .\templates\apps\curriculum\subjects\detail.html:380
@@ -1291,14 +1293,14 @@ msgid "Read-only computed values for reference."
 msgstr "Valeurs calculées en lecture seule pour référence."
 
 #: .\apps\content\admin\course.py:98 .\apps\content\models\resource.py:229
-#: .\apps\curriculum\services\grade_subject.py:728
+#: .\apps\curriculum\services\grade_subject.py:756
 #: .\templates\apps\content\courses\detail.html:65
 #: .\templates\apps\curriculum\grades\detail.html:140
 #: .\templates\dashboard\teacher.html:83
 msgid "Resources"
 msgstr "Ressources"
 
-#: .\apps\content\admin\course.py:107
+#: .\apps\content\admin\course.py:107 .\apps\content\services\course.py:615
 #: .\templates\apps\content\courses\_header.html:55
 #: .\templates\apps\content\courses\course_videos.html:4
 #: .\templates\apps\content\courses\course_videos.html:174
@@ -1673,7 +1675,7 @@ msgstr "Ordre d'affichage de ce chapitre dans la matière de la note."
 #: .\apps\content\models\chapter.py:42 .\apps\content\models\course.py:63
 #: .\apps\content\models\resource.py:95 .\apps\recommender\models.py:107
 #: .\templates\apps\content\resources\exam_detail.html:360
-#: .\templates\apps\content\resources\exercise_detail.html:287
+#: .\templates\apps\content\resources\exercise_detail.html:303
 #: .\templates\apps\content\resources\form.html:308
 #: .\templates\apps\content\resources\lesson_detail.html:345
 #: .\templates\apps\content\resources\test_detail.html:281
@@ -1755,7 +1757,7 @@ msgstr "Aperçu facultatif ou objectifs d’apprentissage pour ce cours."
 #: .\templates\apps\assessement\questions\mcq.html:55
 #: .\templates\apps\assessement\questions\tf.html:41
 #: .\templates\apps\content\resources\exam_detail.html:355
-#: .\templates\apps\content\resources\exercise_detail.html:273
+#: .\templates\apps\content\resources\exercise_detail.html:289
 #: .\templates\apps\content\resources\form.html:300
 #: .\templates\apps\content\resources\lesson_detail.html:340
 #: .\templates\apps\content\resources\test_detail.html:267
@@ -1850,7 +1852,7 @@ msgstr "Fichier téléchargé (PDF, Word, vidéo, etc.)."
 
 #: .\apps\content\models\resource.py:109
 #: .\templates\apps\content\courses\course_exercises.html:207
-#: .\templates\apps\content\courses\resource_list.html:179
+#: .\templates\apps\content\courses\resource_list.html:181
 #: .\templates\apps\content\resources\detail.html:201
 #: .\templates\apps\content\resources\list.html:143
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:268
@@ -1960,7 +1962,7 @@ msgstr ""
 
 #: .\apps\content\models\resource.py:221 .\apps\content\models\video.py:46
 #: .\templates\apps\content\resources\exam_detail.html:384
-#: .\templates\apps\content\resources\exercise_detail.html:303
+#: .\templates\apps\content\resources\exercise_detail.html:319
 #: .\templates\apps\content\resources\lesson_detail.html:369
 #: .\templates\apps\content\resources\test_detail.html:297
 msgid "Author"
@@ -1998,12 +2000,13 @@ msgid "Resource term must match the Course term (%(term)s)."
 msgstr ""
 "Le terme de la ressource doit correspondre au terme du cours (%(term)s)."
 
-#: .\apps\content\services\course.py:143
-#: .\apps\curriculum\services\grade.py:152
-#: .\apps\curriculum\services\grade_subject.py:191
-#: .\apps\curriculum\services\grade_subject.py:337
-#: .\apps\curriculum\services\grade_subject.py:526
-#: .\apps\curriculum\services\grade_subject.py:812
+#: .\apps\content\services\course.py:146 .\apps\content\services\course.py:310
+#: .\apps\content\services\course.py:552
+#: .\apps\curriculum\services\grade.py:177
+#: .\apps\curriculum\services\grade_subject.py:219
+#: .\apps\curriculum\services\grade_subject.py:365
+#: .\apps\curriculum\services\grade_subject.py:554
+#: .\apps\curriculum\services\grade_subject.py:840
 #: .\apps\curriculum\services\level.py:213
 #: .\apps\curriculum\services\level.py:263
 #: .\templates\apps\assessement\questions\question_type_select.html:13
@@ -2011,8 +2014,8 @@ msgstr ""
 #: .\templates\apps\assessement\quizzes\quiz_result.html:29
 #: .\templates\apps\billing\pricing.html:19
 #: .\templates\apps\billing\select_payment_method.html:17
+#: .\templates\apps\billing\upgrade.html:22
 #: .\templates\apps\content\courses\course_exercises.html:51
-#: .\templates\apps\content\courses\resource_list.html:27
 #: .\templates\apps\curriculum\subjects\detail.html:56
 #: .\templates\apps\curriculum\subjects\resource_list.html:32
 #: .\templates\errors\400.html:17 .\templates\errors\403.html:18
@@ -2024,41 +2027,86 @@ msgstr ""
 msgid "Home"
 msgstr "Maison"
 
-#: .\apps\content\services\course.py:144 .\apps\curriculum\models\level.py:35
-#: .\apps\curriculum\services\grade.py:153
-#: .\apps\curriculum\services\grade_subject.py:192
-#: .\apps\curriculum\services\grade_subject.py:338
-#: .\apps\curriculum\services\grade_subject.py:527
-#: .\apps\curriculum\services\grade_subject.py:813
+#: .\apps\content\services\course.py:147 .\apps\content\services\course.py:311
+#: .\apps\content\services\course.py:553 .\apps\curriculum\models\level.py:35
+#: .\apps\curriculum\services\grade.py:178
+#: .\apps\curriculum\services\grade_subject.py:220
+#: .\apps\curriculum\services\grade_subject.py:366
+#: .\apps\curriculum\services\grade_subject.py:555
+#: .\apps\curriculum\services\grade_subject.py:841
 #: .\apps\curriculum\services\level.py:214
 #: .\apps\curriculum\services\level.py:264
-#: .\templates\apps\content\courses\resource_list.html:30
 #: .\templates\apps\curriculum\subjects\detail.html:60
 #: .\templates\apps\curriculum\subjects\resource_list.html:36
 msgid "Levels"
 msgstr "Niveaux"
 
-#: .\apps\content\views\course.py:138
+#: .\apps\content\services\course.py:218
+#, fuzzy
+#| msgid "No resources yet"
+msgid "No resource type specified."
+msgstr "Pas encore de ressources"
+
+#: .\apps\content\services\course.py:222
+#, python-format
+msgid "Unknown resource type: %(slug)s"
+msgstr "Type de ressource inconnu : %(slug)s"
+
+#: .\apps\content\services\course.py:242
+msgid "— All —"
+msgstr "- Tous -"
+
+#: .\apps\content\services\course.py:243
+msgid "With Solution"
+msgstr "Avec solution"
+
+#: .\apps\content\services\course.py:244
+msgid "Without Solution"
+msgstr "Sans solution"
+
+#: .\apps\content\views\course.py:141
 #, fuzzy
 #| msgid "You have completed this course."
 msgid "You have completed this course. Well done!"
 msgstr "Vous avez terminé ce cours."
 
-#: .\apps\content\views\course.py:144
+#: .\apps\content\views\course.py:147
 msgid "You are viewing this course outside your enrolled grade."
 msgstr "Vous consultez ce cours en dehors de votre niveau d'inscription."
 
-#: .\apps\content\views\course.py:496
-msgid "— All —"
-msgstr "- Tous -"
+#: .\apps\content\views\course.py:248
+#, python-format
+msgid "%(title)s — Videos"
+msgstr "%(title)s — Vidéos"
 
-#: .\apps\content\views\course.py:497
-msgid "With Solution"
-msgstr "Avec solution"
+#: .\apps\content\views\course.py:352
+#, fuzzy
+#| msgid "No courses found for this quarter and filter combination."
+msgid "No resources found for this filter combination."
+msgstr "Aucun cours trouvé pour ce trimestre et cette combinaison de filtres."
 
-#: .\apps\content\views\course.py:498
-msgid "Without Solution"
-msgstr "Sans solution"
+#: .\apps\content\views\course.py:434
+#, python-format
+msgid "%(title)s — Quizzes"
+msgstr "%(title)s — Quiz"
+
+#: .\apps\content\views\course.py:446
+#, fuzzy
+#| msgid "No courses available for this term."
+msgid "No quizzes are available for this course yet."
+msgstr "Aucun cours disponible pour ce trimestre."
+
+#: .\apps\content\views\course.py:480
+#, fuzzy, python-format
+#| msgid "Mark as completed"
+msgid "%(title)s marked as completed."
+msgstr ""
+
+#: .\apps\content\views\course.py:485
+#, fuzzy, python-format
+#| msgid "Mark as completed"
+msgid "%(title)s marked as incomplete."
+msgstr ""
 
 #: .\apps\content\views\resource.py:56
 msgid "Resource created successfully."
@@ -2083,8 +2131,8 @@ msgid "Edit Resource"
 msgstr "Modifier la ressource"
 
 #: .\apps\content\views\resource.py:110
-#: .\templates\dashboard\update_student.html:104
-#: .\templates\dashboard\update_teacher.html:138
+#: .\templates\dashboard\update_student.html:106
+#: .\templates\dashboard\update_teacher.html:141
 msgid "Save Changes"
 msgstr "Enregistrer les modifications"
 
@@ -2106,7 +2154,7 @@ msgstr "Spécialités"
 #: .\apps\curriculum\admin\grade.py:62 .\apps\curriculum\admin\level.py:74
 #: .\apps\curriculum\models\subject.py:50
 #: .\templates\apps\curriculum\levels\detail.html:84
-#: .\templates\includes\sidebar.html:64
+#: .\templates\includes\sidebar.html:74
 msgid "Subjects"
 msgstr "Sujets"
 
@@ -2279,43 +2327,43 @@ msgstr ""
 "l’innovation."
 
 #: .\apps\curriculum\consts.py:46
-#: .\apps\curriculum\services\grade_subject.py:143
+#: .\apps\curriculum\services\grade_subject.py:171
 #: .\apps\curriculum\views\subject.py:28
 msgid "Tests"
 msgstr "Essais"
 
 #: .\apps\curriculum\consts.py:52
-#: .\apps\curriculum\services\grade_subject.py:144
+#: .\apps\curriculum\services\grade_subject.py:172
 #: .\apps\curriculum\views\subject.py:34
 msgid "Exams"
 msgstr "Examens"
 
 #: .\apps\curriculum\consts.py:58
-#: .\apps\curriculum\services\grade_subject.py:145
+#: .\apps\curriculum\services\grade_subject.py:173
 #: .\apps\curriculum\views\subject.py:40
 msgid "Past Papers"
 msgstr "Articles antérieurs"
 
 #: .\apps\curriculum\consts.py:64
-#: .\apps\curriculum\services\grade_subject.py:146
+#: .\apps\curriculum\services\grade_subject.py:174
 #: .\apps\curriculum\views\subject.py:46
 msgid "Mock Exams"
 msgstr "Examens blancs"
 
 #: .\apps\curriculum\consts.py:70
-#: .\apps\curriculum\services\grade_subject.py:147
+#: .\apps\curriculum\services\grade_subject.py:175
 #: .\apps\curriculum\views\subject.py:52
 msgid "Textbooks"
 msgstr "Manuels"
 
 #: .\apps\curriculum\consts.py:76
-#: .\apps\curriculum\services\grade_subject.py:148
+#: .\apps\curriculum\services\grade_subject.py:176
 #: .\apps\curriculum\views\subject.py:58
 msgid "Foreign Books"
 msgstr "Livres étrangers"
 
 #: .\apps\curriculum\consts.py:82
-#: .\apps\curriculum\services\grade_subject.py:149
+#: .\apps\curriculum\services\grade_subject.py:177
 #: .\apps\curriculum\views\subject.py:64
 msgid "Study Guides"
 msgstr "Guides d'étude"
@@ -2437,7 +2485,7 @@ msgstr ""
 msgid "Grade Subjects"
 msgstr "Matières de classe"
 
-#: .\apps\curriculum\services\grade_subject.py:388
+#: .\apps\curriculum\services\grade_subject.py:416
 #, python-format
 msgid "Courses — %(quarter)s"
 msgstr ""
@@ -2470,51 +2518,51 @@ msgstr ""
 msgid "Subjects and resources for this grade and specialty."
 msgstr "Les matières pour ce niveau n'ont pas encore été ajoutées."
 
-#: .\apps\curriculum\views\grade_subject.py:116
+#: .\apps\curriculum\views\grade_subject.py:131
 #, fuzzy
 #| msgid "Browse quizzes for this subject"
 msgid "Courses, resources, and quizzes for this subject."
 msgstr "Parcourir les quiz sur ce sujet"
 
-#: .\apps\curriculum\views\grade_subject.py:134
+#: .\apps\curriculum\views\grade_subject.py:150
 #, fuzzy
 #| msgid "No questions added to this quiz yet."
 msgid "No courses have been added to this subject yet."
 msgstr "Aucune question ajoutée à ce quiz pour l'instant."
 
-#: .\apps\curriculum\views\grade_subject.py:140
+#: .\apps\curriculum\views\grade_subject.py:156
 #, fuzzy
 #| msgid "You have completed this course."
 msgid "You have completed all courses in this subject. Well done!"
 msgstr "Vous avez terminé ce cours."
 
-#: .\apps\curriculum\views\grade_subject.py:214
+#: .\apps\curriculum\views\grade_subject.py:230
 #, python-format
 msgid "%(subject)s — %(quarter)s"
 msgstr ""
 
-#: .\apps\curriculum\views\grade_subject.py:231
+#: .\apps\curriculum\views\grade_subject.py:247
 msgid "No courses found for this quarter and filter combination."
 msgstr "Aucun cours trouvé pour ce trimestre et cette combinaison de filtres."
 
-#: .\apps\curriculum\views\grade_subject.py:367
+#: .\apps\curriculum\views\grade_subject.py:383
 #, fuzzy
 #| msgid "No exercises found matching your filters."
 msgid "No resources match your current filters."
 msgstr "Aucun exercice trouvé correspondant à vos filtres."
 
-#: .\apps\curriculum\views\grade_subject.py:372
+#: .\apps\curriculum\views\grade_subject.py:388
 #, fuzzy
 #| msgid "No questions added to this quiz yet."
 msgid "No resources have been added to this subject yet."
 msgstr "Aucune question ajoutée à ce quiz pour l'instant."
 
-#: .\apps\curriculum\views\grade_subject.py:442
+#: .\apps\curriculum\views\grade_subject.py:458
 #, python-format
 msgid "Quizzes — %(subject)s"
 msgstr "Quiz — %(subject)s"
 
-#: .\apps\curriculum\views\grade_subject.py:456
+#: .\apps\curriculum\views\grade_subject.py:472
 #, fuzzy
 #| msgid "No exercises found matching your filters."
 msgid "No quizzes match your current filters."
@@ -2673,7 +2721,7 @@ msgstr "Notez ceci"
 #: .\apps\feedback\choices.py:15
 #: .\templates\apps\assessement\quizzes\attempts.html:114
 #: .\templates\apps\assessement\quizzes\list.html:80
-#: .\templates\apps\content\courses\resource_list.html:206
+#: .\templates\apps\content\courses\resource_list.html:208
 #: .\templates\apps\content\resources\list.html:183
 msgid "View"
 msgstr "Voir"
@@ -2692,12 +2740,12 @@ msgid "Rate"
 msgstr "Taux"
 
 #: .\apps\feedback\choices.py:18 .\apps\feedback\models\bookmark.py:60
-#: .\templates\apps\content\courses\course_videos.html:300
-#: .\templates\apps\content\courses\course_videos.html:446
+#: .\templates\apps\content\courses\course_videos.html:314
+#: .\templates\apps\content\courses\course_videos.html:579
 #: .\templates\apps\content\resources\exam_detail.html:167
 #: .\templates\apps\content\resources\exam_detail.html:549
-#: .\templates\apps\content\resources\exercise_detail.html:91
-#: .\templates\apps\content\resources\exercise_detail.html:469
+#: .\templates\apps\content\resources\exercise_detail.html:106
+#: .\templates\apps\content\resources\exercise_detail.html:588
 #: .\templates\apps\content\resources\lesson_detail.html:152
 #: .\templates\apps\content\resources\lesson_detail.html:480
 #: .\templates\apps\content\resources\test_detail.html:91
@@ -2811,23 +2859,23 @@ msgstr "Type de contenu invalide."
 msgid "Rating value is required."
 msgstr "La valeur de notation est requise."
 
-#: .\apps\feedback\views\bookmark.py:35 .\apps\feedback\views\bookmark.py:119
+#: .\apps\feedback\views\bookmark.py:131 .\apps\feedback\views\bookmark.py:302
 msgid "Only students can manage bookmarks."
 msgstr "Seuls les étudiants peuvent gérer les favoris."
 
-#: .\apps\feedback\views\bookmark.py:58 .\apps\feedback\views\bookmark.py:81
+#: .\apps\feedback\views\bookmark.py:150 .\apps\feedback\views\bookmark.py:174
 msgid "Resource not found or not accessible."
 msgstr "Ressource introuvable ou inaccessible."
 
-#: .\apps\feedback\views\bookmark.py:101 .\apps\feedback\views\bookmark.py:169
+#: .\apps\feedback\views\bookmark.py:209 .\apps\feedback\views\bookmark.py:368
 msgid "Bookmark added."
 msgstr "Signet ajouté."
 
-#: .\apps\feedback\views\bookmark.py:101 .\apps\feedback\views\bookmark.py:169
+#: .\apps\feedback\views\bookmark.py:209 .\apps\feedback\views\bookmark.py:368
 msgid "Bookmark removed."
 msgstr "Signet supprimé."
 
-#: .\apps\feedback\views\bookmark.py:130 .\apps\feedback\views\bookmark.py:150
+#: .\apps\feedback\views\bookmark.py:313 .\apps\feedback\views\bookmark.py:334
 msgid "Video not found."
 msgstr "Vidéo introuvable."
 
@@ -3292,7 +3340,7 @@ msgstr ""
 "révision la plus récente."
 
 #: .\apps\pages\views\privacy.py:196 .\templates\account\role_select.html:69
-#: .\templates\account\signup.html:130 .\templates\pages\privacy.html:4
+#: .\templates\account\signup.html:135 .\templates\pages\privacy.html:4
 #: .\templates\pages\privacy.html:26 .\templates\pages\terms.html:120
 msgid "Privacy Policy"
 msgstr "politique de confidentialité"
@@ -3717,7 +3765,7 @@ msgstr ""
 "Nous répondrons à toutes les demandes juridiques dans les 5 jours ouvrables."
 
 #: .\apps\pages\views\terms.py:242 .\templates\account\role_select.html:61
-#: .\templates\account\signup.html:111 .\templates\pages\terms.html:4
+#: .\templates\account\signup.html:116 .\templates\pages\terms.html:4
 #: .\templates\pages\terms.html:26
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
@@ -3907,6 +3955,31 @@ msgstr "Vecteur de caractéristiques de l'article"
 msgid "Item Feature Vectors"
 msgstr "Vecteurs de caractéristiques d'articles"
 
+#: .\apps\tutoring\decorators.py:57
+msgid "This teacher has no subject assigned. Please choose another."
+msgstr ""
+"Cet enseignant n'a aucune matière assignée. Veuillez en choisir un autre."
+
+#: .\apps\tutoring\decorators.py:69
+msgid "Your grade level is not set. Please update your profile."
+msgstr ""
+"Votre niveau scolaire n'est pas défini. Veuillez mettre à jour votre profil."
+
+#: .\apps\tutoring\decorators.py:83
+#, python-format
+msgid ""
+"This teacher teaches a subject for %(level)s, which does not match your "
+"enrolled level."
+msgstr ""
+"Cet enseignant enseigne une matière pour %(level)s, qui ne correspond pas à "
+"votre niveau d'inscription."
+
+#: .\apps\tutoring\views\student.py:163
+#, fuzzy
+#| msgid "Network error. Please try again."
+msgid "Unable to create session. Please try again."
+msgstr "Erreur réseau. Veuillez réessayer."
+
 #: .\common\models\tag.py:22
 msgid "ID of the object being tagged"
 msgstr "ID de l'objet marqué"
@@ -3918,6 +3991,18 @@ msgstr "05 - Balise UUIDT"
 #: .\common\models\tag.py:28
 msgid "05 - UUIDTags"
 msgstr "05 - Balises UUID"
+
+#: .\config\settings.py:161
+msgid "English"
+msgstr "Anglais"
+
+#: .\config\settings.py:162
+msgid "Arabic"
+msgstr "arabe"
+
+#: .\config\settings.py:163
+msgid "French"
+msgstr "Français"
 
 #: .\templates\account\account_inactive.html:9
 #: .\templates\account\account_inactive.html:41
@@ -4036,46 +4121,54 @@ msgstr "Demander un nouvel e-mail de confirmation"
 msgid "Secure Education Platform"
 msgstr "Plateforme éducative sécurisée"
 
-#: .\templates\account\login.html:4 .\templates\account\login.html:80
+#: .\templates\account\login.html:4 .\templates\account\login.html:85
 msgid "Sign In"
 msgstr "Se connecter"
 
-#: .\templates\account\login.html:17
+#: .\templates\account\login.html:13 .\templates\account\logout.html:13
+#: .\templates\account\password_reset.html:13
+#: .\templates\account\signup.html:13 .\templates\includes\navbar-full.html:12
+#: .\templates\includes\sidebar.html:7
+#: .\templates\includes\teacher-sidebar.html:8
+msgid "WN Logo"
+msgstr "Logo SME"
+
+#: .\templates\account\login.html:22
 msgid "Sign in to your account"
 msgstr "Connectez-vous à votre compte"
 
-#: .\templates\account\login.html:73
+#: .\templates\account\login.html:78
 msgid "Remember me"
 msgstr "Souviens-toi de moi"
 
-#: .\templates\account\login.html:93 .\templates\account\signup.html:174
+#: .\templates\account\login.html:98 .\templates\account\signup.html:179
 msgid "OR"
 msgstr "OU"
 
-#: .\templates\account\login.html:97 .\templates\account\signup.html:180
+#: .\templates\account\login.html:102 .\templates\account\signup.html:185
 msgid "Continue with Google"
 msgstr "Continuer avec Google"
 
-#: .\templates\account\login.html:107
+#: .\templates\account\login.html:112
 msgid "Forgot your password?"
 msgstr "Vous avez oublié votre mot de passe ?"
 
-#: .\templates\account\login.html:113
+#: .\templates\account\login.html:118
 msgid "Create a new account"
 msgstr "Créer un nouveau compte"
 
-#: .\templates\account\logout.html:4 .\templates\account\logout.html:26
-#: .\templates\account\logout.html:58
+#: .\templates\account\logout.html:4 .\templates\account\logout.html:31
+#: .\templates\account\logout.html:63
 #: .\templates\account\onboarding_student.html:49
 #: .\templates\account\onboarding_teacher.html:49
 msgid "Sign Out"
 msgstr "Se déconnecter"
 
-#: .\templates\account\logout.html:31
+#: .\templates\account\logout.html:36
 msgid "Are you sure you want to sign out of your account?"
 msgstr "Êtes-vous sûr de vouloir vous déconnecter de votre compte ?"
 
-#: .\templates\account\logout.html:47
+#: .\templates\account\logout.html:52
 #: .\templates\account\password_reset_from_key.html:87
 #: .\templates\account\password_reset_from_key.html:92
 #: .\templates\apps\assessement\questions\essay.html:114
@@ -4083,7 +4176,9 @@ msgstr "Êtes-vous sûr de vouloir vous déconnecter de votre compte ?"
 #: .\templates\apps\assessement\questions\tf.html:82
 #: .\templates\apps\assessement\quizzes\confirm_delete.html:47
 #: .\templates\apps\assessement\quizzes\create.html:205
+#: .\templates\apps\content\courses\course_videos.html:386
 #: .\templates\apps\content\resources\confirm_delete.html:99
+#: .\templates\apps\content\resources\exercise_detail.html:435
 #: .\templates\apps\content\resources\form.html:346
 #: .\templates\apps\tutoring\student\student_sessions.html:248
 #: .\templates\apps\tutoring\teacher\teacher_sessions.html:256
@@ -4125,8 +4220,8 @@ msgstr "Dites-nous ce que vous enseignez."
 #: .\templates\account\password_reset_from_key.html:20
 #: .\templates\account\password_reset_from_key.html:98
 #: .\templates\account\password_reset_from_key_done.html:4
-#: .\templates\includes\navbar-full.html:108
-#: .\templates\includes\navbar.html:114
+#: .\templates\includes\navbar-full.html:106
+#: .\templates\includes\navbar.html:106
 msgid "Change Password"
 msgstr "Changer le mot de passe"
 
@@ -4142,27 +4237,27 @@ msgstr "Mot de passe oublié ?"
 msgid "Password Reset"
 msgstr "Réinitialisation du mot de passe"
 
-#: .\templates\account\password_reset.html:22
+#: .\templates\account\password_reset.html:28
 msgid "Forgotten your password?"
 msgstr "Mot de passe oublié ?"
 
-#: .\templates\account\password_reset.html:25
+#: .\templates\account\password_reset.html:31
 msgid "Enter your email to receive a reset link."
 msgstr "Entrez votre e-mail pour recevoir un lien de réinitialisation."
 
-#: .\templates\account\password_reset.html:42
+#: .\templates\account\password_reset.html:48
 msgid "Email address"
 msgstr "Adresse email"
 
-#: .\templates\account\password_reset.html:59
+#: .\templates\account\password_reset.html:65
 msgid "Reset My Password"
 msgstr "Réinitialiser mon mot de passe"
 
-#: .\templates\account\password_reset.html:69
+#: .\templates\account\password_reset.html:75
 msgid "Back to Dashboard"
 msgstr "Retour au tableau de bord"
 
-#: .\templates\account\password_reset.html:74
+#: .\templates\account\password_reset.html:80
 #: .\templates\account\password_reset_done.html:49
 #: .\templates\account\password_reset_from_key.html:109
 #: .\templates\account\role_select.html:76
@@ -4170,7 +4265,7 @@ msgstr "Retour au tableau de bord"
 msgid "Back to login"
 msgstr "Retour à la connexion"
 
-#: .\templates\account\password_reset.html:80
+#: .\templates\account\password_reset.html:86
 msgid ""
 "\n"
 "          Please contact support if you have trouble resetting your password.\n"
@@ -4237,18 +4332,18 @@ msgid "Before continuing with Google, tell us who you are."
 msgstr "Avant de continuer avec Google, dites-nous qui vous êtes."
 
 #: .\templates\account\role_select.html:61
-#: .\templates\account\role_select.html:69 .\templates\account\signup.html:110
-#: .\templates\account\signup.html:129
+#: .\templates\account\role_select.html:69 .\templates\account\signup.html:115
+#: .\templates\account\signup.html:134
 msgid "I agree to the"
 msgstr "J'accepte le"
 
-#: .\templates\account\signup.html:4 .\templates\account\signup.html:164
-#: .\templates\includes\navbar-full.html:121
-#: .\templates\includes\navbar.html:127
+#: .\templates\account\signup.html:4 .\templates\account\signup.html:169
+#: .\templates\includes\navbar-full.html:119
+#: .\templates\includes\navbar.html:119
 msgid "Register"
 msgstr "Registre"
 
-#: .\templates\account\signup.html:158
+#: .\templates\account\signup.html:163
 msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
@@ -4404,12 +4499,13 @@ msgstr "QCM"
 #: .\templates\apps\assessement\questions\list.html:39
 #: .\templates\apps\content\courses\course_videos.html:137
 #: .\templates\apps\content\courses\quizzes.html:78
-#: .\templates\apps\content\courses\resource_list.html:79
+#: .\templates\apps\content\courses\resource_list.html:81
 #: .\templates\apps\content\resources\list.html:96
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:72
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:91
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:123
 #: .\templates\apps\curriculum\subjects\resource_list.html:93
+#: .\templates\apps\feedback\bookmarks\list.html:50
 msgid "Filter"
 msgstr "Filtre"
 
@@ -4446,12 +4542,12 @@ msgid "No questions found."
 msgstr "Aucune question trouvée."
 
 #: .\templates\apps\assessement\questions\list.html:109
-#: .\templates\apps\content\courses\course_videos.html:371
+#: .\templates\apps\content\courses\course_videos.html:443
 msgid "Previous"
 msgstr "Précédent"
 
 #: .\templates\apps\assessement\questions\list.html:124
-#: .\templates\apps\content\courses\course_videos.html:378
+#: .\templates\apps\content\courses\course_videos.html:450
 msgid "Next"
 msgstr "Suivant"
 
@@ -4462,8 +4558,8 @@ msgid "Update"
 msgstr "Mis à jour"
 
 #: .\templates\apps\assessement\questions\mcq.html:13
-#: .\templates\includes\teacher-sidebar.html:87
-#: .\templates\includes\teacher-sidebar.html:112
+#: .\templates\includes\teacher-sidebar.html:97
+#: .\templates\includes\teacher-sidebar.html:122
 msgid "Create"
 msgstr "Créer"
 
@@ -4632,6 +4728,8 @@ msgid "Override Points"
 msgstr "Remplacer les points"
 
 #: .\templates\apps\assessement\quizzes\add_question.html:98
+#: .\templates\apps\content\courses\course_videos.html:365
+#: .\templates\apps\content\resources\exercise_detail.html:414
 msgid "optional"
 msgstr "facultatif"
 
@@ -4911,7 +5009,7 @@ msgid "Quiz List"
 msgstr "Liste de quiz"
 
 #: .\templates\apps\assessement\quizzes\list.html:24
-#: .\templates\includes\teacher-sidebar.html:97
+#: .\templates\includes\teacher-sidebar.html:107
 msgid "My Quizzes"
 msgstr "Mes quiz"
 
@@ -4975,8 +5073,8 @@ msgstr "Incorrect"
 #: .\templates\apps\assessement\quizzes\quiz_result.html:240
 #: .\templates\apps\assessement\quizzes\take_quiz.html:55
 #: .\templates\apps\content\courses\course_exercises.html:200
-#: .\templates\apps\content\courses\resource_list.html:188
-#: .\templates\apps\content\resources\exercise_detail.html:296
+#: .\templates\apps\content\courses\resource_list.html:190
+#: .\templates\apps\content\resources\exercise_detail.html:312
 #: .\templates\apps\content\resources\test_detail.html:290
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:202
 #: .\templates\apps\curriculum\subjects\resource_list.html:177
@@ -5084,7 +5182,7 @@ msgid "Open session"
 msgstr "Séance ouverte"
 
 #: .\templates\apps\billing\payment_success.html:58
-#: .\templates\includes\teacher-sidebar.html:129
+#: .\templates\includes\teacher-sidebar.html:139
 msgid "My sessions"
 msgstr "Mes séances"
 
@@ -5097,6 +5195,7 @@ msgstr "Rentre à la maison"
 #: .\templates\apps\billing\pricing.html:13
 #: .\templates\apps\billing\pricing.html:21
 #: .\templates\apps\billing\select_payment_method.html:20
+#: .\templates\apps\billing\upgrade.html:25
 msgid "Pricing"
 msgstr "Tarifs"
 
@@ -5109,14 +5208,17 @@ msgid "Forever free"
 msgstr "Gratuit pour toujours"
 
 #: .\templates\apps\billing\pricing.html:133
+#: .\templates\apps\billing\upgrade.html:96
 msgid "per month"
 msgstr "par mois"
 
 #: .\templates\apps\billing\pricing.html:136
+#: .\templates\apps\billing\upgrade.html:98
 msgid "for 6 months"
 msgstr "pendant 6 mois"
 
 #: .\templates\apps\billing\pricing.html:139
+#: .\templates\apps\billing\upgrade.html:101
 msgid "per year"
 msgstr "par année"
 
@@ -5133,6 +5235,7 @@ msgid "Get Started Free"
 msgstr "Commencez gratuitement"
 
 #: .\templates\apps\billing\pricing.html:231
+#: .\templates\apps\billing\upgrade.html:130
 msgid "Upgrade Now"
 msgstr "Mettre à niveau maintenant"
 
@@ -5141,18 +5244,22 @@ msgid "Login to Subscribe"
 msgstr "Connectez-vous pour vous abonner"
 
 #: .\templates\apps\billing\pricing.html:278
+#: .\templates\apps\billing\upgrade.html:170
 msgid "Secure Payments"
 msgstr "Paiements sécurisés"
 
 #: .\templates\apps\billing\pricing.html:295
+#: .\templates\apps\billing\upgrade.html:180
 msgid "Cancel Anytime"
 msgstr "Annuler à tout moment"
 
 #: .\templates\apps\billing\pricing.html:296
+#: .\templates\apps\billing\upgrade.html:181
 msgid "No lock-in contract"
 msgstr "Pas de contrat de blocage"
 
 #: .\templates\apps\billing\pricing.html:312
+#: .\templates\apps\billing\upgrade.html:190
 msgid "Payments"
 msgstr "Paiements"
 
@@ -5179,7 +5286,7 @@ msgstr "Carte de crédit/débit"
 
 #: .\templates\apps\billing\select_payment_method.html:104
 #: .\templates\apps\content\resources\exam_detail.html:401
-#: .\templates\apps\content\resources\exercise_detail.html:330
+#: .\templates\apps\content\resources\exercise_detail.html:346
 #: .\templates\apps\content\resources\test_detail.html:324
 msgid "Recommended"
 msgstr "Recommandé"
@@ -5227,6 +5334,75 @@ msgstr ""
 msgid "Start learning"
 msgstr "Commencez à apprendre"
 
+#: .\templates\apps\billing\upgrade.html:4
+#, fuzzy
+#| msgid "Upgrade Now"
+msgid "Upgrade to"
+msgstr "Mettre à niveau maintenant"
+
+#: .\templates\apps\billing\upgrade.html:15
+#, fuzzy
+#| msgid "Your Plan"
+msgid "Upgrade Your Plan"
+msgstr "Votre forfait"
+
+#: .\templates\apps\billing\upgrade.html:27
+#, fuzzy
+#| msgid "Upgrade Now"
+msgid "Upgrade"
+msgstr "Mettre à niveau maintenant"
+
+#: .\templates\apps\billing\upgrade.html:44
+msgid "This feature requires"
+msgstr "Cette fonctionnalité nécessite"
+
+#: .\templates\apps\billing\upgrade.html:47
+msgid "You are currently on"
+msgstr "Vous êtes actuellement sur"
+
+#: .\templates\apps\billing\upgrade.html:49
+msgid "Upgrade to unlock this feature and everything"
+msgstr "Mettez à niveau pour débloquer cette fonctionnalité et tout"
+
+#: .\templates\apps\billing\upgrade.html:49
+msgid "includes."
+msgstr ""
+
+#: .\templates\apps\billing\upgrade.html:66
+msgid "Most Popular"
+msgstr "Les plus populaires"
+
+#: .\templates\apps\billing\upgrade.html:99
+#: .\templates\apps\billing\upgrade.html:102
+msgid "mo"
+msgstr "mo"
+
+#: .\templates\apps\billing\upgrade.html:108
+#, fuzzy
+#| msgid "Quiz"
+msgid "Save"
+msgstr "Questionnaire"
+
+#: .\templates\apps\billing\upgrade.html:141
+#, fuzzy
+#| msgid "No FAQs available at the moment."
+msgid "No upgrade plans available at the moment. Please"
+msgstr "Aucune FAQ disponible pour le moment."
+
+#: .\templates\apps\billing\upgrade.html:142
+msgid "view all plans"
+msgstr "voir tous les forfaits"
+
+#: .\templates\apps\billing\upgrade.html:154
+#, fuzzy
+#| msgid "No, go back"
+msgid "Go back"
+msgstr "Non, reviens"
+
+#: .\templates\apps\billing\upgrade.html:158
+msgid "View all plans"
+msgstr "Voir tous les forfaits"
+
 #: .\templates\apps\content\courses\_header.html:36
 msgid "Details"
 msgstr "Détails"
@@ -5267,7 +5443,7 @@ msgstr "- Statut -"
 #: .\templates\apps\content\courses\course_exercises.html:227
 #: .\templates\apps\content\courses\detail.html:34
 #: .\templates\apps\content\resources\exam_detail.html:182
-#: .\templates\apps\content\resources\exercise_detail.html:100
+#: .\templates\apps\content\resources\exercise_detail.html:116
 #: .\templates\apps\content\resources\lesson_detail.html:167
 #: .\templates\apps\content\resources\test_detail.html:100
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:171
@@ -5288,24 +5464,25 @@ msgstr "Appliquer"
 #: .\templates\apps\content\courses\course_exercises.html:169
 #: .\templates\apps\content\courses\course_videos.html:143
 #: .\templates\apps\content\courses\quizzes.html:83
-#: .\templates\apps\content\courses\resource_list.html:83
+#: .\templates\apps\content\courses\resource_list.html:85
 #: .\templates\apps\content\resources\list.html:101
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:77
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:95
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:128
 #: .\templates\apps\curriculum\subjects\resource_list.html:98
+#: .\templates\apps\feedback\bookmarks\list.html:55
 msgid "Clear"
 msgstr "Clair"
 
 #: .\templates\apps\content\courses\course_exercises.html:232
-#: .\templates\apps\content\courses\resource_list.html:115
+#: .\templates\apps\content\courses\resource_list.html:117
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:175
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:281
 msgid "In progress"
 msgstr "En cours"
 
 #: .\templates\apps\content\courses\course_exercises.html:238
-#: .\templates\apps\content\courses\resource_list.html:196
+#: .\templates\apps\content\courses\resource_list.html:198
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:180
 msgid "Not started"
 msgstr "Pas commencé"
@@ -5351,21 +5528,21 @@ msgid "-"
 msgstr ""
 
 #: .\templates\apps\content\courses\course_videos.html:292
-#: .\templates\apps\content\courses\course_videos.html:404
+#: .\templates\apps\content\courses\course_videos.html:476
 msgid "Seen"
 msgstr "Vu"
 
 #: .\templates\apps\content\courses\course_videos.html:292
-#: .\templates\apps\content\courses\course_videos.html:404
+#: .\templates\apps\content\courses\course_videos.html:476
 msgid "Mark as seen"
 msgstr "Marquer comme vu"
 
-#: .\templates\apps\content\courses\course_videos.html:300
-#: .\templates\apps\content\courses\course_videos.html:445
+#: .\templates\apps\content\courses\course_videos.html:314
+#: .\templates\apps\content\courses\course_videos.html:578
 #: .\templates\apps\content\resources\exam_detail.html:167
 #: .\templates\apps\content\resources\exam_detail.html:548
-#: .\templates\apps\content\resources\exercise_detail.html:91
-#: .\templates\apps\content\resources\exercise_detail.html:468
+#: .\templates\apps\content\resources\exercise_detail.html:106
+#: .\templates\apps\content\resources\exercise_detail.html:587
 #: .\templates\apps\content\resources\lesson_detail.html:152
 #: .\templates\apps\content\resources\lesson_detail.html:479
 #: .\templates\apps\content\resources\test_detail.html:91
@@ -5373,9 +5550,68 @@ msgstr "Marquer comme vu"
 msgid "Bookmarked"
 msgstr "Mis en signet"
 
-#: .\templates\apps\content\courses\course_videos.html:314
+#: .\templates\apps\content\courses\course_videos.html:329
 msgid "Select a video to start watching"
 msgstr "Sélectionnez une vidéo pour commencer à regarder"
+
+#: .\templates\apps\content\courses\course_videos.html:353
+#: .\templates\apps\content\courses\course_videos.html:570
+#: .\templates\apps\content\resources\exercise_detail.html:402
+#: .\templates\apps\content\resources\exercise_detail.html:579
+#, fuzzy
+#| msgid "Back to Resource"
+msgid "Bookmark this resource"
+msgstr "Retour à la ressource"
+
+#: .\templates\apps\content\courses\course_videos.html:355
+#: .\templates\apps\content\resources\exercise_detail.html:404
+#, fuzzy
+#| msgid "Closed"
+msgid "Close"
+msgstr "Fermé"
+
+#: .\templates\apps\content\courses\course_videos.html:364
+#: .\templates\apps\content\resources\exercise_detail.html:413
+#, fuzzy
+#| msgid "Personal Note"
+msgid "Personal note"
+msgstr "Note personnelle"
+
+#: .\templates\apps\content\courses\course_videos.html:371
+#: .\templates\apps\content\resources\exercise_detail.html:420
+msgid "Add a note to remember why you saved this…"
+msgstr ""
+"Ajoutez une note pour vous rappeler pourquoi vous avez enregistré ceci…"
+
+#: .\templates\apps\content\courses\course_videos.html:382
+#: .\templates\apps\content\resources\exercise_detail.html:431
+#, fuzzy
+#| msgid "My Bookmarks"
+msgid "Remove bookmark"
+msgstr "Mes favoris"
+
+#: .\templates\apps\content\courses\course_videos.html:390
+#: .\templates\apps\content\courses\course_videos.html:571
+#: .\templates\apps\content\resources\exercise_detail.html:439
+#: .\templates\apps\content\resources\exercise_detail.html:580
+#, fuzzy
+#| msgid "Bookmark"
+msgid "Save bookmark"
+msgstr "Marque-page"
+
+#: .\templates\apps\content\courses\course_videos.html:566
+#: .\templates\apps\content\resources\exercise_detail.html:575
+#, fuzzy
+#| msgid "Bookmark"
+msgid "Edit bookmark"
+msgstr "Marque-page"
+
+#: .\templates\apps\content\courses\course_videos.html:567
+#: .\templates\apps\content\resources\exercise_detail.html:576
+#, fuzzy
+#| msgid "Student Profile"
+msgid "Update note"
+msgstr "Profil de l'étudiant"
 
 #: .\templates\apps\content\courses\detail.html:20
 msgid "Course Details"
@@ -5383,7 +5619,7 @@ msgstr "Détails du cours"
 
 #: .\templates\apps\content\courses\detail.html:39
 #: .\templates\apps\content\resources\exam_detail.html:177
-#: .\templates\apps\content\resources\exercise_detail.html:104
+#: .\templates\apps\content\resources\exercise_detail.html:120
 #: .\templates\apps\content\resources\lesson_detail.html:162
 #: .\templates\apps\content\resources\test_detail.html:104
 msgid "Mark as completed"
@@ -5391,7 +5627,7 @@ msgstr "Marquer comme terminé"
 
 #: .\templates\apps\content\courses\detail.html:95
 #: .\templates\apps\curriculum\grade_subjects\detail.html:107
-#: .\templates\apps\curriculum\grade_subjects\detail.html:176
+#: .\templates\apps\curriculum\grade_subjects\detail.html:177
 #: .\templates\apps\curriculum\subjects\detail.html:123
 #: .\templates\apps\curriculum\subjects\detail.html:190
 msgid "Your Progress"
@@ -5433,7 +5669,7 @@ msgid "Manual grading"
 msgstr "Classement manuel"
 
 #: .\templates\apps\content\courses\quizzes.html:134
-#: .\templates\apps\content\courses\resource_list.html:141
+#: .\templates\apps\content\courses\resource_list.html:143
 #: .\templates\apps\content\resources\detail.html:140
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:147
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:196
@@ -5486,37 +5722,32 @@ msgstr "Aucun quiz disponible pour l'instant"
 msgid "Quizzes will appear here once added."
 msgstr "Les quiz apparaîtront ici une fois ajoutés."
 
-#: .\templates\apps\content\courses\resource_list.html:20
-#, python-format
-msgid "%(count)s resource(s) found"
-msgstr "%(count)s ressource(s) trouvée(s)"
-
-#: .\templates\apps\content\courses\resource_list.html:60
+#: .\templates\apps\content\courses\resource_list.html:62
 msgid "Search…"
 msgstr "Rechercher…"
 
-#: .\templates\apps\content\courses\resource_list.html:64
+#: .\templates\apps\content\courses\resource_list.html:66
 #: .\templates\apps\content\resources\list.html:87
 #: .\templates\apps\curriculum\subjects\resource_list.html:73
 msgid "All difficulties"
 msgstr "Toutes les difficultés"
 
-#: .\templates\apps\content\courses\resource_list.html:71
+#: .\templates\apps\content\courses\resource_list.html:73
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:69
 #: .\templates\apps\curriculum\subjects\resource_list.html:83
 msgid "All terms"
 msgstr "Tous les termes"
 
-#: .\templates\apps\content\courses\resource_list.html:110
+#: .\templates\apps\content\courses\resource_list.html:112
 msgid "Done"
 msgstr "Fait"
 
-#: .\templates\apps\content\courses\resource_list.html:227
+#: .\templates\apps\content\courses\resource_list.html:229
 #, python-format
 msgid "No %(title)s available yet"
 msgstr "Aucun %(title)s disponible pour l'instant"
 
-#: .\templates\apps\content\courses\resource_list.html:229
+#: .\templates\apps\content\courses\resource_list.html:231
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:309
 #: .\templates\apps\curriculum\subjects\resource_list.html:233
 msgid "Resources will appear here once added."
@@ -5582,7 +5813,7 @@ msgstr "Durée"
 
 #: .\templates\apps\content\resources\detail.html:151
 #: .\templates\apps\content\resources\exam_detail.html:251
-#: .\templates\apps\content\resources\exercise_detail.html:177
+#: .\templates\apps\content\resources\exercise_detail.html:193
 #: .\templates\apps\content\resources\lesson_detail.html:236
 #: .\templates\apps\content\resources\test_detail.html:171
 msgid "Due in"
@@ -5590,7 +5821,7 @@ msgstr "Due dans"
 
 #: .\templates\apps\content\resources\detail.html:152
 #: .\templates\apps\content\resources\exam_detail.html:251
-#: .\templates\apps\content\resources\exercise_detail.html:177
+#: .\templates\apps\content\resources\exercise_detail.html:193
 #: .\templates\apps\content\resources\lesson_detail.html:236
 #: .\templates\apps\content\resources\test_detail.html:171
 msgid "days"
@@ -5623,63 +5854,63 @@ msgid "Download File"
 msgstr "Télécharger le fichier"
 
 #: .\templates\apps\content\resources\exam_detail.html:202
-#: .\templates\apps\content\resources\exercise_detail.html:124
+#: .\templates\apps\content\resources\exercise_detail.html:140
 #: .\templates\apps\content\resources\lesson_detail.html:187
 #: .\templates\apps\content\resources\test_detail.html:124
 msgid "Exercise Statement"
 msgstr "Déclaration d'exercice"
 
 #: .\templates\apps\content\resources\exam_detail.html:209
-#: .\templates\apps\content\resources\exercise_detail.html:131
+#: .\templates\apps\content\resources\exercise_detail.html:147
 #: .\templates\apps\content\resources\lesson_detail.html:194
 #: .\templates\apps\content\resources\test_detail.html:131
 msgid "Solved"
 msgstr "Résolu"
 
 #: .\templates\apps\content\resources\exam_detail.html:213
-#: .\templates\apps\content\resources\exercise_detail.html:136
+#: .\templates\apps\content\resources\exercise_detail.html:152
 #: .\templates\apps\content\resources\lesson_detail.html:198
 #: .\templates\apps\content\resources\test_detail.html:136
 msgid "Not solved"
 msgstr "Non résolu"
 
 #: .\templates\apps\content\resources\exam_detail.html:245
-#: .\templates\apps\content\resources\exercise_detail.html:171
+#: .\templates\apps\content\resources\exercise_detail.html:187
 #: .\templates\apps\content\resources\lesson_detail.html:230
 #: .\templates\apps\content\resources\test_detail.html:165
 msgid "Total marks"
 msgstr "Notes totales"
 
 #: .\templates\apps\content\resources\exam_detail.html:269
-#: .\templates\apps\content\resources\exercise_detail.html:194
+#: .\templates\apps\content\resources\exercise_detail.html:210
 #: .\templates\apps\content\resources\lesson_detail.html:254
 #: .\templates\apps\content\resources\test_detail.html:188
 msgid "Your Actions"
 msgstr "Vos actions"
 
 #: .\templates\apps\content\resources\exam_detail.html:283
-#: .\templates\apps\content\resources\exercise_detail.html:206
+#: .\templates\apps\content\resources\exercise_detail.html:222
 #: .\templates\apps\content\resources\lesson_detail.html:268
 #: .\templates\apps\content\resources\test_detail.html:200
 msgid "Already Solved"
 msgstr "Déjà résolu"
 
 #: .\templates\apps\content\resources\exam_detail.html:288
-#: .\templates\apps\content\resources\exercise_detail.html:210
+#: .\templates\apps\content\resources\exercise_detail.html:226
 #: .\templates\apps\content\resources\lesson_detail.html:273
 #: .\templates\apps\content\resources\test_detail.html:204
 msgid "Mark as Solved"
 msgstr "Marquer comme résolu"
 
 #: .\templates\apps\content\resources\exam_detail.html:298
-#: .\templates\apps\content\resources\exercise_detail.html:219
+#: .\templates\apps\content\resources\exercise_detail.html:235
 #: .\templates\apps\content\resources\lesson_detail.html:283
 #: .\templates\apps\content\resources\test_detail.html:213
 msgid "Rate this exercise"
 msgstr "Notez cet exercice"
 
 #: .\templates\apps\content\resources\exam_detail.html:315
-#: .\templates\apps\content\resources\exercise_detail.html:236
+#: .\templates\apps\content\resources\exercise_detail.html:252
 #: .\templates\apps\content\resources\lesson_detail.html:300
 #: .\templates\apps\content\resources\test_detail.html:230
 #, python-format
@@ -5687,42 +5918,42 @@ msgid "You rated this %(val)s/5"
 msgstr "Vous avez noté ce %(val)s/5"
 
 #: .\templates\apps\content\resources\exam_detail.html:317
-#: .\templates\apps\content\resources\exercise_detail.html:238
+#: .\templates\apps\content\resources\exercise_detail.html:254
 #: .\templates\apps\content\resources\lesson_detail.html:302
 #: .\templates\apps\content\resources\test_detail.html:232
 msgid "Click a star to rate"
 msgstr "Cliquez sur une étoile pour noter"
 
 #: .\templates\apps\content\resources\exam_detail.html:331
-#: .\templates\apps\content\resources\exercise_detail.html:250
+#: .\templates\apps\content\resources\exercise_detail.html:266
 #: .\templates\apps\content\resources\lesson_detail.html:316
 #: .\templates\apps\content\resources\test_detail.html:244
 msgid "View Solution"
 msgstr "Voir la solution"
 
 #: .\templates\apps\content\resources\exam_detail.html:336
-#: .\templates\apps\content\resources\exercise_detail.html:255
+#: .\templates\apps\content\resources\exercise_detail.html:271
 #: .\templates\apps\content\resources\lesson_detail.html:321
 #: .\templates\apps\content\resources\test_detail.html:249
 msgid "Solution not available yet."
 msgstr "Solution pas encore disponible."
 
 #: .\templates\apps\content\resources\exam_detail.html:348
-#: .\templates\apps\content\resources\exercise_detail.html:266
+#: .\templates\apps\content\resources\exercise_detail.html:282
 #: .\templates\apps\content\resources\lesson_detail.html:333
 #: .\templates\apps\content\resources\test_detail.html:260
 msgid "Exercise Info"
 msgstr "Informations sur l'exercice"
 
 #: .\templates\apps\content\resources\exam_detail.html:366
-#: .\templates\apps\content\resources\exercise_detail.html:293
+#: .\templates\apps\content\resources\exercise_detail.html:309
 #: .\templates\apps\content\resources\lesson_detail.html:351
 #: .\templates\apps\content\resources\test_detail.html:287
 msgid "Marks"
 msgstr "Marques"
 
 #: .\templates\apps\content\resources\exam_detail.html:377
-#: .\templates\apps\content\resources\exercise_detail.html:317
+#: .\templates\apps\content\resources\exercise_detail.html:333
 #: .\templates\apps\content\resources\lesson_detail.html:362
 #: .\templates\apps\content\resources\test_detail.html:311
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:216
@@ -5734,27 +5965,27 @@ msgid "Same level"
 msgstr "Même niveau"
 
 #: .\templates\apps\content\resources\exam_detail.html:441
-#: .\templates\apps\content\resources\exercise_detail.html:364
+#: .\templates\apps\content\resources\exercise_detail.html:380
 #: .\templates\apps\content\resources\test_detail.html:366
 msgid "No recommendations available."
 msgstr "Aucune recommandation disponible."
 
 #: .\templates\apps\content\resources\exam_detail.html:495
-#: .\templates\apps\content\resources\exercise_detail.html:420
+#: .\templates\apps\content\resources\exercise_detail.html:493
 #: .\templates\apps\content\resources\lesson_detail.html:426
 #: .\templates\apps\content\resources\test_detail.html:415
 msgid "Saving…"
 msgstr "Économie…"
 
 #: .\templates\apps\content\resources\exam_detail.html:510
-#: .\templates\apps\content\resources\exercise_detail.html:431
+#: .\templates\apps\content\resources\exercise_detail.html:504
 #: .\templates\apps\content\resources\lesson_detail.html:441
 #: .\templates\apps\content\resources\test_detail.html:426
 msgid "You rated this"
 msgstr "Vous avez noté ceci"
 
 #: .\templates\apps\content\resources\exam_detail.html:515
-#: .\templates\apps\content\resources\exercise_detail.html:435
+#: .\templates\apps\content\resources\exercise_detail.html:508
 #: .\templates\apps\content\resources\lesson_detail.html:446
 #: .\templates\apps\content\resources\test_detail.html:430
 msgid "Failed to save. Try again."
@@ -5818,7 +6049,7 @@ msgstr "Taux:"
 
 #: .\templates\apps\content\resources\list.html:4
 #: .\templates\apps\content\resources\list.html:11
-#: .\templates\includes\teacher-sidebar.html:72
+#: .\templates\includes\teacher-sidebar.html:82
 msgid "My Resources"
 msgstr "Mes ressources"
 
@@ -5844,6 +6075,7 @@ msgstr "Tous les statuts"
 
 #: .\templates\apps\content\resources\list.html:78
 #: .\templates\apps\curriculum\grade_subjects\resources_by_term.html:57
+#: .\templates\apps\feedback\bookmarks\list.html:40
 msgid "All types"
 msgstr "Tous types"
 
@@ -5866,10 +6098,10 @@ msgstr "Cours pour ce trimestre"
 #: .\templates\apps\curriculum\grade_subjects\courses_by_quarter.html:41
 #: .\templates\apps\curriculum\grade_subjects\quizzes.html:42
 #: .\templates\errors\404.html:50 .\templates\errors\500.html:50
-#: .\templates\includes\navbar-full.html:35
-#: .\templates\includes\navbar.html:40 .\templates\includes\navbar.html:41
-#: .\templates\includes\sidebar.html:36
-#: .\templates\includes\teacher-sidebar.html:41
+#: .\templates\includes\navbar-full.html:33
+#: .\templates\includes\navbar.html:32 .\templates\includes\navbar.html:33
+#: .\templates\includes\sidebar.html:46
+#: .\templates\includes\teacher-sidebar.html:51
 msgid "Search"
 msgstr "Recherche"
 
@@ -5905,12 +6137,12 @@ msgstr "Ressources du cours"
 msgid "Subject Information"
 msgstr "Informations sur le sujet"
 
-#: .\templates\apps\curriculum\grade_subjects\detail.html:151
+#: .\templates\apps\curriculum\grade_subjects\detail.html:152
 #: .\templates\apps\curriculum\subjects\detail.html:166
 msgid "Ask for an Online Tutor"
 msgstr "Demandez un tuteur en ligne"
 
-#: .\templates\apps\curriculum\grade_subjects\detail.html:189
+#: .\templates\apps\curriculum\grade_subjects\detail.html:190
 #: .\templates\apps\curriculum\subjects\detail.html:203
 msgid "courses completed"
 msgstr "cours terminés"
@@ -6109,17 +6341,41 @@ msgid "Tests & Exams"
 msgstr "Tests et examens"
 
 #: .\templates\apps\curriculum\subjects\resource_list.html:69
-#: .\templates\includes\sidebar.html:35
-#: .\templates\includes\teacher-sidebar.html:40
+#: .\templates\includes\sidebar.html:45
+#: .\templates\includes\teacher-sidebar.html:50
 msgid "Search..."
 msgstr "Recherche..."
 
-#: .\templates\apps\feedback\bookmarks\list.html:18
-#: .\templates\includes\sidebar.html:87
+#: .\templates\apps\feedback\bookmarks\list.html:4
+msgid "My favorites"
+msgstr "Mes favoris"
+
+#: .\templates\apps\feedback\bookmarks\list.html:20
+#: .\templates\includes\sidebar.html:97
 msgid "My Bookmarks"
 msgstr "Mes favoris"
 
-#: .\templates\apps\feedback\bookmarks\list.html:71
+#: .\templates\apps\feedback\bookmarks\list.html:35
+#, fuzzy
+#| msgid "Search exercises…"
+msgid "Search in notes…"
+msgstr "Exercices de recherche…"
+
+#: .\templates\apps\feedback\bookmarks\list.html:66
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "            %(count)s exercise(s) found\n"
+#| "          "
+msgid ""
+"\n"
+"                %(count)s bookmark(s) match your filters.\n"
+"              "
+msgstr ""
+"\n"
+"%(count)s exercice(s) trouvé(s)"
+
+#: .\templates\apps\feedback\bookmarks\list.html:123
 #, fuzzy, python-format
 #| msgid ""
 #| "\n"
@@ -6140,13 +6396,13 @@ msgstr[1] ""
 "\n"
 "%(count)s sujet(s)"
 
-#: .\templates\apps\feedback\bookmarks\list.html:87
+#: .\templates\apps\feedback\bookmarks\list.html:139
 #, fuzzy
 #| msgid "My Bookmarks"
 msgid "No bookmarks yet"
 msgstr "Mes favoris"
 
-#: .\templates\apps\feedback\bookmarks\list.html:89
+#: .\templates\apps\feedback\bookmarks\list.html:141
 #, fuzzy
 #| msgid "Free resources are accessible to guest users."
 msgid "Save resources to access them quickly later."
@@ -6444,67 +6700,67 @@ msgstr ""
 "Vous proposez actuellement des séances de tutorat gratuites. Les étudiants "
 "peuvent vous réserver sans paiement."
 
-#: .\templates\dashboard\update_student.html:24
+#: .\templates\dashboard\update_student.html:26
 #, fuzzy
 #| msgid "Not scheduled"
 msgid "Not specified"
 msgstr "Non programmé"
 
-#: .\templates\dashboard\update_student.html:35
-#: .\templates\dashboard\update_teacher.html:58
+#: .\templates\dashboard\update_student.html:37
+#: .\templates\dashboard\update_teacher.html:61
 #, fuzzy
 #| msgid "Student Profile"
 msgid "Update Profile"
 msgstr "Profil de l'étudiant"
 
-#: .\templates\dashboard\update_student.html:43
-#: .\templates\dashboard\update_teacher.html:66
+#: .\templates\dashboard\update_student.html:45
+#: .\templates\dashboard\update_teacher.html:69
 #, fuzzy
 #| msgid "Account Inactive"
 msgid "Account Info"
 msgstr "Compte inactif"
 
-#: .\templates\dashboard\update_student.html:82
+#: .\templates\dashboard\update_student.html:84
 #, fuzzy
 #| msgid "Student"
 msgid "Student Info"
 msgstr "Étudiant"
 
-#: .\templates\dashboard\update_teacher.html:27
+#: .\templates\dashboard\update_teacher.html:30
 #, fuzzy
 #| msgid "Re-send Verification"
 msgid "Pending Verification"
 msgstr "Renvoyer la vérification"
 
-#: .\templates\dashboard\update_teacher.html:33
+#: .\templates\dashboard\update_teacher.html:36
 #, fuzzy
 #| msgid "Hourly Price"
 msgid "Hour Price"
 msgstr "Prix ​​horaire"
 
-#: .\templates\dashboard\update_teacher.html:35
+#: .\templates\dashboard\update_teacher.html:38
 msgid "DA"
 msgstr "DA"
 
-#: .\templates\dashboard\update_teacher.html:47
+#: .\templates\dashboard\update_teacher.html:50
 #, fuzzy
 #| msgid "Price per hour for tutoring sessions."
 msgid "You are offering free tutoring sessions."
 msgstr "Prix ​​horaire pour les séances de tutorat."
 
-#: .\templates\dashboard\update_teacher.html:52
+#: .\templates\dashboard\update_teacher.html:55
 #, fuzzy
 #| msgid "Your teacher account is pending verification."
 msgid "Your account is verified."
 msgstr "Votre compte enseignant est en attente de vérification."
 
-#: .\templates\dashboard\update_teacher.html:105
+#: .\templates\dashboard\update_teacher.html:108
 #, fuzzy
 #| msgid "Teaching Scope"
 msgid "Teaching Info"
 msgstr "Portée de l'enseignement"
 
-#: .\templates\dashboard\update_teacher.html:109
+#: .\templates\dashboard\update_teacher.html:112
 msgid "Level and subject are locked after verification."
 msgstr "Le niveau et le sujet sont verrouillés après vérification."
 
@@ -6682,59 +6938,49 @@ msgstr "Confidentialité"
 msgid "Terms"
 msgstr "Termes"
 
-#: .\templates\includes\navbar-full.html:63
-#: .\templates\includes\navbar.html:69
+#: .\templates\includes\navbar-full.html:61
+#: .\templates\includes\navbar.html:61
 msgid "Go Premium"
 msgstr "Passez à la version premium"
 
-#: .\templates\includes\navbar-full.html:105
-#: .\templates\includes\navbar.html:111
+#: .\templates\includes\navbar-full.html:103
+#: .\templates\includes\navbar.html:103
 msgid "Email Settings"
 msgstr "Paramètres de messagerie"
 
-#: .\templates\includes\navbar-full.html:112
-#: .\templates\includes\navbar.html:118
+#: .\templates\includes\navbar-full.html:110
+#: .\templates\includes\navbar.html:110
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: .\templates\includes\navbar-full.html:118
-#: .\templates\includes\navbar.html:124
+#: .\templates\includes\navbar-full.html:116
+#: .\templates\includes\navbar.html:116
 msgid "Login"
 msgstr "Se connecter"
 
-#: .\templates\includes\sidebar.html:7
-#: .\templates\includes\teacher-sidebar.html:8
-msgid "WN Logo"
-msgstr "Logo SME"
-
-#: .\templates\includes\sidebar.html:17
-#: .\templates\includes\teacher-sidebar.html:21
-msgid "User Image"
-msgstr "Image de l'utilisateur"
-
-#: .\templates\includes\sidebar.html:56
-#: .\templates\includes\teacher-sidebar.html:62
+#: .\templates\includes\sidebar.html:66
+#: .\templates\includes\teacher-sidebar.html:72
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: .\templates\includes\sidebar.html:71
+#: .\templates\includes\sidebar.html:81
 msgid "Resolved Resources"
 msgstr "Ressources résolues"
 
-#: .\templates\includes\sidebar.html:79
+#: .\templates\includes\sidebar.html:89
 msgid "My Sessions"
 msgstr "Mes séances"
 
-#: .\templates\includes\teacher-sidebar.html:81
-#: .\templates\includes\teacher-sidebar.html:106
+#: .\templates\includes\teacher-sidebar.html:91
+#: .\templates\includes\teacher-sidebar.html:116
 msgid "List"
 msgstr "Liste"
 
-#: .\templates\includes\teacher-sidebar.html:118
+#: .\templates\includes\teacher-sidebar.html:128
 msgid "Question bank"
 msgstr "Banque de questions"
 
-#: .\templates\includes\teacher-sidebar.html:137
+#: .\templates\includes\teacher-sidebar.html:147
 msgid "Tips & Guidance"
 msgstr "Conseils et conseils"
 
@@ -7133,6 +7379,13 @@ msgid ""
 msgstr ""
 "\n"
 "Continuer avec %(provider)s"
+
+#, python-format
+#~ msgid "%(count)s resource(s) found"
+#~ msgstr "%(count)s ressource(s) trouvée(s)"
+
+#~ msgid "User Image"
+#~ msgstr "Image de l'utilisateur"
 
 #~ msgid "Quiz list"
 #~ msgstr "Liste de quiz"

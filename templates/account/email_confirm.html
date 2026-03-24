@@ -2,157 +2,84 @@
 {% load i18n %}
 {% load account %}
 {% load allauth %}
-
-{% block title %}{% trans "Email Confirmation" %}{% endblock %}
-
+{% block title %}
+  {% trans "Email Confirmation" %}
+{% endblock %}
 {% block content %}
-
-<div class="row justify-content-center">
-  <div class="col-xl-5 col-lg-6 col-md-8">
-
-    <div class="card shadow-sm border-0">
-
-      <!-- Header -->
-      <div class="card-header bg-white text-center border-0 pt-4 pb-2">
-
-        <div class="mb-3">
-          <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle bg-primary"
-               style="width:70px;height:70px;">
-            <i class="fas fa-envelope-open-text text-white fa-lg"></i>
+  <div class="row justify-content-center">
+    <div class="col-xl-5 col-lg-6 col-md-8">
+      <div class="card shadow-sm border-0">
+        <!-- Header -->
+        <div class="card-header bg-white text-center border-0 pt-4 pb-2">
+          <div class="mb-3">
+            <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle bg-primary"
+                 style="width:70px;
+                        height:70px">
+              <i class="fas fa-envelope-open-text text-white fa-lg"></i>
+            </div>
           </div>
+          <h4 class="font-weight-bold mb-1">{% trans "Confirm your email" %}</h4>
+          <p class="text-muted mb-0 small">{% trans "Secure your WN account by confirming your email address" %}</p>
         </div>
-
-        <h4 class="font-weight-bold mb-1">
-          {% trans "Confirm your email" %}
-        </h4>
-
-        <p class="text-muted mb-0 small">
-          {% trans "Secure your WN account by confirming your email address" %}
-        </p>
-
-      </div>
-
-
-      <!-- Body -->
-      <div class="card-body px-4 pb-4">
-
-        {% if confirmation %}
-
-          {% user_display confirmation.email_address.user as user_display %}
-
-          {% if can_confirm %}
-
-            <div class="alert alert-light border text-center">
-
-              <div class="mb-2 text-primary">
-                <i class="fas fa-user-shield fa-2x"></i>
+        <!-- Body -->
+        <div class="card-body px-4 pb-4">
+          {% if confirmation %}
+            {% user_display confirmation.email_address.user as user_display %}
+            {% if can_confirm %}
+              <div class="alert alert-light border text-center">
+                <div class="mb-2 text-primary">
+                  <i class="fas fa-user-shield fa-2x"></i>
+                </div>
+                <div class="small text-muted">{% trans "You are about to confirm the email address:" %}</div>
+                <div class="font-weight-bold text-dark mb-2">{{ confirmation.email_address.email }}</div>
+                <div class="small text-muted">
+                  {% trans "for user" %} <strong>{{ user_display }}</strong>
+                </div>
               </div>
-
-              <div class="small text-muted">
-                {% trans "You are about to confirm the email address:" %}
+              {% url 'account_confirm_email' confirmation.key as action_url %}
+              <form method="post" action="{{ action_url }}">
+                {% csrf_token %}
+                {{ redirect_field }}
+                <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  {% trans "Confirm Email Address" %}
+                </button>
+              </form>
+              <div class="text-center mt-3">
+                <small class="text-muted">{% trans "This helps us protect your account." %}</small>
               </div>
-
-              <div class="font-weight-bold text-dark mb-2">
-                {{ confirmation.email_address.email }}
+            {% else %}
+              <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-lg mb-2"></i>
+                <div class="font-weight-bold">{% trans "Email already confirmed" %}</div>
+                <div class="small">{% trans "This email is already linked to another account." %}</div>
               </div>
-
-              <div class="small text-muted">
-                {% trans "for user" %} <strong>{{ user_display }}</strong>
-              </div>
-
-            </div>
-
-            {% url 'account_confirm_email' confirmation.key as action_url %}
-
-            <form method="post" action="{{ action_url }}">
-              {% csrf_token %}
-              {{ redirect_field }}
-
-              <button type="submit"
-                      class="btn btn-primary btn-block font-weight-bold">
-
-                <i class="fas fa-check-circle mr-2"></i>
-                {% trans "Confirm Email Address" %}
-
-              </button>
-            </form>
-
-            <div class="text-center mt-3">
-              <small class="text-muted">
-                {% trans "This helps us protect your account." %}
-              </small>
-            </div>
-
-
+              <a href="{% url 'account_login' %}"
+                 class="btn btn-outline-primary btn-block">
+                <i class="fas fa-arrow-left mr-2"></i>
+                {% trans "Back to Login" %}
+              </a>
+            {% endif %}
           {% else %}
-
-            <div class="alert alert-warning text-center">
-
-              <i class="fas fa-exclamation-triangle fa-lg mb-2"></i>
-
-              <div class="font-weight-bold">
-                {% trans "Email already confirmed" %}
-              </div>
-
-              <div class="small">
-                {% trans "This email is already linked to another account." %}
-              </div>
-
+            <div class="alert alert-danger text-center">
+              <i class="fas fa-times-circle fa-lg mb-2"></i>
+              <div class="font-weight-bold">{% trans "Invalid or expired link" %}</div>
+              <div class="small">{% trans "Email confirmation link is no longer valid." %}</div>
             </div>
-
-            <a href="{% url 'account_login' %}"
-               class="btn btn-outline-primary btn-block">
-
-               <i class="fas fa-arrow-left mr-2"></i>
-               {% trans "Back to Login" %}
-
+            <a href="{% url 'account_email' %}" class="btn btn-primary btn-block">
+              <i class="fas fa-redo mr-2"></i>
+              {% trans "Request new confirmation email" %}
             </a>
-
           {% endif %}
-
-
-        {% else %}
-
-          <div class="alert alert-danger text-center">
-
-            <i class="fas fa-times-circle fa-lg mb-2"></i>
-
-            <div class="font-weight-bold">
-              {% trans "Invalid or expired link" %}
-            </div>
-
-            <div class="small">
-              {% trans "Email confirmation link is no longer valid." %}
-            </div>
-
-          </div>
-
-          <a href="{% url 'account_email' %}"
-             class="btn btn-primary btn-block">
-
-            <i class="fas fa-redo mr-2"></i>
-            {% trans "Request new confirmation email" %}
-
-          </a>
-
-        {% endif %}
-
+        </div>
+        <!-- Footer -->
+        <div class="card-footer bg-white text-center border-0 pb-4">
+          <small class="text-muted">
+            WN © {% now "Y" %} ·
+            {% trans "Secure Education Platform" %}
+          </small>
+        </div>
       </div>
-
-
-      <!-- Footer -->
-      <div class="card-footer bg-white text-center border-0 pb-4">
-
-        <small class="text-muted">
-          WN © {% now "Y" %} ·
-          {% trans "Secure Education Platform" %}
-        </small>
-
-      </div>
-
     </div>
-
   </div>
-</div>
-
 {% endblock %}

@@ -1,60 +1,46 @@
 {% extends "layouts/auth.html" %}
 {% load static i18n allauth account socialaccount %}
-
-{% block title %}{% trans "Verify Your Email Address" %} | WN{% endblock title %}
-
+{% block title %}
+  {% trans "Verify Your Email Address" %} | WN
+{% endblock title %}
 {% block auth_card %}
-<div class="login-box">
-
-  <!-- Logo -->
-  <div class="login-logo">
-    <a href="/"><b>W</b>onder<b>N</b>et</a>
-  </div>
-
-  <div class="card card-outline card-info shadow">
-
-    <!-- Header -->
-    <div class="card-header text-center">
-      <a href="{% url 'pages:landing' %}" class="h1">
-        <b>WN</b>
-      </a>
+  <div class="login-box">
+    <!-- Logo -->
+    <div class="login-logo">
+      <a href="/"><b>W</b>onder<b>N</b>et</a>
     </div>
-
-    <!-- Body -->
-    <div class="card-body text-center">
-
-      <div class="mb-3">
-        <i class="fas fa-envelope-open-text fa-3x text-info"></i>
+    <div class="card card-outline card-info shadow">
+      <!-- Header -->
+      <div class="card-header text-center">
+        <a href="{% url 'pages:landing' %}" class="h1">
+          <b>WN</b>
+        </a>
       </div>
-
-      <h4 class="font-weight-bold">
-        {% trans "Verify Your Email Address" %}
-      </h4>
-
-      <p class="text-muted mt-3">
-        {% blocktrans %}
+      <!-- Body -->
+      <div class="card-body text-center">
+        <div class="mb-3">
+          <i class="fas fa-envelope-open-text fa-3x text-info"></i>
+        </div>
+        <h4 class="font-weight-bold">{% trans "Verify Your Email Address" %}</h4>
+        <p class="text-muted mt-3">
+          {% blocktrans %}
           We have sent an email to you for verification.
           Follow the link provided to finalize your signup.
         {% endblocktrans %}
-      </p>
-
-      <p class="small text-muted">
-        {% blocktrans %}
+        </p>
+        <p class="small text-muted">
+          {% blocktrans %}
           If you don’t see the email in your inbox, please check your spam folder.
           Contact us if you do not receive the verification email within a few minutes.
         {% endblocktrans %}
-      </p>
-
-      <hr>
-
-      <a href="{% url 'account_login' %}" class="btn btn-outline-primary btn-block">
-        <i class="fas fa-sign-in-alt mr-1"></i>
-        {% trans "Back to Login" %}
-      </a>
-
+        </p>
+        <hr>
+        <a href="{% url 'account_login' %}"
+           class="btn btn-outline-primary btn-block">
+          <i class="fas fa-sign-in-alt mr-1"></i>
+          {% trans "Back to Login" %}
+        </a>
+      </div>
     </div>
-
   </div>
-
-</div>
 {% endblock auth_card %}

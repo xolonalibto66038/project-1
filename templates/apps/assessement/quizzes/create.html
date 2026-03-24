@@ -1,216 +1,161 @@
 {% extends "layouts/base.html" %}
 {% load static i18n %}
-
-{% block title %}{% trans "Quiz Create" %}{% endblock title %}
-
+{% block title %}
+  {% trans "Quiz Create" %}
+{% endblock title %}
 {% block content %}
-<section class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2 align-items-center">
-      <div class="col-sm-8">
-        <h1 class="font-weight-bold">
-          {% if object %}
-            <i class="fas fa-edit"></i> {% trans "Edit Quiz" %}
-          {% else %}
-            <i class="fas fa-plus"></i> {% trans "Create Quiz" %}
-          {% endif %}
-        </h1>
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2 align-items-center">
+        <div class="col-sm-8">
+          <h1 class="font-weight-bold">
+            {% if object %}
+              <i class="fas fa-edit"></i> {% trans "Edit Quiz" %}
+            {% else %}
+              <i class="fas fa-plus"></i> {% trans "Create Quiz" %}
+            {% endif %}
+          </h1>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="content">
-  <div class="container-fluid">
-    <div class="card card-primary">
-      <div class="card-header">
-        <h3 class="card-title">
-          {% if object %} {% trans "Edit Quiz" %} {% else %} {% trans "Create Quiz" %} {% endif %}
-        </h3>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title">
+            {% if object %}
+              {% trans "Edit Quiz" %}
+            {% else %}
+              {% trans "Create Quiz" %}
+            {% endif %}
+          </h3>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="card-body">
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <h5 class="mb-3">{% trans "Basic Information" %}</h5>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Title" %}</label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="invalid-feedback d-block">{{ form.title.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Description" %}</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="invalid-feedback d-block">{{ form.description.errors|striptags }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{% trans "Instructions" %}</label>
+              {{ form.instructions }}
+              {% if form.instructions.errors %}
+                <div class="invalid-feedback d-block">{{ form.instructions.errors|striptags }}</div>
+              {% endif %}
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Quiz Settings" %}</h5>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Time Limit (minutes)" %}</label>
+                {{ form.time_limit }}
+                {% if form.time_limit.errors %}
+                  <div class="invalid-feedback d-block">{{ form.time_limit.errors|striptags }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Max Attempts" %}</label>
+                {{ form.max_attempts }}
+                {% if form.max_attempts.errors %}
+                  <div class="invalid-feedback d-block">{{ form.max_attempts.errors|striptags }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">{% trans "Passing Score (%)" %}</label>
+                {{ form.passing_score }}
+                {% if form.passing_score.errors %}
+                  <div class="invalid-feedback d-block">{{ form.passing_score.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Availability" %}</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "Start Date" %}</label>
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                  <div class="invalid-feedback d-block">{{ form.start_date.errors|striptags }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "End Date" %}</label>
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                  <div class="invalid-feedback d-block">{{ form.end_date.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Parent Link" %}</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "Subject" %}</label>
+                {{ form.grade_subject }}
+                {% if form.grade_subject.errors %}
+                  <div class="invalid-feedback d-block">{{ form.grade_subject.errors|striptags }}</div>
+                {% endif %}
+                <small class="form-text text-muted">
+                  {% trans "Select a Subject if this quiz is for a subject. Leave empty if linked to a Course." %}
+                </small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{% trans "Course" %}</label>
+                {{ form.course }}
+                {% if form.course.errors %}<div class="invalid-feedback d-block">{{ form.course.errors|striptags }}</div>{% endif %}
+                <small class="form-text text-muted">
+                  {% trans "Select a Course if this quiz is for a course. Leave empty if linked to a Subject." %}
+                </small>
+              </div>
+            </div>
+            <hr>
+            <h5 class="mb-3">{% trans "Quiz Behavior" %}</h5>
+            <div class="form-check mb-2">
+              {{ form.is_free }}
+              <label class="form-check-label">{% trans "Free" %}</label>
+            </div>
+            <div class="form-check mb-2">
+              {{ form.is_published }}
+              <label class="form-check-label">{% trans "Publish it" %}</label>
+            </div>
+            <div class="form-check mb-2">
+              {{ form.randomize_questions }}
+              <label class="form-check-label">{% trans "Randomize Question Order" %}</label>
+            </div>
+            <div class="form-check mb-2">
+              {{ form.show_results_immediately }}
+              <label class="form-check-label">{% trans "Show Results Immediately" %}</label>
+            </div>
+            <div class="form-check mb-3">
+              {{ form.allow_review }}
+              <label class="form-check-label">{% trans "Allow Review After Submission" %}</label>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'assessment:quiz:quiz-list' %}"
+               class="btn btn-secondary">{% trans "Cancel" %}</a>
+            <button type="submit" class="btn btn-primary">
+              {% if object %}
+                {% trans "Update Quiz" %}
+              {% else %}
+                {% trans "Save Quiz" %}
+              {% endif %}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form method="post">
-        {% csrf_token %}
-
-        <div class="card-body">
-
-          {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-              {{ form.non_field_errors }}
-            </div>
-          {% endif %}
-
-          <h5 class="mb-3">{% trans "Basic Information" %}</h5>
-
-          <div class="mb-3">
-            <label class="form-label">{% trans "Title" %}</label>
-            {{ form.title }}
-            {% if form.title.errors %}
-              <div class="invalid-feedback d-block">
-                {{ form.title.errors|striptags }}
-              </div>
-            {% endif %}
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">{% trans "Description" %}</label>
-            {{ form.description }}
-            {% if form.description.errors %}
-              <div class="invalid-feedback d-block">
-                {{ form.description.errors|striptags }}
-              </div>
-            {% endif %}
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">{% trans "Instructions" %}</label>
-            {{ form.instructions }}
-            {% if form.instructions.errors %}
-              <div class="invalid-feedback d-block">
-                {{ form.instructions.errors|striptags }}
-              </div>
-            {% endif %}
-          </div>
-
-          <hr>
-
-          <h5 class="mb-3">{% trans "Quiz Settings" %}</h5>
-
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label class="form-label">{% trans "Time Limit (minutes)" %}</label>
-              {{ form.time_limit }}
-              {% if form.time_limit.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.time_limit.errors|striptags }}
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="col-md-4 mb-3">
-              <label class="form-label">{% trans "Max Attempts" %}</label>
-              {{ form.max_attempts }}
-              {% if form.max_attempts.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.max_attempts.errors|striptags }}
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="col-md-4 mb-3">
-              <label class="form-label">{% trans "Passing Score (%)" %}</label>
-              {{ form.passing_score }}
-              {% if form.passing_score.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.passing_score.errors|striptags }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <hr>
-
-          <h5 class="mb-3">{% trans "Availability" %}</h5>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{% trans "Start Date" %}</label>
-              {{ form.start_date }}
-              {% if form.start_date.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.start_date.errors|striptags }}
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{% trans "End Date" %}</label>
-              {{ form.end_date }}
-              {% if form.end_date.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.end_date.errors|striptags }}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <hr>
-          <h5 class="mb-3">{% trans "Parent Link" %}</h5>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{% trans "Subject" %}</label>
-              {{ form.grade_subject }}
-              {% if form.grade_subject.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.grade_subject.errors|striptags }}
-                </div>
-              {% endif %}
-              <small class="form-text text-muted">
-                {% trans "Select a Subject if this quiz is for a subject. Leave empty if linked to a Course." %}
-              </small>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">{% trans "Course" %}</label>
-              {{ form.course }}
-              {% if form.course.errors %}
-                <div class="invalid-feedback d-block">
-                  {{ form.course.errors|striptags }}
-                </div>
-              {% endif %}
-              <small class="form-text text-muted">
-                {% trans "Select a Course if this quiz is for a course. Leave empty if linked to a Subject." %}
-              </small>
-            </div>
-          </div>
-
-          <hr>
-
-          <h5 class="mb-3">{% trans "Quiz Behavior" %}</h5>
-          <div class="form-check mb-2">
-            {{ form.is_free }}
-            <label class="form-check-label">{% trans "Free" %}</label>
-          </div>
-
-          <div class="form-check mb-2">
-            {{ form.is_published }}
-            <label class="form-check-label">{% trans "Publish it" %}</label>
-          </div>
-
-          <div class="form-check mb-2">
-            {{ form.randomize_questions }}
-            <label class="form-check-label">
-              {% trans "Randomize Question Order" %}
-            </label>
-          </div>
-
-          <div class="form-check mb-2">
-            {{ form.show_results_immediately }}
-            <label class="form-check-label">
-              {% trans "Show Results Immediately" %}
-            </label>
-          </div>
-
-          <div class="form-check mb-3">
-            {{ form.allow_review }}
-            <label class="form-check-label">
-              {% trans "Allow Review After Submission" %}
-            </label>
-          </div>
-
-        </div>
-
-        <div class="card-footer text-end">
-          <a href="{% url 'assessment:quiz:quiz-list' %}" class="btn btn-secondary">
-            {% trans "Cancel" %}
-          </a>
-          <button type="submit" class="btn btn-primary">
-            {% if object %} {% trans "Update Quiz" %} {% else %} {% trans "Save Quiz" %} {% endif %}
-          </button>
-        </div>
-
-      </form>
     </div>
-  </div>
-</section>
+  </section>
 {% endblock %}

@@ -1,333 +1,201 @@
 {% extends "layouts/base-full.html" %}
 {% load i18n %}
-
-{% block title %}{% trans "Pricing" %}{% endblock %}
-
-{% block content %}
-
-<section class="content-header">
-<div class="container-fluid">
-
-<div class="row mb-2">
-<div class="col-sm-6">
-<h1><i class="fas fa-money-bill-wave text-success"></i> {% trans "Pricing" %}</h1>
-</div>
-
-<div class="col-sm-6">
-<ol class="breadcrumb float-sm-right">
-<li class="breadcrumb-item">
-<a href="{% url 'pages:landing' %}"><i class="fas fa-home"></i> {% trans "Home" %}</a>
-</li>
-<li class="breadcrumb-item active">{% trans "Pricing" %}</li>
-</ol>
-</div>
-</div>
-
-</div>
-</section>
-
-<section class="content">
-<div class="container-fluid">
-
-<!-- PERIOD SWITCHER -->
-
-<div class="row mb-4">
-<div class="col text-center">
-
-<div class="btn-group btn-group-toggle" data-toggle="buttons" id="periodSwitcher">
-
-{% for iv in intervals %}
-
-<label class="btn btn-outline-primary {% if iv.value == default_interval %}active{% endif %}">
-<input type="radio"
-       name="period"
-       value="{{ iv.value }}"
-       {% if iv.value == default_interval %}checked{% endif %}>
-{{ iv.label }}
-</label>
-
-{% endfor %}
-
-</div>
-
-</div>
-</div>
-
-<!-- PRICING CARDS -->
-
-<div class="row">
-
-{% for item in matrix %}
-{% with offer=item.offer plans=item.plans_by_interval %}
-
-<div class="col-md-4 d-flex">
-
-<div class="card card-outline
-{% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %}
-border-success shadow-lg
-{% endif %}
-{% if offer.tier == 'free' %}card-secondary
-{% elif offer.tier == 'standard' %}card-primary
-{% else %}card-warning{% endif %}
-flex-fill">
-
-{% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %}
-
-<div class="ribbon-wrapper ribbon-lg">
-<div class="ribbon bg-success">
-{% trans "Your Plan" %}
-</div>
-</div>
-{% endif %}
-
-<!-- HEADER -->
-
-<div class="card-header text-center">
-
-<h3 class="card-title font-weight-bold">
-
-{% if offer.tier == "free" %} <i class="fas fa-unlock text-secondary mr-1"></i>
-
-{% elif offer.tier == "standard" %} <i class="fas fa-graduation-cap text-primary mr-1"></i>
-
-{% else %} <i class="fas fa-crown text-warning mr-1"></i>
-{% endif %}
-
-{{ offer.name }}
-
-</h3>
-
-{% if offer.description %}
-
-<p class="text-muted mb-0">{{ offer.description }}</p>
-{% endif %}
-
-</div>
-
-<!-- BODY -->
-
-<div class="card-body d-flex flex-column">
-
-<div class="text-center mb-4">
-
-{% if offer.is_free %}
-
-<h2 class="font-weight-bold">€0</h2>
-<p class="text-muted">{% trans "Forever free" %}</p>
-
-{% else %}
-
-{% for interval_val, plan in plans.items %}
-
-<div class="price-panel"
-     data-period="{{ interval_val }}"
-     style="display:{% if interval_val == default_interval %}block{% else %}none{% endif %}">
-
-<h2 class="font-weight-bold">
-€{{ plan.price }}
-</h2>
-
-<p class="text-muted">
-
-{% if interval_val == "month" %}
-{% trans "per month" %}
-
-{% elif interval_val == "6month" %}
-{% trans "for 6 months" %}
-
-{% else %}
-{% trans "per year" %}
-
-{% endif %}
-
-</p>
-
-</div>
-
-{% endfor %}
-
-{% endif %}
-
-</div>
-
-<!-- FEATURES -->
-
-<ul class="list-group list-group-flush flex-grow-1">
-
-{% for feature in item.features %}
-
-<li class="list-group-item">
-
-{% if feature.included %}
-
-<i class="fas fa-check text-success mr-2"></i>
-{{ feature.text }}
-
-{% else %}
-
-<i class="fas fa-times text-danger mr-2"></i> <span class="text-muted">{{ feature.text }}</span>
-
-{% endif %}
-
-</li>
-
-{% endfor %}
-
-</ul>
-
-</div>
-
-<!-- FOOTER -->
-
-<div class="card-footer text-center">
-
-{% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %}
-
-<button class="btn btn-success btn-block" disabled>
-<i class="fas fa-check"></i>
-{% trans "Current Plan" %}
-</button>
-
-{% else %}
-
-{% if offer.is_free %}
-
-{% if request.user.is_authenticated %}
-
-<a href="{% url 'pages:landing' %}"
-class="btn btn-secondary btn-block">
-
-<i class="fas fa-check"></i>
-{% trans "Free Plan" %}
-
-</a>
-
-{% else %}
-
-<a href="{% url 'account_signup' %}"
-class="btn btn-secondary btn-block">
-
-<i class="fas fa-user-plus"></i>
-{% trans "Get Started Free" %}
-
-</a>
-
-{% endif %}
-
-{% else %}
-
-{% for interval_val, plan in plans.items %}
-
-<div class="cta-panel"
-     data-period="{{ interval_val }}"
-     style="display:{% if interval_val == default_interval %}block{% else %}none{% endif %}">
-
-{% if request.user.is_authenticated %}
-
-<a href="{% url 'billing:select-method' plan_pk=plan.pk %}"
-class="btn btn-primary btn-block">
-
-<i class="fas fa-rocket mr-1"></i>
-{% trans "Upgrade Now" %}
-
-</a>
-
-{% else %}
-
-<a href="{% url 'account_login' %}?next={% url 'billing:pricing' %}"
-class="btn btn-primary btn-block">
-
-<i class="fas fa-sign-in-alt"></i>
-{% trans "Login to Subscribe" %}
-
-</a>
-
-{% endif %}
-
-</div>
-
-{% endfor %}
-
-{% endif %}
-
-{% endif %}
-
-</div>
-
-</div>
-</div>
-
-{% endwith %}
-{% endfor %}
-
-</div>
-
-<!-- TRUST BAR -->
-
-<div class="row mt-4">
-
-<div class="col-md-4">
-
-<div class="info-box">
-
-<span class="info-box-icon bg-success">
-<i class="fas fa-shield-alt"></i>
-</span>
-
-<div class="info-box-content">
-<span class="info-box-text">{% trans "Secure Payments" %}</span>
-<span class="info-box-number">SSL Encryption</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-4">
-
-<div class="info-box">
-
-<span class="info-box-icon bg-info">
-<i class="fas fa-undo"></i>
-</span>
-
-<div class="info-box-content">
-<span class="info-box-text">{% trans "Cancel Anytime" %}</span>
-<span class="info-box-number">{% trans "No lock-in contract" %}</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="col-md-4">
-
-<div class="info-box">
-
-<span class="info-box-icon bg-warning">
-<i class="fas fa-credit-card"></i>
-</span>
-
-<div class="info-box-content">
-<span class="info-box-text">{% trans "Payments" %}</span>
-<span class="info-box-number">Visa • Mastercard • Amex</span>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</section>
-
+{% block title %}
+  {% trans "Pricing" %}
 {% endblock %}
-
+{% block content %}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>
+            <i class="fas fa-money-bill-wave text-success"></i> {% trans "Pricing" %}
+          </h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item">
+              <a href="{% url 'pages:landing' %}"><i class="fas fa-home"></i> {% trans "Home" %}</a>
+            </li>
+            <li class="breadcrumb-item active">{% trans "Pricing" %}</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <!-- PERIOD SWITCHER -->
+      <div class="row mb-4">
+        <div class="col text-center">
+          <div class="btn-group btn-group-toggle"
+               data-toggle="buttons"
+               id="periodSwitcher">
+            {% for iv in intervals %}
+              <label class="btn btn-outline-primary {% if iv.value == default_interval %}active{% endif %}">
+                <input type="radio"
+                       name="period"
+                       value="{{ iv.value }}"
+                       {% if iv.value == default_interval %}checked{% endif %}>
+                {{ iv.label }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <!-- PRICING CARDS -->
+      <div class="row">
+        {% for item in matrix %}
+          {% with offer=item.offer plans=item.plans_by_interval %}
+            <div class="col-md-4 d-flex">
+              <div class="card card-outline {% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %} border-success shadow-lg {% endif %} {% if offer.tier == 'free' %}card-secondary {% elif offer.tier == 'standard' %}card-primary {% else %}card-warning{% endif %} flex-fill">
+                {% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %}
+                  <div class="ribbon-wrapper ribbon-lg">
+                    <div class="ribbon bg-success">{% trans "Your Plan" %}</div>
+                  </div>
+                {% endif %}
+                <!-- HEADER -->
+                <div class="card-header text-center">
+                  <h3 class="card-title font-weight-bold">
+                    {% if offer.tier == "free" %}
+                      <i class="fas fa-unlock text-secondary mr-1"></i>
+                    {% elif offer.tier == "standard" %}
+                      <i class="fas fa-graduation-cap text-primary mr-1"></i>
+                    {% else %}
+                      <i class="fas fa-crown text-warning mr-1"></i>
+                    {% endif %}
+                    {{ offer.name }}
+                  </h3>
+                  {% if offer.description %}<p class="text-muted mb-0">{{ offer.description }}</p>{% endif %}
+                </div>
+                <!-- BODY -->
+                <div class="card-body d-flex flex-column">
+                  <div class="text-center mb-4">
+                    {% if offer.is_free %}
+                      <h2 class="font-weight-bold">€0</h2>
+                      <p class="text-muted">{% trans "Forever free" %}</p>
+                    {% else %}
+                      {% for interval_val, plan in plans.items %}
+                        <div class="price-panel"
+                             data-period="{{ interval_val }}"
+                             style="display:{% if interval_val == default_interval %}block{% else %}none{% endif %}">
+                          <h2 class="font-weight-bold">€{{ plan.price }}</h2>
+                          <p class="text-muted">
+                            {% if interval_val == "month" %}
+                              {% trans "per month" %}
+                            {% elif interval_val == "6month" %}
+                              {% trans "for 6 months" %}
+                            {% else %}
+                              {% trans "per year" %}
+                            {% endif %}
+                          </p>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <!-- FEATURES -->
+                  <ul class="list-group list-group-flush flex-grow-1">
+                    {% for feature in item.features %}
+                      <li class="list-group-item">
+                        {% if feature.included %}
+                          <i class="fas fa-check text-success mr-2"></i>
+                          {{ feature.text }}
+                        {% else %}
+                          <i class="fas fa-times text-danger mr-2"></i> <span class="text-muted">{{ feature.text }}</span>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <!-- FOOTER -->
+                <div class="card-footer text-center">
+                  {% if request.user.is_authenticated and request.user.subscription and request.user.subscription.is_active and request.user.subscription.plan.offer.tier == offer.tier %}
+                    <button class="btn btn-success btn-block" disabled>
+                      <i class="fas fa-check"></i>
+                      {% trans "Current Plan" %}
+                    </button>
+                  {% else %}
+                    {% if offer.is_free %}
+                      {% if request.user.is_authenticated %}
+                        <a href="{% url 'pages:landing' %}" class="btn btn-secondary btn-block">
+                          <i class="fas fa-check"></i>
+                          {% trans "Free Plan" %}
+                        </a>
+                      {% else %}
+                        <a href="{% url 'account_signup' %}" class="btn btn-secondary btn-block">
+                          <i class="fas fa-user-plus"></i>
+                          {% trans "Get Started Free" %}
+                        </a>
+                      {% endif %}
+                    {% else %}
+                      {% for interval_val, plan in plans.items %}
+                        <div class="cta-panel"
+                             data-period="{{ interval_val }}"
+                             style="display:{% if interval_val == default_interval %}block{% else %}none{% endif %}">
+                          {% if request.user.is_authenticated %}
+                            <a href="{% url 'billing:select-method' plan_pk=plan.pk %}"
+                               class="btn btn-primary btn-block">
+                              <i class="fas fa-rocket mr-1"></i>
+                              {% trans "Upgrade Now" %}
+                            </a>
+                          {% else %}
+                            <a href="{% url 'account_login' %}?next={% url 'billing:pricing' %}"
+                               class="btn btn-primary btn-block">
+                              <i class="fas fa-sign-in-alt"></i>
+                              {% trans "Login to Subscribe" %}
+                            </a>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+      <!-- TRUST BAR -->
+      <div class="row mt-4">
+        <div class="col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-success">
+              <i class="fas fa-shield-alt"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Secure Payments" %}</span>
+              <span class="info-box-number">SSL Encryption</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-info">
+              <i class="fas fa-undo"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Cancel Anytime" %}</span>
+              <span class="info-box-number">{% trans "No lock-in contract" %}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning">
+              <i class="fas fa-credit-card"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">{% trans "Payments" %}</span>
+              <span class="info-box-number">Visa • Mastercard • Amex</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
 {% block extra_js %}
-
-<script>
-
+  <script>
 document.querySelectorAll('#periodSwitcher input').forEach(input => {
 
 input.addEventListener('change', function(){
@@ -354,6 +222,5 @@ panel.dataset.period === period ? 'block' : 'none';
 
 });
 
-</script>
-
+  </script>
 {% endblock %}
