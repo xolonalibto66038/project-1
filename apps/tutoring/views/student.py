@@ -12,7 +12,9 @@ from django.views.decorators.http import require_POST
 from apps.accounts.choices import UserRole
 from apps.accounts.models import CustomUser
 from apps.authentication.decorators import student_required
+from apps.billing.choices import OfferTier
 from apps.billing.decorators import subscription_required
+from apps.billing.exceptions import SubscriptionRequired
 from apps.billing.services import StripeService
 
 from ..decorators import teacher_level_required
@@ -109,7 +111,8 @@ def available_teachers(request, subject_pk=None):
 
 @login_required
 @student_required
-@subscription_required
+# @premium_required
+@subscription_required(tier=OfferTier.PREMIUM)  # same as above, explicit
 @teacher_level_required
 @require_POST
 def select_teacher(request, teacher_id):
@@ -146,6 +149,8 @@ def select_teacher(request, teacher_id):
 
         return redirect(checkout.url)
 
+    except SubscriptionRequired:
+        raise
     except Exception as ex:
         logger.exception(
             f"Exception : {str(ex)}, select_teacher: session creation failed for "

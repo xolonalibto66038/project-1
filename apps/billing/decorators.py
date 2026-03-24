@@ -1,64 +1,70 @@
-# # apps/billing/decorators.py
-
-# from functools import wraps
-# from django.shortcuts import redirect
-
-
-# def subscription_required(view_func):
-#     """
-#     Blocks access unless the user has an active subscription.
-#     Redirects unauthenticated users to login.
-#     Redirects users without active subscription to pricing page.
-#     Staff and superusers always pass through.
-#     """
-#     @wraps(view_func)
-#     def wrapper(request, *args, **kwargs):
-
-#         if not request.user.is_authenticated:
-#             return redirect('account_login')
-
-#         # Staff bypass
-#         if request.user.is_staff or request.user.is_superuser:
-#             return view_func(request, *args, **kwargs)
-
-#         # Check your own Subscription model
-#         try:
-#             if request.user.subscription.is_active:
-#                 return view_func(request, *args, **kwargs)
-#         except Exception:
-#             pass
-
-#         return redirect('billing:pricing')
-
-#     return wrapper
-
 from functools import wraps
 
 from django.shortcuts import redirect
 
+from .choices import OfferTier
+from .exceptions import SubscriptionRequired
+from .helpers import _deny_access, _has_tier
 
-def subscription_required(view_func):
+
+# def subscription_required(
+#     view_func=None, *, tier=OfferTier.STANDARD, redirect_url="billing:pricing"
+# ):
+def subscription_required(view_func=None, *, tier=OfferTier.STANDARD):
     """
-    Blocks access unless the user has an active subscription.
+    Blocks access unless the user has an active subscription at or above `tier`.
+
+    Default tier: STANDARD  →  paid content / resources.
+
+    Usage:
+        @subscription_required
+        def my_view(request): ...
+
+        @subscription_required(tier=OfferTier.PREMIUM)
+        def tutor_view(request): ...
+
+        @subscription_required(tier=OfferTier.PREMIUM, redirect_url="billing:upgrade")
+        def tutor_view(request): ...
     """
 
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect("account_login")
 
-        user = request.user
+            if _has_tier(request.user, tier):
+                return fn(request, *args, **kwargs)
 
-        if not user.is_authenticated:
-            return redirect("account_login")
+            # return redirect(redirect_url)
 
-        # Staff bypass
-        if user.is_staff or user.is_superuser:
-            return view_func(request, *args, **kwargs)
+            # # Raise — middleware handles the redirect
+            # raise SubscriptionRequired(
+            #     required_tier=tier,
+            #     next_url=request.path,
+            # )
+            # ← handle the redirect RIGHT HERE, no exception needed
+            return _deny_access(request, tier)
 
-        subscription = getattr(user, "subscription", None)
+        return wrapper
 
-        if subscription and subscription.is_active:
-            return view_func(request, *args, **kwargs)
+    # Support both @subscription_required and @subscription_required(tier=...)
+    if view_func is not None:
+        return decorator(view_func)
 
-        return redirect("billing:pricing")
+    return decorator
 
-    return wrapper
+
+# Convenience alias — clearer intent at the call site
+def premium_required(view_func=None, *, redirect_url="billing:pricing"):
+    """
+    Shorthand for @subscription_required(tier=OfferTier.PREMIUM).
+
+    Usage:
+        @premium_required
+        def tutor_view(request): ...
+    """
+    # return subscription_required(
+    #     view_func, tier=OfferTier.PREMIUM, redirect_url=redirect_url
+    # )
+    return subscription_required(view_func, tier=OfferTier.PREMIUM)

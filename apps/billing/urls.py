@@ -6,6 +6,7 @@ from .views import (
     PricingPageView,
     SelectPaymentMethodView,
     SubscriptionSuccessView,
+    UpgradeView,
 )
 from .webhooks import stripe_webhook
 
@@ -13,6 +14,7 @@ app_name = "billing"
 
 urlpatterns = [
     path("pricing/", PricingPageView.as_view(), name="pricing"),
+    path("upgrade/", UpgradeView.as_view(), name="upgrade"),
     path(
         "checkout/<uuid:plan_pk>/", CreateCheckoutSessionView.as_view(), name="checkout"
     ),

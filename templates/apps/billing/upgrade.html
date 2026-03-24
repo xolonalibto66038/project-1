@@ -1,0 +1,201 @@
+{% extends "layouts/base-full.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Upgrade to" %} {{ required_tier_label }}{% endblock %}
+
+{% block content %}
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-crown text-warning"></i>
+          {% trans "Upgrade Your Plan" %}
+        </h1>
+      </div>
+
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}"><i class="fas fa-home"></i> {% trans "Home" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'billing:pricing' %}">{% trans "Pricing" %}</a>
+          </li>
+          <li class="breadcrumb-item active">{% trans "Upgrade" %}</li>
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <!-- CONTEXT BANNER -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="callout callout-warning">
+          <h5>
+            <i class="fas fa-lock mr-2"></i>
+            {% trans "This feature requires" %} <strong>{{ required_tier_label }}</strong>
+          </h5>
+          <p class="mb-0">
+            {% trans "You are currently on" %}
+            <strong>{{ current_subscription.plan.offer.name }}</strong>.
+            {% trans "Upgrade to unlock this feature and everything" %} {{ required_tier_label }} {% trans "includes." %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAN CARDS -->
+    <div class="row justify-content-center">
+
+      {% for plan in upgrade_plans %}
+
+      <div class="col-md-4 d-flex">
+        <div class="card card-outline card-warning flex-fill {% if plan.is_popular %}shadow-lg{% endif %}">
+
+          {% if plan.is_popular %}
+          <div class="ribbon-wrapper ribbon-lg">
+            <div class="ribbon bg-warning">
+              {% trans "Most Popular" %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- CARD HEADER -->
+          <div class="card-header text-center">
+            <h3 class="card-title font-weight-bold">
+              <i class="fas fa-crown text-warning mr-1"></i>
+              {{ plan.offer.name }}
+            </h3>
+            <p class="text-muted mb-0">{{ plan.get_interval_display }}</p>
+          </div>
+
+          <!-- CARD BODY -->
+          <div class="card-body d-flex flex-column text-center">
+
+            <!-- PRICE -->
+            <div class="mb-4">
+
+              {% if plan.original_price %}
+              <p class="text-muted mb-0">
+                <del>€{{ plan.original_price }}</del>
+              </p>
+              {% endif %}
+
+              <h2 class="font-weight-bold mb-0">€{{ plan.price }}</h2>
+
+              <p class="text-muted small">
+                {% if plan.interval == "month" %}
+                  {% trans "per month" %}
+                {% elif plan.interval == "6month" %}
+                  {% trans "for 6 months" %}
+                  <br><span class="text-info">(€{{ plan.price_per_month }} / {% trans "mo" %})</span>
+                {% else %}
+                  {% trans "per year" %}
+                  <br><span class="text-info">(€{{ plan.price_per_month }} / {% trans "mo" %})</span>
+                {% endif %}
+              </p>
+
+              {% if plan.savings_percent %}
+              <span class="badge badge-success">
+                {% trans "Save" %} {{ plan.savings_percent }}%
+              </span>
+              {% endif %}
+
+            </div>
+
+            <!-- FEATURES -->
+            <ul class="list-group list-group-flush flex-grow-1 text-left mb-4">
+              {% for feature in plan.offer.features %}
+              <li class="list-group-item px-0">
+                <i class="fas fa-check text-success mr-2"></i>{{ feature }}
+              </li>
+              {% endfor %}
+            </ul>
+
+          </div>
+
+          <!-- CARD FOOTER -->
+          <div class="card-footer text-center">
+            <a href="{% url 'billing:select-method' plan_pk=plan.pk %}?next={{ next_url|urlencode }}"
+               class="btn btn-warning btn-block font-weight-bold">
+              <i class="fas fa-rocket mr-1"></i>
+              {% trans "Upgrade Now" %}
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      {% empty %}
+      <div class="col-12">
+        <div class="callout callout-danger">
+          <p class="mb-0">
+            {% trans "No upgrade plans available at the moment. Please" %}
+            <a href="{% url 'billing:pricing' %}">{% trans "view all plans" %}</a>.
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- BACK / VIEW ALL -->
+    <div class="row mt-2 mb-4">
+      <div class="col-12 text-center">
+        <a href="{{ next_url }}" class="btn btn-link text-muted">
+          <i class="fas fa-arrow-left mr-1"></i>{% trans "Go back" %}
+        </a>
+        <span class="text-muted mx-2">|</span>
+        <a href="{% url 'billing:pricing' %}" class="btn btn-link text-muted">
+          <i class="fas fa-th-list mr-1"></i>{% trans "View all plans" %}
+        </a>
+      </div>
+    </div>
+
+    <!-- TRUST BAR -->
+    <div class="row">
+
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-success"><i class="fas fa-shield-alt"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">{% trans "Secure Payments" %}</span>
+            <span class="info-box-number">SSL Encryption</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-info"><i class="fas fa-undo"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">{% trans "Cancel Anytime" %}</span>
+            <span class="info-box-number">{% trans "No lock-in contract" %}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="info-box">
+          <span class="info-box-icon bg-warning"><i class="fas fa-credit-card"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text">{% trans "Payments" %}</span>
+            <span class="info-box-number">Visa • Mastercard • Amex</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

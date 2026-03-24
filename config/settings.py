@@ -97,6 +97,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     # internal
     "apps.authentication.middleware.OnboardingMiddleware",
+    "apps.billing.middleware.SubscriptionGateMiddleware",
     "common.middleware.allauth_ratelimit.AllauthRateLimitMiddleware",
 ]
 

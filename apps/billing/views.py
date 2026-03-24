@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 
 from apps.tutoring.models import TutoringSession
 
+from .choices import OfferTier
 from .models import Plan
 from .selectors import get_pricing_context, get_user_subscription
 
@@ -22,6 +23,38 @@ class PricingPageView(TemplateView):
         context.update(get_pricing_context())
         context["user_subscription"] = get_user_subscription(self.request.user)
         return context
+
+
+class UpgradeView(LoginRequiredMixin, TemplateView):
+    """
+    Shown to already-paying users who tried to access a higher-tier feature.
+    Pre-selects the required tier and carries ?next= for post-payment redirect.
+    """
+
+    template_name = "apps/billing/upgrade.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        required_tier = self.request.GET.get("required_tier", OfferTier.PREMIUM)
+        next_url = self.request.GET.get("next", "/")
+
+        ctx["required_tier"] = required_tier
+        ctx["next_url"] = next_url
+        ctx["current_subscription"] = getattr(self.request.user, "subscription", None)
+
+        # Only show plans for the required tier
+        ctx["upgrade_plans"] = Plan.objects.filter(
+            offer__tier=required_tier,
+            is_active=True,
+        ).select_related("offer")
+
+        # Human-readable tier label
+        ctx["required_tier_label"] = dict(OfferTier.choices).get(
+            required_tier, required_tier
+        )
+
+        return ctx
 
 
 class SelectPaymentMethodView(LoginRequiredMixin, TemplateView):
