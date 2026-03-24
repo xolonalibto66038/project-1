@@ -94,9 +94,48 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
             stripe_customer_id = customer.id
 
         if user_subscription and user_subscription.is_active:
-            return JsonResponse(
-                {"error": "You already have an active subscription."}, status=400
-            )
+            # Allow if the user is upgrading to a different tier
+            if user_subscription.plan.offer.tier == plan.offer.tier:
+                return JsonResponse(
+                    {"error": "You already have an active subscription for this plan."},
+                    status=400,
+                )
+
+            # # The proper way to it
+            # # Upgrade: modify the existing Stripe subscription instead of creating a new one
+            # try:
+            #     stripe_sub = stripe.Subscription.retrieve(
+            #         user_subscription.stripe_subscription_id
+            #     )
+            #     updated = stripe.Subscription.modify(
+            #         user_subscription.stripe_subscription_id,
+            #         items=[
+            #             {
+            #                 "id": stripe_sub["items"]["data"][0]["id"],
+            #                 "price": plan.stripe_price_id,
+            #             }
+            #         ],
+            #         proration_behavior="always_invoice",  # charge the diff immediately
+            #         metadata={
+            #             "user_id": str(request.user.id),
+            #             "plan_id": str(plan.id),
+            #         },
+            #     )
+
+            #     # Update local DB immediately
+            #     user_subscription.plan = plan
+            #     user_subscription.status = updated.status
+            #     user_subscription.save(update_fields=["plan", "status"])
+
+            #     next_url = (
+            #         request.POST.get("next")
+            #         or request.GET.get("next")
+            #         or "/billing/subscription_success/"
+            #     )
+            #     return JsonResponse({"redirect_url": next_url})
+
+            # except stripe.error.StripeError as e:
+            #     return JsonResponse({"error": str(e)}, status=400)
 
         if not plan.stripe_price_id:
             return JsonResponse(
@@ -108,6 +147,13 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
 
         method_key = request.POST.get("payment_method", "card")
         payment_methods = self.ALLOWED_METHODS.get(method_key, ["card"])
+
+        # # The proper way
+        # next_url = (
+        #     request.POST.get("next")
+        #     or request.GET.get("next")
+        #     or "/billing/subscription_success/"
+        # )
 
         try:
             session = stripe.checkout.Session.create(
@@ -128,7 +174,15 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
                 success_url=request.build_absolute_uri(
                     "/billing/subscription_success/"
                 ),
+                # # The proper way
+                # success_url=request.build_absolute_uri(
+                #     f"/billing/subscription_success/?next={next_url}"
+                # ),
                 cancel_url=request.build_absolute_uri("/billing/pricing/"),
+                # # The proper way
+                # cancel_url=request.build_absolute_uri(
+                #     request.POST.get("next") or "/billing/pricing/"
+                # ),
             )
         except stripe.error.StripeError as e:
             return JsonResponse({"error": str(e)}, status=400)
