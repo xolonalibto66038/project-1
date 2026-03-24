@@ -6,6 +6,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% endblock %} | WN</title>
+  <link rel="icon" href="{% static 'dist/img/favicon.ico' %}">
+  
   {% include "includes/styles.html" %}
   {% block extra_css %}{% endblock %}
 </head>
@@ -13,7 +15,11 @@
 <body class="hold-transition {% if request.user.is_authenticated %}sidebar-mini{% else %}layout-top-nav{% endif %} layout-navbar-fixed layout-fixed sidebar-collapse">
 
 <div class="wrapper">
-  {% include "includes/navbar.html" %}
+  {% if request.user.is_authenticated %}
+    {% include "includes/navbar.html" %}
+  {% else %}
+    {% include "includes/navbar-full.html" %}
+  {% endif %}
 
   {% if request.user.is_authenticated %}
     {% if request.user.is_student %}

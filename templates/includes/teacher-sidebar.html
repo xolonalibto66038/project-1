@@ -4,7 +4,7 @@
 
   <!-- Brand Logo -->
   <a href="{% url 'pages:landing' %}" class="brand-link text-center">
-    <img src="{% static 'dist/img/AdminLTELogo.png' %}"
+    <img src="{% static 'dist/img/wnlogo.png' %}"
          alt="{% trans 'WN Logo' %}"
          class="brand-image img-circle elevation-3">
     <span class="brand-text font-weight-light ml-2">WN</span>
@@ -16,9 +16,18 @@
     <!-- User Panel -->
     <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
-        <img src="{% static 'dist/img/user2-160x160.jpg' %}"
+        {% comment %} <img src="{% static 'dist/img/user2-160x160.jpg' %}"
              class="img-circle elevation-2"
-             alt="{% trans 'User Image' %}">
+             alt="{% trans 'User Image' %}"> {% endcomment %}
+        {% if user.avatar_url %}
+        <img src="{{ user.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+              class="img-circle elevation-2"
+              width="50"
+              height="50"
+              alt="{{ user.first_name }} {{ user.last_name }}">
+        {% else %}
+        {{ user.avatar_display|safe }}
+        {% endif %}
       </div>
       <div class="info">
         <a href="#" class="d-block font-weight-bold">
