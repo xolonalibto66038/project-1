@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     CreateCheckoutSessionView,
+    PaymentCancelView,
     PaymentSuccessView,
     PricingPageView,
     SelectPaymentMethodView,
@@ -29,5 +30,6 @@ urlpatterns = [
         name="subscription-success",
     ),
     path("payment_success/", PaymentSuccessView.as_view(), name="payment-success"),
+    path("payment_cancel/", PaymentCancelView.as_view(), name="payment-cancel"),
     path("webhook/", stripe_webhook, name="webhook"),
 ]

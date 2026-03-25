@@ -1,0 +1,55 @@
+{% extends "layouts/base-full.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Payment Cancelled" %}{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container">
+    <div class="row justify-content-center" style="min-height:70vh; align-items:center;">
+      <div class="col-lg-5 col-md-7 text-center">
+        <div class="card border-0 shadow-lg" style="border-radius:20px;">
+          <div class="card-body p-5">
+
+            <div class="mb-4">
+              <div style="width:80px;
+                          height:80px;
+                          background:linear-gradient(135deg,#e53935,#ef5350);
+                          border-radius:50%;
+                          display:inline-flex;
+                          align-items:center;
+                          justify-content:center;">
+                <i class="fas fa-times text-white" style="font-size:2rem;"></i>
+              </div>
+            </div>
+
+            <h2 class="font-weight-bold mb-2">{% trans "Payment Cancelled" %}</h2>
+            <p class="text-muted mb-4">
+              {% trans "Your payment was cancelled and you have not been charged. You can try again whenever you're ready." %}
+            </p>
+
+            <div class="alert alert-warning border-0 mb-4" style="border-radius:12px;">
+              <i class="fas fa-info-circle mr-2"></i>
+              {% trans "No charges were made to your account." %}
+            </div>
+
+            <a href="{% url 'tutoring:student:student-sessions' %}"
+               class="btn btn-primary btn-block btn-lg mb-3"
+               style="border-radius:50px;">
+              <i class="fas fa-search mr-2"></i>
+              {% trans "Find a teacher" %}
+            </a>
+
+            <a href="{% url 'pages:landing' %}"
+               class="btn btn-outline-secondary btn-block"
+               style="border-radius:50px;">
+              {% trans "Go to home" %}
+            </a>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,3 +1,5 @@
+import logging
+
 import stripe
 from django.conf import settings
 from django.db import transaction
@@ -13,6 +15,8 @@ from apps.tutoring.services import SessionService
 from .models import Plan, Subscription
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
+
+logger = logging.getLogger(__name__)
 
 
 @csrf_exempt
@@ -111,65 +115,78 @@ def _handle_checkout_completed(session):
             },
         )
 
+    # elif session["mode"] == "payment":
+
+    #     metadata = session.get("metadata", {})
+    #     student_id = metadata.get("student_id")
+    #     teacher_id = metadata.get("teacher_id")
+
+    #     if not student_id or not teacher_id:
+    #         return HttpResponse(status=400)
+
+    #     try:
+
+    #         with transaction.atomic():
+    #             # Idempotency — skip if already processed
+    #             if TutoringSession.objects.filter(
+    #                 stripe_checkout_session_id=session["id"]
+    #             ).exists():
+    #                 return HttpResponse(status=200)
+
+    #             student = CustomUser.objects.get(id=student_id)
+    #             teacher = CustomUser.objects.select_related("teacher_profile").get(
+    #                 id=teacher_id
+    #             )
+
+    #             # Now create the DB session — payment is confirmed
+    #             tutoring_session = SessionService.create_paid_session(
+    #                 student=student,
+    #                 teacher=teacher,
+    #                 stripe_checkout_session_id=session["id"],
+    #                 stripe_payment_intent_id=session["payment_intent"],
+    #             )
+
+    #     except TutoringSession.DoesNotExist:
+    #         return HttpResponse(status=200)
+
     elif session["mode"] == "payment":
 
         metadata = session.get("metadata", {})
-        student_id = metadata.get("student_id")
-        teacher_id = metadata.get("teacher_id")
+        pay_type = metadata.get("type")
 
-        if not student_id or not teacher_id:
-            return HttpResponse(status=400)
+        # ── Meet session payment ──────────────────────────────────────
+        if pay_type == "meet_session_payment":
+            _handle_meet_session_payment(session, metadata)
 
-        try:
+        # ── Tutoring session payment (existing) ──────────────────────
+        elif pay_type == "tutoring_payment":
+            student_id = metadata.get("student_id")
+            teacher_id = metadata.get("teacher_id")
 
-            with transaction.atomic():
-                # Idempotency — skip if already processed
-                if TutoringSession.objects.filter(
-                    stripe_checkout_session_id=session["id"]
-                ).exists():
-                    return HttpResponse(status=200)
+            if not student_id or not teacher_id:
+                return
 
-                student = CustomUser.objects.get(id=student_id)
-                teacher = CustomUser.objects.select_related("teacher_profile").get(
-                    id=teacher_id
-                )
+            try:
+                with transaction.atomic():
+                    if TutoringSession.objects.filter(
+                        stripe_checkout_session_id=session["id"]
+                    ).exists():
+                        return
 
-                # Now create the DB session — payment is confirmed
-                tutoring_session = SessionService.create_paid_session(
-                    student=student,
-                    teacher=teacher,
-                    stripe_checkout_session_id=session["id"],
-                    stripe_payment_intent_id=session["payment_intent"],
-                )
+                    student = CustomUser.objects.get(id=student_id)
+                    teacher = CustomUser.objects.select_related("teacher_profile").get(
+                        id=teacher_id
+                    )
 
-                # tutoring_session = TutoringSession.objects.select_for_update().get(
-                #     id=session_id
-                # )
+                    SessionService.create_paid_session(
+                        student=student,
+                        teacher=teacher,
+                        stripe_checkout_session_id=session["id"],
+                        stripe_payment_intent_id=session["payment_intent"],
+                    )
 
-                # # idempotency protection
-                # if tutoring_session.status == TutoringSession.Status.PAYMENT_AUTHORIZED:
-
-                #     return HttpResponse(status=200)
-
-                # tutoring_session.status = TutoringSession.Status.PAYMENT_AUTHORIZED
-
-                # tutoring_session.stripe_checkout_session_id = session["id"]
-
-                # tutoring_session.stripe_payment_intent_id = session["payment_intent"]
-
-                # tutoring_session.payment_authorized_at = timezone.now()
-
-                # tutoring_session.save(
-                #     update_fields=[
-                #         "status",
-                #         "stripe_checkout_session_id",
-                #         "stripe_payment_intent_id",
-                #         "payment_authorized_at",
-                #         "updated_at",
-                #     ]
-                # )
-        except TutoringSession.DoesNotExist:
-            return HttpResponse(status=200)
+            except (CustomUser.DoesNotExist, Exception):
+                logger.exception("tutoring_payment webhook failed")
 
 
 def _handle_subscription_updated(subscription_obj):
@@ -198,3 +215,33 @@ def _handle_payment_failed(invoice_obj):
         Subscription.objects.filter(stripe_subscription_id=sub_id).update(
             status="past_due"
         )
+
+
+def _handle_meet_session_payment(session, metadata):
+    from apps.tutoring.models import GoogleSession
+    from apps.tutoring.services.meet import MeetService
+
+    meet_session_id = metadata.get("meet_session_id")
+
+    if not meet_session_id:
+        logger.error("meet_session_payment: missing meet_session_id in metadata")
+        return
+
+    try:
+        with transaction.atomic():
+            google_session = GoogleSession.objects.select_for_update().get(
+                pk=meet_session_id,
+                state=GoogleSession.State.PENDING_PAYMENT,
+            )
+            MeetService.on_payment_confirmed(
+                session=google_session,
+                payment=None,
+            )
+
+    except GoogleSession.DoesNotExist:
+        logger.warning(
+            "meet_session_payment: GoogleSession %s not found or wrong state",
+            meet_session_id,
+        )
+    except Exception:
+        logger.exception("meet_session_payment: failed for session %s", meet_session_id)

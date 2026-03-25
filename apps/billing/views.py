@@ -2,7 +2,7 @@ import stripe
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -232,3 +232,10 @@ class PaymentFailureView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["user_subscription"] = get_user_subscription(self.request.user)
         return context
+
+
+class PaymentCancelView(View):
+    template_name = "apps/billing/payment_cancel.html"
+
+    def get(self, request):
+        return render(request, self.template_name)

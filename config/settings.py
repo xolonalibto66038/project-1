@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import json
 import os
 from pathlib import Path
 
@@ -406,9 +407,11 @@ ZOOM_HOST_EMAIL = env("ZOOM_HOST_EMAIL", default="")
 
 # Google meet settings
 
-GOOGLE_SERVICE_ACCOUNT_FILE = env("GOOGLE_SERVICE_ACCOUNT_FILE")
-GOOGLE_CALENDAR_HOST_EMAIL = env("GOOGLE_CALENDAR_HOST_EMAIL")
-
+GOOGLE_TOKEN_FILE = os.path.join(BASE_DIR, "token.json")
+GOOGLE_CREDENTIALS_FILE = os.path.join(BASE_DIR, "credentials.json")
+GOOGLE_CALENDAR_SCOPES = ["https://www.googleapis.com/auth/calendar"]
+GOOGLE_MEET_DEFAULT_TIMEZONE = "Africa/Algiers"
+GOOGLE_MEET_MAX_PARTICIPANTS = 10
 
 # Broker (Redis)
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"

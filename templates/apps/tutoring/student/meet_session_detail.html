@@ -1,0 +1,384 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Session Detail" %}{% endblock %}
+
+{% block content %}
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row align-items-center mb-2">
+      <div class="col-sm-7">
+        <h1 class="font-weight-bold mb-0">
+          <i class="fas fa-calendar-alt text-primary mr-2"></i>
+          {% trans "Session Detail" %}
+          <small class="text-muted ml-2" style="font-size:1rem;">#{{ session.pk }}</small>
+        </h1>
+        <small class="text-muted">
+          {% trans "Requested" %} {{ session.created_at|date:"d M Y, H:i" }}
+        </small>
+      </div>
+      <div class="col-sm-5">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="{% url 'pages:landing' %}"><i class="fas fa-home mr-1"></i>{% trans "Home" %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'tutoring:meet:student-meet-sessions' %}">{% trans "Meet Sessions" %}</a>
+          </li>
+          <li class="breadcrumb-item active font-weight-bold">#{{ session.pk }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+<div class="container-fluid">
+<div class="row">
+
+  {# ── Left column ── #}
+  <div class="col-lg-4 mb-4">
+
+    {# State card #}
+    <div class="card card-outline
+      {% if session.state == 'pending_teacher' %}card-warning
+      {% elif session.state == 'pending_payment' %}card-secondary
+      {% elif session.state == 'paid' %}card-info
+      {% elif session.state == 'active' %}card-primary
+      {% elif session.state == 'completed' %}card-dark
+      {% else %}card-danger{% endif %}
+      mb-3">
+
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-info-circle mr-2"></i>{% trans "Session Info" %}
+        </h3>
+      </div>
+
+      <div class="card-body">
+        <dl class="row mb-0">
+
+          <dt class="col-5 text-muted small">{% trans "State" %}</dt>
+          <dd class="col-7">
+            {% if session.state == "pending_teacher" %}
+              <span class="badge badge-warning"><i class="fas fa-hourglass-start mr-1"></i>{% trans "Pending Approval" %}</span>
+            {% elif session.state == "pending_payment" %}
+              <span class="badge badge-secondary"><i class="fas fa-credit-card mr-1"></i>{% trans "Pending Payment" %}</span>
+            {% elif session.state == "paid" %}
+              <span class="badge badge-info"><i class="fas fa-check-circle mr-1"></i>{% trans "Paid" %}</span>
+            {% elif session.state == "active" %}
+              <span class="badge badge-primary"><i class="fas fa-video mr-1"></i>{% trans "Active" %}</span>
+            {% elif session.state == "completed" %}
+              <span class="badge badge-dark"><i class="fas fa-check-double mr-1"></i>{% trans "Completed" %}</span>
+            {% elif session.state == "cancelled" %}
+              <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i>{% trans "Cancelled" %}</span>
+            {% elif session.state == "refunded" %}
+              <span class="badge badge-secondary"><i class="fas fa-undo mr-1"></i>{% trans "Refunded" %}</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-5 text-muted small">{% trans "Price" %}</dt>
+          <dd class="col-7 small">
+            {% if session.price_amount == 0 %}
+              <span class="badge badge-success">{% trans "Free" %}</span>
+            {% else %}
+              <strong>{{ session.price_amount }} {{ session.price_currency }}</strong>
+            {% endif %}
+          </dd>
+
+          <dt class="col-5 text-muted small">{% trans "Duration" %}</dt>
+          <dd class="col-7 small">{{ session.duration_minutes }} {% trans "min" %}</dd>
+
+          <dt class="col-5 text-muted small">{% trans "Proposed" %}</dt>
+          <dd class="col-7 small">
+            {{ session.proposed_start|date:"d M Y" }}<br>
+            {{ session.proposed_start|date:"H:i" }} → {{ session.proposed_end|date:"H:i" }}
+          </dd>
+
+          {% if session.confirmed_start %}
+          <dt class="col-5 text-muted small">{% trans "Confirmed" %}</dt>
+          <dd class="col-7 small">
+            {{ session.confirmed_start|date:"d M Y" }}<br>
+            {{ session.confirmed_start|date:"H:i" }} → {{ session.confirmed_end|date:"H:i" }}
+          </dd>
+          {% endif %}
+
+        </dl>
+      </div>
+    </div>
+
+    {# Pay now card — pending_payment only #}
+    {% if session.state == "pending_payment" %}
+    <div class="card card-outline card-warning mb-3">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-exclamation-circle mr-2 text-warning"></i>
+          {% trans "Payment Required" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          {% trans "Your teacher approved the session. Complete payment to confirm your spot." %}
+        </p>
+        <a href="{% url 'tutoring:meet:meet-session-pay' session_id=session.pk %}"
+           class="btn btn-warning btn-block font-weight-bold">
+          <i class="fas fa-credit-card mr-2"></i>
+          {% trans "Pay Now" %} — {{ session.price_amount }} {{ session.price_currency }}
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Google Meet card — paid / active #}
+    {% if session.google_meet_link %}
+    <div class="card card-outline card-success mb-3">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-video mr-2"></i>{% trans "Google Meet" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <a href="{{ session.google_meet_link }}"
+           target="_blank"
+           class="btn btn-success btn-block mb-2">
+          <i class="fas fa-video mr-2"></i>{% trans "Join Meeting" %}
+        </a>
+        {% if session.google_calendar_link %}
+        <a href="{{ session.google_calendar_link }}"
+           target="_blank"
+           class="btn btn-outline-secondary btn-block btn-sm">
+          <i class="fas fa-calendar-plus mr-1"></i>{% trans "Add to Calendar" %}
+        </a>
+        {% endif %}
+        {% if session.join_code %}
+        <div class="mt-3 text-center">
+          <small class="text-muted d-block mb-1">{% trans "Join code" %}</small>
+          <code class="h5">{{ session.join_code }}</code>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# Cancel card — pending only #}
+    {% if session.state == "pending_teacher" or session.state == "pending_payment" %}
+    <div class="card card-outline card-danger">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-times-circle mr-2"></i>{% trans "Cancel Session" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          {% trans "You can cancel this session as long as the teacher hasn't started it." %}
+        </p>
+        <button type="button"
+                class="btn btn-outline-danger btn-block"
+                data-toggle="modal"
+                data-target="#cancelModal">
+          <i class="fas fa-times mr-2"></i>{% trans "Cancel Session" %}
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  {# ── Right column ── #}
+  <div class="col-lg-8">
+
+    {# Teacher card #}
+    <div class="card card-outline card-primary mb-3">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-chalkboard-teacher mr-2"></i>{% trans "Teacher" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <img src="{% static 'dist/img/avatar.png' %}"
+               class="img-circle elevation-2 mr-3"
+               width="60" height="60" alt="avatar">
+          <div>
+            <h5 class="font-weight-bold mb-1">{{ session.teacher.get_full_name }}</h5>
+            <small class="text-muted d-block">
+              <i class="fas fa-envelope mr-1"></i>{{ session.teacher.email }}
+            </small>
+            {% if session.teacher.teacher_profile.hour_price == 0 %}
+            <span class="badge badge-success mt-1">{% trans "Free Teacher" %}</span>
+            {% else %}
+            <span class="badge badge-warning mt-1">
+              {{ session.teacher.teacher_profile.hour_price }} {{ session.price_currency }} / {% trans "hr" %}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Notes #}
+    <div class="card card-outline card-secondary mb-3">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-comment-alt mr-2"></i>{% trans "Notes" %}
+        </h3>
+      </div>
+      <div class="card-body">
+
+        <div class="mb-3">
+          <small class="text-muted font-weight-bold d-block mb-1">
+            <i class="fas fa-user-graduate mr-1"></i>{% trans "Your Notes" %}
+          </small>
+          {% if session.student_notes %}
+          <div class="p-3 bg-light rounded">{{ session.student_notes }}</div>
+          {% else %}
+          <span class="text-muted small">{% trans "No notes provided." %}</span>
+          {% endif %}
+        </div>
+
+        {% if session.teacher_notes %}
+        <hr>
+        <div>
+          <small class="text-muted font-weight-bold d-block mb-1">
+            <i class="fas fa-chalkboard-teacher mr-1"></i>{% trans "Teacher Notes" %}
+          </small>
+          <div class="p-3 bg-light rounded">{{ session.teacher_notes }}</div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    {# Cancellation reason #}
+    {% if session.state == "cancelled" and session.cancellation_reason %}
+    <div class="card card-outline card-danger mb-3">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-exclamation-circle mr-2"></i>{% trans "Cancellation Reason" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <p class="mb-0">{{ session.cancellation_reason }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    {# Timeline #}
+    <div class="card card-outline card-secondary">
+      <div class="card-header">
+        <h3 class="card-title font-weight-bold">
+          <i class="fas fa-stream mr-2"></i>{% trans "Timeline" %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="timeline timeline-inverse">
+
+          <div class="time-label">
+            <span class="bg-primary">{{ session.created_at|date:"d M Y" }}</span>
+          </div>
+
+          <div>
+            <i class="fas fa-calendar-plus bg-primary"></i>
+            <div class="timeline-item">
+              <span class="time"><i class="fas fa-clock mr-1"></i>{{ session.created_at|date:"H:i" }}</span>
+              <h3 class="timeline-header">{% trans "You requested a session" %}</h3>
+            </div>
+          </div>
+
+          {% if session.state != "pending_teacher" %}
+          <div>
+            <i class="fas fa-check {% if session.state == 'cancelled' %}bg-danger{% else %}bg-success{% endif %}"></i>
+            <div class="timeline-item">
+              <h3 class="timeline-header">
+                {% if session.state == "cancelled" %}
+                  {% trans "Session was cancelled" %}
+                {% else %}
+                  {% trans "Teacher approved your request" %}
+                {% endif %}
+              </h3>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if session.state == "paid" or session.state == "active" or session.state == "completed" %}
+          <div>
+            <i class="fas fa-credit-card bg-info"></i>
+            <div class="timeline-item">
+              <h3 class="timeline-header">{% trans "Payment confirmed" %}</h3>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if session.state == "active" or session.state == "completed" %}
+          <div>
+            <i class="fas fa-video bg-primary"></i>
+            <div class="timeline-item">
+              <h3 class="timeline-header">{% trans "Session started" %}</h3>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if session.state == "completed" %}
+          <div>
+            <i class="fas fa-check-double bg-dark"></i>
+            <div class="timeline-item">
+              <h3 class="timeline-header">{% trans "Session completed" %}</h3>
+            </div>
+          </div>
+          {% endif %}
+
+          <div><i class="fas fa-clock bg-secondary"></i></div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+</section>
+
+{# Cancel modal #}
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title font-weight-bold">
+          <i class="fas fa-exclamation-triangle mr-2 text-danger"></i>
+          {% trans "Cancel Session" %}
+        </h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <form method="post"
+            action="{% url 'tutoring:meet:student-meet-session-cancel' session_id=session.pk %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted small">
+            {% trans "Are you sure you want to cancel this session? This action cannot be undone." %}
+          </p>
+          <div class="form-group mb-0">
+            <label class="font-weight-bold small">
+              {% trans "Reason" %}
+              <span class="text-muted font-weight-normal">({% trans "optional" %})</span>
+            </label>
+            <textarea name="reason" class="form-control" rows="3"
+                      placeholder="{% trans 'Why are you cancelling?' %}"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+            {% trans "Keep Session" %}
+          </button>
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="fas fa-times mr-1"></i>{% trans "Yes, Cancel" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

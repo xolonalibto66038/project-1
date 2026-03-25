@@ -11,3 +11,5 @@ logs/
 *.log
 bin
 scripts
+credentials.json
+token.json

@@ -1,0 +1,331 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Meet Sessions" %}{% endblock %}
+
+{% block content %}
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-calendar-alt text-primary mr-2"></i>
+          {% trans "Meet Sessions" %}
+        </h1>
+        <p class="text-muted mb-0">{% trans "Manage your Google Meet tutoring sessions" %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+  <div class="container-fluid">
+
+    {# ── State filter tabs ── #}
+    <div class="card card-outline card-secondary mb-3">
+      <div class="card-body py-2">
+        <div class="d-flex flex-wrap" style="gap:6px;">
+
+          <a href="?{% if querystring %}{{ querystring }}{% endif %}"
+             class="btn btn-sm {% if not filter_state %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            {% trans "All" %}
+          </a>
+
+          {% for value, label in state_choices %}
+          {% with count=0 %}
+          <a href="?state={{ value }}{% if querystring %}&{{ querystring }}{% endif %}"
+             class="btn btn-sm {% if filter_state == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            {% if value == "pending_teacher" %}<i class="fas fa-hourglass-start mr-1"></i>
+            {% elif value == "pending_payment" %}<i class="fas fa-credit-card mr-1"></i>
+            {% elif value == "paid" %}<i class="fas fa-check-circle mr-1"></i>
+            {% elif value == "active" %}<i class="fas fa-video mr-1"></i>
+            {% elif value == "completed" %}<i class="fas fa-check-double mr-1"></i>
+            {% elif value == "cancelled" %}<i class="fas fa-times-circle mr-1"></i>
+            {% elif value == "refunded" %}<i class="fas fa-undo mr-1"></i>
+            {% endif %}
+            {{ label }}
+            {# Badge count #}
+            {% for sc in state_counts %}
+              {% if sc.state == value %}
+                <span class="badge badge-light ml-1">{{ sc.count }}</span>
+              {% endif %}
+            {% endfor %}
+          </a>
+          {% endwith %}
+          {% endfor %}
+
+        </div>
+      </div>
+    </div>
+
+    {# ── Sessions table ── #}
+    <div class="card card-primary card-outline">
+
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-list mr-2"></i>
+          {% trans "Sessions" %}
+        </h3>
+        <div class="card-tools">
+          <span class="badge badge-primary">
+            {{ page_obj.paginator.count }} {% trans "total" %}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        {% if sessions %}
+        <table class="table table-hover align-middle mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>{% trans "Student" %}</th>
+              <th>{% trans "Proposed" %}</th>
+              <th>{% trans "Confirmed" %}</th>
+              <th>{% trans "Duration" %}</th>
+              <th>{% trans "Price" %}</th>
+              <th>{% trans "State" %}</th>
+              <th class="text-right">{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for session in sessions %}
+            <tr>
+
+              {# ── Student ── #}
+              <td>
+                <div class="d-flex align-items-center">
+                  <img src="{% static 'dist/img/avatar.png' %}"
+                       class="img-circle elevation-2 mr-2"
+                       width="40" height="40" alt="avatar">
+                  <div>
+                    <strong>{{ session.student.get_full_name }}</strong>
+                    <br>
+                    <small class="text-muted">{{ session.student.email }}</small>
+                  </div>
+                </div>
+              </td>
+
+              {# ── Proposed ── #}
+              <td>
+                <span class="text-muted small">
+                  {{ session.proposed_start|date:"d M Y" }}<br>
+                  {{ session.proposed_start|date:"H:i" }} → {{ session.proposed_end|date:"H:i" }}
+                </span>
+              </td>
+
+              {# ── Confirmed ── #}
+              <td>
+                {% if session.confirmed_start %}
+                <span class="small">
+                  {{ session.confirmed_start|date:"d M Y" }}<br>
+                  {{ session.confirmed_start|date:"H:i" }} → {{ session.confirmed_end|date:"H:i" }}
+                </span>
+                {% else %}
+                <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+
+              {# ── Duration ── #}
+              <td>
+                <span class="small">{{ session.duration_minutes }} {% trans "min" %}</span>
+              </td>
+
+              {# ── Price ── #}
+              <td>
+                {% if session.price_amount == 0 %}
+                <span class="badge badge-success">{% trans "Free" %}</span>
+                {% else %}
+                <span class="small font-weight-bold">
+                  {{ session.price_amount }} {{ session.price_currency }}
+                </span>
+                {% endif %}
+              </td>
+
+              {# ── State badge ── #}
+              <td>
+                {% if session.state == "pending_teacher" %}
+                  <span class="badge badge-warning">
+                    <i class="fas fa-hourglass-start mr-1"></i>{% trans "Pending Approval" %}
+                  </span>
+                {% elif session.state == "pending_payment" %}
+                  <span class="badge badge-secondary">
+                    <i class="fas fa-credit-card mr-1"></i>{% trans "Pending Payment" %}
+                  </span>
+                {% elif session.state == "paid" %}
+                  <span class="badge badge-info">
+                    <i class="fas fa-check-circle mr-1"></i>{% trans "Paid" %}
+                  </span>
+                {% elif session.state == "active" %}
+                  <span class="badge badge-primary">
+                    <i class="fas fa-video mr-1"></i>{% trans "Active" %}
+                  </span>
+                {% elif session.state == "completed" %}
+                  <span class="badge badge-dark">
+                    <i class="fas fa-check-double mr-1"></i>{% trans "Completed" %}
+                  </span>
+                {% elif session.state == "cancelled" %}
+                  <span class="badge badge-danger">
+                    <i class="fas fa-times-circle mr-1"></i>{% trans "Cancelled" %}
+                  </span>
+                {% elif session.state == "refunded" %}
+                  <span class="badge badge-secondary">
+                    <i class="fas fa-undo mr-1"></i>{% trans "Refunded" %}
+                  </span>
+                {% else %}
+                  <span class="badge badge-light">{{ session.state }}</span>
+                {% endif %}
+              </td>
+
+              {# ── Actions ── #}
+              <td class="text-right">
+                <div class="d-flex justify-content-end flex-wrap" style="gap:4px;">
+
+                  {# View detail #}
+                  <a href="{% url 'tutoring:meet:meet-session-detail' session_id=session.pk %}"
+                     class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-eye"></i>
+                  </a>
+
+                  {# Accept #}
+                  {% if session.state == "pending_teacher" %}
+                  <form method="post"
+                        action="{% url 'tutoring:meet:meet-session-accept' session_id=session.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">
+                      <i class="fas fa-check mr-1"></i>{% trans "Accept" %}
+                    </button>
+                  </form>
+                  {% endif %}
+
+                  {# Start #}
+                  {% if session.state == "paid" %}
+                  <form method="post"
+                        action="{% url 'tutoring:meet:meet-session-start' session_id=session.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-primary">
+                      <i class="fas fa-video mr-1"></i>{% trans "Start" %}
+                    </button>
+                  </form>
+                  {% endif %}
+
+                  {# Join Meet link #}
+                  {% if session.state == "active" and session.google_meet_link %}
+                  <a href="{{ session.google_meet_link }}"
+                     target="_blank"
+                     class="btn btn-sm btn-primary">
+                    <i class="fas fa-video mr-1"></i>{% trans "Join" %}
+                  </a>
+                  {% endif %}
+
+                  {# Complete #}
+                  {% if session.state == "active" %}
+                  <form method="post"
+                        action="{% url 'tutoring:meet:meet-session-complete' session_id=session.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-dark">
+                      <i class="fas fa-check-double mr-1"></i>{% trans "Complete" %}
+                    </button>
+                  </form>
+                  {% endif %}
+
+                  {# Reject / Cancel #}
+                  {% if session.state == "pending_teacher" or session.state == "pending_payment" %}
+                  <button type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          data-toggle="modal"
+                          data-target="#cancelModal"
+                          data-session-id="{{ session.pk }}"
+                          data-action-url="{% if session.state == 'pending_teacher' %}{% url 'tutoring:meet:meet-session-reject' session_id=session.pk %}{% else %}{% url 'tutoring:meet:meet-session-cancel' session_id=session.pk %}{% endif %}">
+                    <i class="fas fa-times mr-1"></i>
+                    {% if session.state == "pending_teacher" %}{% trans "Reject" %}{% else %}{% trans "Cancel" %}{% endif %}
+                  </button>
+                  {% endif %}
+
+                </div>
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% else %}
+        <div class="p-5 text-center text-muted">
+          <i class="fas fa-calendar-times fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+          <h5 class="font-weight-bold">{% trans "No sessions found" %}</h5>
+          <p class="small mb-0">
+            {% if filter_state %}
+              {% trans "No sessions with this status." %}
+              <a href="?">{% trans "Clear filter" %}</a>
+            {% else %}
+              {% trans "Students haven't requested any sessions yet." %}
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if is_paginated %}
+      <div class="card-footer">
+        {% include "includes/pagination.html" with querystring=querystring %}
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</section>
+
+{# ── Reject / Cancel modal ── #}
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" style="border-radius:16px;">
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title font-weight-bold">
+          <i class="fas fa-exclamation-triangle mr-2 text-danger"></i>
+          {% trans "Confirm Action" %}
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <form method="post" id="cancelForm" action="">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group mb-0">
+            <label class="font-weight-bold small">
+              {% trans "Reason" %}
+              <span class="text-muted font-weight-normal">({% trans "optional" %})</span>
+            </label>
+            <textarea name="reason"
+                      class="form-control"
+                      rows="3"
+                      placeholder="{% trans 'Provide a reason...' %}"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-dismiss="modal">
+            {% trans "Back" %}
+          </button>
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="fas fa-times mr-1"></i>{% trans "Confirm" %}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $('#cancelModal').on('show.bs.modal', function (e) {
+    var url = $(e.relatedTarget).data('action-url');
+    $('#cancelForm').attr('action', url);
+  });
+</script>
+
+{% endblock %}

@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
@@ -20,6 +21,7 @@ from apps.billing.services import StripeService
 from ..decorators import teacher_level_required
 from ..models import TutoringSession
 from ..services import SessionService
+from ..services.meet import MeetService
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
@@ -166,6 +168,59 @@ def select_teacher(request, teacher_id):
             "tutoring:student:available-teachers",
             subject_pk=teacher.teacher_profile.subject.pk,
         )
+
+
+@login_required
+@student_required
+@teacher_level_required
+@require_POST
+def meet_teacher(request, teacher_id):
+    teacher = get_object_or_404(
+        CustomUser.objects.select_related("teacher_profile"),
+        id=teacher_id,
+        role=UserRole.TEACHER,
+        is_active=True,
+        teacher_profile__is_verified_teacher=True,
+    )
+
+    proposed_start_raw = request.POST.get("proposed_start")
+    proposed_end_raw = request.POST.get("proposed_end")
+
+    if not proposed_start_raw or not proposed_end_raw:
+        messages.error(request, _("Please provide a proposed start and end time."))
+        return redirect("tutoring:student:available-teachers")
+
+    try:
+        proposed_start = timezone.datetime.fromisoformat(proposed_start_raw)
+        proposed_end = timezone.datetime.fromisoformat(proposed_end_raw)
+    except ValueError:
+        messages.error(request, _("Invalid date format."))
+        return redirect("tutoring:student:available-teachers")
+
+    if proposed_start >= proposed_end:
+        messages.error(request, _("End time must be after start time."))
+        return redirect("tutoring:student:available-teachers")
+
+    try:
+        MeetService.request_session(
+            student=request.user,
+            teacher=teacher,
+            proposed_start=proposed_start,
+            proposed_end=proposed_end,
+            notes=request.POST.get("student_notes", ""),
+        )
+        messages.success(
+            request, _("Session request sent. Waiting for teacher approval.")
+        )
+        return redirect("tutoring:student:student-sessions")
+
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect("tutoring:student:available-teachers")
+    except Exception as ex:
+        logger.exception("meet_teacher failed: %s", str(ex))
+        messages.error(request, _("Unable to create session. Please try again."))
+        return redirect("tutoring:student:available-teachers")
 
 
 @login_required

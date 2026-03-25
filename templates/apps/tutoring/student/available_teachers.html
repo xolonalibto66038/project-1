@@ -3,7 +3,7 @@
 {% load breadcrumbs %}
 {% block title %}
   {% trans "Select an Online Teacher" %}
-{% endblock %}
+{% endblock title %}
 {% block content %}
   <section class="content-header">
     <div class="container-fluid">
@@ -86,6 +86,15 @@
                           </button>
                         </form>
                       {% endif %}
+                      {# ── Meet button → triggers modal ── #}
+                      <button type="button"
+                              class="btn btn-outline-info btn-sm"
+                              data-toggle="modal"
+                              data-target="#meetModal"
+                              data-teacher-id="{{ teacher.id }}"
+                              data-teacher-name="{{ teacher.get_full_name }}">
+                        <i class="fas fa-calendar-plus mr-1"></i>{% trans "Meet" %}
+                      </button>
                     </div>
                   </div>
                 </li>
@@ -164,6 +173,15 @@
                           </button>
                         </form>
                       {% endif %}
+                      {# ── Meet button → triggers modal ── #}
+                      <button type="button"
+                              class="btn btn-outline-info btn-sm"
+                              data-toggle="modal"
+                              data-target="#meetModal"
+                              data-teacher-id="{{ teacher.id }}"
+                              data-teacher-name="{{ teacher.get_full_name }}">
+                        <i class="fas fa-calendar-plus mr-1"></i>{% trans "Meet" %}
+                      </button>
                     </div>
                   </div>
                 </li>
@@ -179,4 +197,97 @@
       </div>
     </div>
   </section>
-{% endblock %}
+
+  {# ── Meet modal ── #}
+  <div class="modal fade" id="meetModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="border-radius:16px;">
+
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas fa-calendar-plus mr-2 text-info"></i>
+            {% trans "Request a Meet Session" %}
+          </h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <form method="post" id="meetForm" action="">
+          {% csrf_token %}
+
+          <div class="modal-body">
+
+            <p class="text-muted small mb-3">
+              {% trans "Propose a time for your session with" %}
+              <strong id="meetTeacherName"></strong>.
+              {% trans "The teacher will confirm your request." %}
+            </p>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-alt mr-1 text-info"></i>
+                {% trans "Proposed Start" %}
+              </label>
+              <input type="datetime-local"
+                    name="proposed_start"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-check mr-1 text-info"></i>
+                {% trans "Proposed End" %}
+              </label>
+              <input type="datetime-local"
+                    name="proposed_end"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="form-group mb-0">
+              <label class="font-weight-bold small">
+                <i class="fas fa-comment-alt mr-1 text-info"></i>
+                {% trans "Notes" %}
+                <span class="text-muted font-weight-normal">({% trans "optional" %})</span>
+              </label>
+              <textarea name="student_notes"
+                        class="form-control"
+                        rows="2"
+                        placeholder="{% trans 'Anything you want the teacher to know...' %}"></textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-dismiss="modal">
+              {% trans "Cancel" %}
+            </button>
+            <button type="submit" class="btn btn-info btn-sm">
+              <i class="fas fa-paper-plane mr-1"></i>
+              {% trans "Send Request" %}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block extra_js %}
+<script>
+  $('#meetModal').on('show.bs.modal', function (e) {
+    var btn        = $(e.relatedTarget);
+    var teacherId  = btn.data('teacher-id');
+    var teacherName = btn.data('teacher-name');
+    $('#meetTeacherName').text(teacherName);
+    $('#meetForm').attr(
+      'action',
+      '/tutoring/student/teachers/' + teacherId + '/meet/'
+    );
+  });
+</script>
+{% endblock extra_js %}

@@ -2,6 +2,7 @@ from django.urls import path
 
 from ..views.student import (
     available_teachers,
+    meet_teacher,
     select_teacher,
     session_detail,
     student_sessions,
@@ -20,6 +21,11 @@ urlpatterns = [
         "teachers/<uuid:teacher_id>/select/",
         select_teacher,
         name="select-teacher",
+    ),
+    path(
+        "teachers/<uuid:teacher_id>/meet/",
+        meet_teacher,
+        name="meet-teacher",
     ),
     path(
         "sessions/",

@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .helpers import trigger_teacher_payout
-from .models import TutoringSession
+from .models import GoogleSession, TutoringSession
+from .services.meet import MeetService
 
 
 @csrf_exempt
@@ -114,3 +115,18 @@ def verify_zoom_signature(request):
     expected = f"v0={hash}"
 
     return hmac.compare_digest(signature, expected)
+
+
+def handle_payment_success(payment):
+    """
+    Called when Chargily fires a payment.success webhook.
+    Your existing logic already creates/updates the Payment model.
+    Add this block to trigger tutoring session activation.
+    """
+    try:
+        session = payment.tutoring_session  # OneToOne reverse relation
+        if session.state == GoogleSession.State.PENDING_PAYMENT:
+            MeetService.on_payment_confirmed(session, payment)
+            # This will: mark_paid() → create Meet event → schedule Celery tasks
+    except GoogleSession.DoesNotExist:
+        pass  # payment not related to a tutoring session (e.g. subscription)
