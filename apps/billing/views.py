@@ -1,7 +1,16 @@
+import hashlib
+import hmac
+import json
+
+import requests
 import stripe
+from chargily_pay import ChargilyClient
+from chargily_pay.entity import Checkout
+
+# from chargily_pay.settings import CHARGILYPAY_PRODUCTION_URL, CHARGILYPAY_SANDBOX_URL
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic import TemplateView
@@ -9,7 +18,7 @@ from django.views.generic import TemplateView
 from apps.tutoring.models import TutoringSession
 
 from .choices import OfferTier
-from .models import Plan
+from .models import Plan, Subscription  # adjust to your actual models
 from .selectors import get_pricing_context, get_user_subscription
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
@@ -239,3 +248,200 @@ class PaymentCancelView(View):
 
     def get(self, request):
         return render(request, self.template_name)
+
+
+def _chargily_client() -> ChargilyClient:
+    return ChargilyClient(
+        key=settings.CHARGILY_APP_KEY,
+        secret=settings.CHARGILY_APP_SECRET,
+        # url="https://pay.chargily.net/test/api/v2",
+        url="https://pay.chargily.net/test/api/pay-v2",
+    )
+
+
+# ── Checkout dispatcher (POST) ───────────────────────────────────────────────
+
+
+class CheckoutView(LoginRequiredMixin, View):
+
+    def post(self, request, plan_pk):
+        plan = get_object_or_404(Plan, pk=plan_pk, is_active=True)
+        method = request.POST.get("payment_method", "")
+
+        if method == "chargily":
+            return self._chargily_checkout(request, plan)
+
+        # --- existing Stripe-based methods (card / paypal / google_pay) -----
+        # keep your existing Stripe logic here, e.g.:
+        # return self._stripe_checkout(request, plan, method)
+
+        return JsonResponse({"error": "Unknown payment method."}, status=400)
+
+    def get(self, request, plan_pk):
+        plan = get_object_or_404(Plan, pk=plan_pk, is_active=True)
+        return self._chargily_checkout(request, plan, redirect_mode=True)
+
+    # ── Chargily ─────────────────────────────────────────────────────────────
+    # def _chargily_checkout(self, request, plan, redirect_mode=False):
+    #     client = _chargily_client()
+    #     CHARGILY_EUR_TO_DZD_RATE = 145  # approx rate, adjust as needed
+
+    #     amount_dzd = max(round(float(plan.price) * CHARGILY_EUR_TO_DZD_RATE, 2), 10.0)
+
+    #     success_url = (
+    #         request.build_absolute_uri(settings.CHARGILY_SUCCESS_URL)
+    #         + f"?plan={plan.pk}"
+    #     )
+    #     failure_url = request.build_absolute_uri(settings.CHARGILY_FAILURE_URL)
+    #     webhook_url = request.build_absolute_uri(settings.CHARGILY_WEBHOOK_URL)
+
+    #     checkout = client.create_checkout(
+    #         Checkout(
+    #             amount=amount_dzd,
+    #             currency="dzd",
+    #             success_url=success_url,
+    #             failure_url=failure_url,
+    #             webhook_endpoint=webhook_url,
+    #             metadata={
+    #                 "user_id": str(request.user.pk),
+    #                 "plan_id": str(plan.pk),
+    #             },
+    #             description=f"{plan.offer.name} — {plan.get_interval_display()}",
+    #         )
+    #     )
+
+    #     checkout_url = checkout["checkout_url"]
+
+    #     if redirect_mode:
+    #         from django.shortcuts import redirect
+
+    #         return redirect(checkout_url)
+
+    #     return JsonResponse({"checkout_url": checkout_url})
+
+    def _chargily_checkout(self, request, plan, redirect_mode=False):
+        CHARGILY_EUR_TO_DZD_RATE = 145
+        amount_dzd = max(round(float(plan.price) * CHARGILY_EUR_TO_DZD_RATE, 2), 10.0)
+
+        success_url = (
+            request.build_absolute_uri(settings.CHARGILY_SUCCESS_URL)
+            + f"?plan={plan.pk}"
+        )
+        failure_url = request.build_absolute_uri(settings.CHARGILY_FAILURE_URL)
+        webhook_url = request.build_absolute_uri(settings.CHARGILY_WEBHOOK_URL)
+
+        base_url = (
+            "https://pay.chargily.net/test/api/v2"
+            if settings.DEBUG
+            else "https://pay.chargily.net/api/v2"
+        )
+
+        response = requests.post(
+            f"{base_url}/checkouts",
+            headers={
+                "Authorization": f"Bearer {settings.CHARGILY_APP_SECRET}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "amount": amount_dzd,
+                "currency": "dzd",
+                "success_url": success_url,
+                "failure_url": failure_url,
+                "webhook_endpoint": webhook_url,
+                "metadata": {
+                    "user_id": str(request.user.pk),
+                    "plan_id": str(plan.pk),
+                },
+                "description": f"{plan.offer.name} — {plan.get_interval_display()}",
+            },
+        )
+        response.raise_for_status()
+        checkout_url = response.json()["checkout_url"]
+
+        if redirect_mode:
+            from django.shortcuts import redirect
+
+            return redirect(checkout_url)
+
+        return JsonResponse({"checkout_url": checkout_url})
+
+
+# ── Chargily redirect landing pages ─────────────────────────────────────────
+
+
+class ChargilySuccessView(LoginRequiredMixin, TemplateView):
+    """
+    Chargily redirects here after a successful payment.
+    Do NOT provision access here — wait for the webhook.
+    Just show a friendly "we're processing" message.
+    """
+
+    template_name = "apps/billing/chargily_success.html"
+
+
+class ChargilyFailureView(LoginRequiredMixin, TemplateView):
+    template_name = "apps/billing/chargily_failure.html"
+
+
+# ── Chargily webhook (server-to-server) ─────────────────────────────────────
+
+
+class ChargilyWebhookView(View):
+    """
+    Receives POST events from Chargily.
+    Verifies the HMAC-SHA256 signature, then provisions the subscription.
+    """
+
+    def post(self, request):
+        # 1. Verify signature
+        signature = request.headers.get("signature", "")
+        payload = request.body
+
+        expected = hmac.new(
+            settings.CHARGILY_APP_SECRET.encode(),
+            payload,
+            hashlib.sha256,
+        ).hexdigest()
+
+        if not hmac.compare_digest(expected, signature):
+            return HttpResponse(status=403)
+
+        # 2. Parse event
+        try:
+            event = json.loads(payload)
+        except json.JSONDecodeError:
+            return HttpResponse(status=400)
+
+        # 3. Handle checkout.paid
+        if event.get("type") == "checkout.paid":
+            self._handle_checkout_paid(event["data"])
+
+        return HttpResponse(status=200)
+
+    def _handle_checkout_paid(self, data):
+        metadata = data.get("metadata", {})
+        user_id = metadata.get("user_id")
+        plan_id = metadata.get("plan_id")
+
+        if not user_id or not plan_id:
+            return
+
+        # Provision the subscription — adjust to your models
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        try:
+            user = User.objects.get(pk=user_id)
+            plan = Plan.objects.get(pk=plan_id, is_active=True)
+        except (User.DoesNotExist, Plan.DoesNotExist):
+            return
+
+        Subscription.objects.update_or_create(
+            user=user,
+            defaults={
+                "plan": plan,
+                "status": "active",
+                # set your period dates here if needed
+            },
+        )

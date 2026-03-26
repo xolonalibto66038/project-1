@@ -1,6 +1,10 @@
 from django.urls import path
 
 from .views import (
+    ChargilyFailureView,
+    ChargilySuccessView,
+    ChargilyWebhookView,
+    CheckoutView,
     CreateCheckoutSessionView,
     PaymentCancelView,
     PaymentSuccessView,
@@ -32,4 +36,23 @@ urlpatterns = [
     path("payment_success/", PaymentSuccessView.as_view(), name="payment-success"),
     path("payment_cancel/", PaymentCancelView.as_view(), name="payment-cancel"),
     path("webhook/", stripe_webhook, name="webhook"),
+    path(
+        "chargily_checkout/<uuid:plan_pk>/",
+        CheckoutView.as_view(),
+        name="chargily-checkout",
+    ),
+    path(
+        "chargily/success/",
+        ChargilySuccessView.as_view(),
+        name="chargily_success",
+    ),
+    path(
+        "chargily/failure/",
+        ChargilyFailureView.as_view(),
+        name="chargily_failure",
+    ),
+    path(
+        "chargily/webhook/",
+        ChargilyWebhookView.as_view(),
+    ),
 ]

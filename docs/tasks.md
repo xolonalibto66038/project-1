@@ -7,3 +7,4 @@ ideas
 - rating document quality
 - add resource difficulty
 - rating without a profile ?
+- Verify trans/text inside js

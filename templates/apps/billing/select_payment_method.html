@@ -128,6 +128,36 @@
                   </div>
                 </div>
               </div>
+              {# Chargily Pay #}
+              <div class="payment-option border-bottom" data-method="chargily" data-url="{% url 'billing:chargily-checkout' plan.pk %}">
+                <div class="d-flex align-items-center p-3" style="gap:16px; cursor:pointer">
+                  <div class="payment-icon-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38">
+                      <!-- Shadow/back card — dark navy, rotated back -->
+                      <rect x="9" y="5" width="21" height="15" rx="3.5"
+                            fill="#1E3ADB" opacity="0.9"
+                            transform="rotate(-12, 19, 12)"/>
+                      <!-- Front card — cyan, slight forward tilt -->
+                      <rect x="6" y="16" width="23" height="16" rx="3.5"
+                            fill="#00CFEA"
+                            transform="rotate(7, 18, 24)"/>
+                      <!-- White cutout shape (the inner logo mark) -->
+                      <rect x="9" y="19" width="8" height="6" rx="2"
+                            fill="white" opacity="0.95"
+                            transform="rotate(7, 13, 22)"/>
+                    </svg>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="font-weight-bold">Chargily Pay</div>
+                    <div class="text-muted" style="font-size:.8rem;">
+                      {% trans "Pay via CIB, EDAHABIA or mobile wallet (Algeria)" %}
+                    </div>
+                  </div>
+                  <div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
               {# Google Pay #}
               <div class="payment-option" data-method="google_pay">
                 <div class="d-flex align-items-center p-3"
@@ -161,6 +191,7 @@
     </div>
   </section>
 {% endblock %}
+
 {% block extra_js %}
   <script>
 (function () {
@@ -177,7 +208,7 @@
     });
   });
 
-  // Click → POST to checkout
+  {% comment %} // Click → POST to checkout
   document.querySelectorAll('.payment-option').forEach(opt => {
     opt.addEventListener('click', async function () {
       const method = this.dataset.method;
@@ -212,16 +243,61 @@
         if (data.checkout_url) {
           window.location.href = data.checkout_url;
         } else {
-          alert(data.error || '{% trans "Something went wrong." %}');
+          alert(data.error || `{% trans "Something went wrong." %}`);
           location.reload();
         }
       } catch (err) {
         console.error(err);
-        alert('{% trans "Network error. Please try again." %}');
+        alert(`{% trans "Network error. Please try again." %}`);
         location.reload();
       }
     });
+  }); {% endcomment %}
+  document.querySelectorAll('.payment-option').forEach(opt => {
+  opt.addEventListener('click', async function () {
+    const method     = this.dataset.method;
+    const directUrl  = this.dataset.url;   // ← present only on chargily
+    const icon       = this.querySelector('.fa-chevron-right');
+
+    if (icon) icon.className = 'fas fa-spinner fa-spin text-muted';
+
+    document.querySelectorAll('.payment-option').forEach(o => {
+      o.style.pointerEvents = 'none';
+      o.style.opacity = '0.6';
+    });
+    this.style.opacity = '1';
+
+    // ── Chargily: direct GET redirect, no AJAX needed ──
+    if (directUrl) {
+      window.location.href = directUrl;
+      return;
+    }
+
+    // ── All other methods: existing AJAX POST flow ──
+    try {
+      const formData = new FormData();
+      formData.append('payment_method', method);
+
+      const res  = await fetch(`/billing/checkout/${planPk}/`, {
+        method:  'POST',
+        headers: { 'X-CSRFToken': CSRF },
+        body:    formData,
+      });
+      const data = await res.json();
+
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.error || `{% trans "Something went wrong." %}`);
+        location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`{% trans "Network error. Please try again." %}`);
+      location.reload();
+    }
   });
+});
 })();
   </script>
 {% endblock %}

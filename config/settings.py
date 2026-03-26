@@ -433,3 +433,12 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days for "remember me"
 SESSION_COOKIE_SECURE = True  # HTTPS only — critical
 SESSION_COOKIE_HTTPONLY = True  # JS can't read the cookie
 SESSION_COOKIE_SAMESITE = "Lax"  # CSRF protection
+
+
+CHARGILY_APP_KEY = env("CHARGILY_APP_KEY")
+CHARGILY_APP_SECRET = env("CHARGILY_APP_SECRET")  # for webhook signature verification
+CHARGILY_SUCCESS_URL = "/billing/chargily/success/"
+CHARGILY_FAILURE_URL = "/billing/chargily/failure/"
+CHARGILY_WEBHOOK_URL = "/billing/chargily/webhook/"
+CHARGILYPAY_PRODUCTION_URL = "https://pay.chargily.com"
+CHARGILYPAY_SANDBOX_URL = "https://pay.chargily.net/test/api/v2"
