@@ -1,0 +1,183 @@
+{% extends "layouts/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "My Zoom Sessions" %}{% endblock %}
+
+{% block content %}
+
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>
+          <i class="fas fa-calendar-alt text-primary mr-2"></i>
+          {% trans "My Zoom Sessions" %}
+        </h1>
+        <p class="text-muted mb-0">{% trans "Track your Zoom tutoring sessions" %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content">
+<div class="container-fluid">
+
+  {# ── State filter tabs ── #}
+  <div class="card card-outline card-secondary mb-3">
+    <div class="card-body py-2">
+      <div class="d-flex flex-wrap" style="gap:6px;">
+
+        <a href="?" class="btn btn-sm {% if not filter_state %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+          {% trans "All" %}
+        </a>
+
+        {% for value, label in state_choices %}
+        <a href="?state={{ value }}"
+           class="btn btn-sm {% if filter_state == value %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+          {% if value == "pending_teacher" %}<i class="fas fa-hourglass-start mr-1"></i>
+          {% elif value == "pending_payment" %}<i class="fas fa-credit-card mr-1"></i>
+          {% elif value == "paid" %}<i class="fas fa-check-circle mr-1"></i>
+          {% elif value == "active" %}<i class="fas fa-video mr-1"></i>
+          {% elif value == "completed" %}<i class="fas fa-check-double mr-1"></i>
+          {% elif value == "cancelled" %}<i class="fas fa-times-circle mr-1"></i>
+          {% elif value == "refunded" %}<i class="fas fa-undo mr-1"></i>
+          {% endif %}
+          {{ label }}
+          {% for sc in state_counts %}
+            {% if sc.state == value %}
+              <span class="badge badge-light ml-1">{{ sc.count }}</span>
+            {% endif %}
+          {% endfor %}
+        </a>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+  {# ── Sessions list ── #}
+  <div class="card card-primary card-outline">
+
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-list mr-2"></i>{% trans "Sessions" %}
+      </h3>
+      <div class="card-tools">
+        <span class="badge badge-primary">
+          {{ page_obj.paginator.count }} {% trans "total" %}
+        </span>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      {% if sessions %}
+      <div class="list-group list-group-flush">
+
+        {% for session in sessions %}
+        <a href="{% url 'tutoring:zoom:student-zoom-session-detail' session_id=session.pk %}"
+           class="list-group-item list-group-item-action px-4 py-3">
+
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+            {# ── Left: teacher + schedule ── #}
+            <div class="d-flex align-items-center flex-grow-1 mr-3">
+              <img src="{% static 'dist/img/avatar.png' %}"
+                   class="img-circle elevation-1 mr-3"
+                   width="48" height="48" alt="avatar">
+              <div>
+                <div class="font-weight-bold">
+                  {{ session.teacher.get_full_name }}
+                </div>
+                <small class="text-muted d-flex flex-wrap mt-1" style="gap:8px;">
+                  <span>
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    {{ session.proposed_start|date:"d M Y" }}
+                  </span>
+                  <span>
+                    <i class="far fa-clock mr-1"></i>
+                    {{ session.proposed_start|date:"H:i" }} → {{ session.proposed_end|date:"H:i" }}
+                  </span>
+                  <span>
+                    <i class="fas fa-hourglass-half mr-1"></i>
+                    {{ session.duration_minutes }} {% trans "min" %}
+                  </span>
+                  {% if session.price_amount == 0 %}
+                  <span class="text-success font-weight-bold">
+                    <i class="fas fa-gift mr-1"></i>{% trans "Free" %}
+                  </span>
+                  {% else %}
+                  <span>
+                    <i class="fas fa-coins mr-1"></i>
+                    {{ session.price_amount }} {{ session.price_currency }}
+                  </span>
+                  {% endif %}
+                </small>
+              </div>
+            </div>
+
+            {# ── Right: state badge ── #}
+            <div class="d-flex align-items-center" style="gap:6px;">
+              {% if session.state == "pending_teacher" %}
+                <span class="badge badge-warning"><i class="fas fa-hourglass-start mr-1"></i>{% trans "Pending Approval" %}</span>
+              {% elif session.state == "pending_payment" %}
+                <span class="badge badge-secondary"><i class="fas fa-credit-card mr-1"></i>{% trans "Pending Payment" %}</span>
+              {% elif session.state == "paid" %}
+                <span class="badge badge-info"><i class="fas fa-check-circle mr-1"></i>{% trans "Paid" %}</span>
+              {% elif session.state == "active" %}
+                <span class="badge badge-primary"><i class="fas fa-video mr-1"></i>{% trans "Active" %}</span>
+              {% elif session.state == "completed" %}
+                <span class="badge badge-dark"><i class="fas fa-check-double mr-1"></i>{% trans "Completed" %}</span>
+              {% elif session.state == "cancelled" %}
+                <span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i>{% trans "Cancelled" %}</span>
+              {% elif session.state == "refunded" %}
+                <span class="badge badge-secondary"><i class="fas fa-undo mr-1"></i>{% trans "Refunded" %}</span>
+              {% endif %}
+
+              {# Pay now CTA #}
+              {% if session.state == "pending_payment" %}
+              <span class="badge badge-warning">
+                <i class="fas fa-exclamation-circle mr-1"></i>{% trans "Action required" %}
+              </span>
+              {% endif %}
+
+              <i class="fas fa-chevron-right text-muted ml-2"></i>
+            </div>
+
+          </div>
+
+        </a>
+        {% endfor %}
+
+      </div>
+
+      {% else %}
+      <div class="p-5 text-center text-muted">
+        <i class="fas fa-calendar-times fa-3x mb-3 d-block" style="color:#dee2e6;"></i>
+        <h5 class="font-weight-bold">{% trans "No sessions found" %}</h5>
+        <p class="small mb-0">
+          {% if filter_state %}
+            {% trans "No sessions with this status." %}
+            <a href="?">{% trans "Clear filter" %}</a>
+          {% else %}
+            {% trans "You haven't requested any sessions yet." %}
+            <a href="#">
+              {% trans "Find a teacher" %}
+            </a>
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer">
+      {% include "includes/pagination.html" with querystring=querystring %}
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+</section>
+{% endblock %}

@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models.custom_user import CustomUser
-from apps.tutoring.models import TutoringSession
+from apps.tutoring.models import ZoomSession
 from apps.tutoring.services import SessionService
 
 from .models import Plan, Subscription
@@ -128,7 +128,7 @@ def _handle_checkout_completed(session):
 
     #         with transaction.atomic():
     #             # Idempotency — skip if already processed
-    #             if TutoringSession.objects.filter(
+    #             if ZoomSession.objects.filter(
     #                 stripe_checkout_session_id=session["id"]
     #             ).exists():
     #                 return HttpResponse(status=200)
@@ -146,7 +146,7 @@ def _handle_checkout_completed(session):
     #                 stripe_payment_intent_id=session["payment_intent"],
     #             )
 
-    #     except TutoringSession.DoesNotExist:
+    #     except ZoomSession.DoesNotExist:
     #         return HttpResponse(status=200)
 
     elif session["mode"] == "payment":
@@ -168,7 +168,7 @@ def _handle_checkout_completed(session):
 
             try:
                 with transaction.atomic():
-                    if TutoringSession.objects.filter(
+                    if ZoomSession.objects.filter(
                         stripe_checkout_session_id=session["id"]
                     ).exists():
                         return

@@ -6,6 +6,7 @@ from ..views.student import (
     select_teacher,
     session_detail,
     student_sessions,
+    zoom_teacher,
 )
 from ..views.teacher import cancel_session, cancel_session_confirm
 
@@ -26,6 +27,11 @@ urlpatterns = [
         "teachers/<uuid:teacher_id>/meet/",
         meet_teacher,
         name="meet-teacher",
+    ),
+    path(
+        "teachers/<uuid:teacher_id>/zoom/",
+        zoom_teacher,
+        name="zoom-teacher",
     ),
     path(
         "sessions/",

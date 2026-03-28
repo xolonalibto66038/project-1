@@ -19,7 +19,7 @@ from apps.billing.exceptions import SubscriptionRequired
 from apps.billing.services import StripeService
 
 from ..decorators import teacher_level_required
-from ..models import TutoringSession
+from ..models import ZoomSession
 from ..services import SessionService
 from ..services.meet import MeetService
 
@@ -107,6 +107,21 @@ def available_teachers(request, subject_pk=None):
         "subject_pk": subject_pk,
         "crumbs": crumbs,
     }
+
+    context["teacher_cards"] = [
+        {
+            "card_class": "card-warning",
+            "title": _("Available Premium Teachers"),
+            "empty_message": _("No Premium teachers available right now"),
+            "teachers": paid_teachers,
+        },
+        {
+            "card_class": "card-primary",
+            "title": _("Available Free Teachers"),
+            "empty_message": _("No teachers available right now"),
+            "teachers": free_teachers,
+        },
+    ]
 
     return render(request, "apps/tutoring/student/available_teachers.html", context)
 
@@ -225,11 +240,66 @@ def meet_teacher(request, teacher_id):
 
 @login_required
 @student_required
+@teacher_level_required
+@require_POST
+def zoom_teacher(request, teacher_id):
+    teacher = get_object_or_404(
+        CustomUser.objects.select_related("teacher_profile"),
+        id=teacher_id,
+        role=UserRole.TEACHER,
+        is_active=True,
+        teacher_profile__is_verified_teacher=True,
+    )
+
+    proposed_start_raw = request.POST.get("proposed_start")
+    proposed_end_raw = request.POST.get("proposed_end")
+
+    if not proposed_start_raw or not proposed_end_raw:
+        messages.error(request, _("Please provide a proposed start and end time."))
+        return redirect("tutoring:student:available-teachers")
+
+    try:
+        proposed_start = timezone.datetime.fromisoformat(proposed_start_raw)
+        proposed_end = timezone.datetime.fromisoformat(proposed_end_raw)
+    except ValueError:
+        messages.error(request, _("Invalid date format."))
+        return redirect("tutoring:student:available-teachers")
+
+    if proposed_start >= proposed_end:
+        messages.error(request, _("End time must be after start time."))
+        return redirect("tutoring:student:available-teachers")
+
+    try:
+        from ..services.zoom import ZoomService
+
+        ZoomService.request_session(
+            student=request.user,
+            teacher=teacher,
+            proposed_start=proposed_start,
+            proposed_end=proposed_end,
+            notes=request.POST.get("student_notes", ""),
+        )
+        messages.success(
+            request, _("Zoom session request sent. Waiting for teacher approval.")
+        )
+        return redirect("tutoring:student:student-sessions")
+
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect("tutoring:student:available-teachers")
+    except Exception as ex:
+        logger.exception("zoom_teacher failed: %s", str(ex))
+        messages.error(request, _("Unable to create session. Please try again."))
+        return redirect("tutoring:student:available-teachers")
+
+
+@login_required
+@student_required
 @subscription_required
 def student_sessions(request):
 
     sessions = (
-        TutoringSession.objects.filter(
+        ZoomSession.objects.filter(
             student=request.user,
         )
         .select_related("teacher")
@@ -256,7 +326,7 @@ def session_detail(request, session_id):
     """
 
     session = get_object_or_404(
-        TutoringSession.objects.select_related(
+        ZoomSession.objects.select_related(
             "teacher",
             "teacher__teacher_profile",
             "student",

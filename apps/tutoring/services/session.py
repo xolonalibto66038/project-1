@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from apps.tutoring.models import TutoringSession
+from apps.tutoring.models import ZoomSession
 
 
 class SessionService:
@@ -22,10 +22,10 @@ class SessionService:
             raise ValueError("Cannot book yourself")
 
         # Block duplicate confirmed free session
-        existing = TutoringSession.objects.filter(
+        existing = ZoomSession.objects.filter(
             student=student,
             teacher=teacher,
-            status=TutoringSession.Status.CONFIRMED,
+            status=ZoomSession.Status.CONFIRMED,
             started_at__isnull=True,
         ).first()
 
@@ -37,13 +37,13 @@ class SessionService:
         platform_fee = Decimal("0")
         teacher_amount = Decimal("0")
 
-        return TutoringSession.objects.create(
+        return ZoomSession.objects.create(
             student=student,
             teacher=teacher,
             price=Decimal("0"),
             platform_fee=platform_fee,
             teacher_amount=teacher_amount,
-            status=TutoringSession.Status.PAYMENT_AUTHORIZED,
+            status=ZoomSession.Status.PAYMENT_AUTHORIZED,
         )
 
     @staticmethod
@@ -66,13 +66,13 @@ class SessionService:
         platform_fee = (price * Decimal(platform_fee_percent)) / Decimal("100")
         teacher_amount = price - platform_fee
 
-        return TutoringSession.objects.create(
+        return ZoomSession.objects.create(
             student=student,
             teacher=teacher,
             price=price,
             platform_fee=platform_fee,
             teacher_amount=teacher_amount,
-            status=TutoringSession.Status.PAYMENT_AUTHORIZED,
+            status=ZoomSession.Status.PAYMENT_AUTHORIZED,
             stripe_checkout_session_id=stripe_checkout_session_id,
             stripe_payment_intent_id=stripe_payment_intent_id,
             payment_authorized_at=timezone.now(),
@@ -103,12 +103,12 @@ class SessionService:
 #         # ✅ 🚫 BLOCK: existing confirmed free session not started yet
 #         if is_free:
 #             existing_free = (
-#                 TutoringSession.objects.select_for_update()
+#                 ZoomSession.objects.select_for_update()
 #                 .filter(
 #                     student=student,
 #                     teacher=teacher,
 #                     price=0,
-#                     status=TutoringSession.Status.CONFIRMED,
+#                     status=ZoomSession.Status.CONFIRMED,
 #                     started_at__isnull=True,  # not started yet
 #                 )
 #                 .first()
@@ -119,21 +119,21 @@ class SessionService:
 #                     "You already have a confirmed session with this teacher."
 #                 )
 
-#         status = TutoringSession.Status.PENDING_PAYMENT
+#         status = ZoomSession.Status.PENDING_PAYMENT
 
 #         # if is_free:
 #         #     raise ValueError("Invalid teacher rate")
 
 #         # ✅ Prevent duplicate pending sessions (fix your bug)
 #         pending_status = (
-#             TutoringSession.Status.PAYMENT_AUTHORIZED
+#             ZoomSession.Status.PAYMENT_AUTHORIZED
 #             if is_free
-#             else TutoringSession.Status.PENDING_PAYMENT
+#             else ZoomSession.Status.PENDING_PAYMENT
 #         )
 
 #         # Prevent duplicate pending sessions
 #         existing = (
-#             TutoringSession.objects.select_for_update()
+#             ZoomSession.objects.select_for_update()
 #             .filter(
 #                 student=student,
 #                 teacher=teacher,
@@ -154,12 +154,12 @@ class SessionService:
 #         teacher_amount = price - platform_fee
 
 #         status = (
-#             TutoringSession.Status.PAYMENT_AUTHORIZED
+#             ZoomSession.Status.PAYMENT_AUTHORIZED
 #             if is_free
-#             else TutoringSession.Status.PENDING_PAYMENT
+#             else ZoomSession.Status.PENDING_PAYMENT
 #         )
 
-#         session = TutoringSession.objects.create(
+#         session = ZoomSession.objects.create(
 #             student=student,
 #             teacher=teacher,
 #             price=price,

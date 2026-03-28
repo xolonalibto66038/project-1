@@ -9,8 +9,9 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .helpers import trigger_teacher_payout
-from .models import GoogleSession, TutoringSession
+from .models import GoogleSession, ZoomSession
 from .services.meet import MeetService
+from .services.zoom import ZoomService
 
 
 @csrf_exempt
@@ -53,9 +54,9 @@ def zoom_webhook(request):
 
     try:
 
-        session = TutoringSession.objects.get(zoom_meeting_id=meeting_id)
+        session = ZoomSession.objects.get(zoom_meeting_id=meeting_id)
 
-    except TutoringSession.DoesNotExist:
+    except ZoomSession.DoesNotExist:
 
         return HttpResponse(status=200)
 
@@ -65,7 +66,7 @@ def zoom_webhook(request):
 
     if event == "meeting.started":
 
-        session.status = TutoringSession.Status.IN_PROGRESS
+        session.status = ZoomSession.Status.IN_PROGRESS
 
         session.started_at = timezone.now()
 
@@ -83,7 +84,7 @@ def zoom_webhook(request):
 
     elif event == "meeting.ended":
 
-        session.status = TutoringSession.Status.COMPLETED
+        session.status = ZoomSession.Status.COMPLETED
 
         session.completed_at = timezone.now()
 

@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views import View
 from django.views.generic import TemplateView
 
-from apps.tutoring.models import TutoringSession
+from apps.tutoring.models import ZoomSession
 
 from .choices import OfferTier
 from .models import Plan, Subscription  # adjust to your actual models
@@ -218,7 +218,7 @@ class PaymentSuccessView(LoginRequiredMixin, TemplateView):
 
         if stripe_session_id:
             tutoring_session = (
-                TutoringSession.objects.filter(
+                ZoomSession.objects.filter(
                     stripe_checkout_session_id=stripe_session_id,
                     student=self.request.user,
                 )

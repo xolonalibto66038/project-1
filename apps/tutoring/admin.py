@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import GoogleSession, TutoringSession
+from .models import GoogleSession, ZoomSession
 
-admin.site.register(TutoringSession)
+admin.site.register(ZoomSession)
 admin.site.register(GoogleSession)

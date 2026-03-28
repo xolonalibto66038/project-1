@@ -21,6 +21,363 @@
   </section>
   <section class="content">
     <div class="container-fluid">
+
+      {% for card in teacher_cards %}
+        <div class="card {{ card.card_class }} card-outline">
+          <div class="card-header">
+            <h3 class="card-title">
+              <i class="fas fa-users mr-2"></i>
+              {{ card.title }}
+            </h3>
+          </div>
+          <div class="card-body p-0">
+            {% if card.teachers %}
+              <ul class="list-group list-group-flush">
+                {% for teacher in card.teachers %}
+                  <li class="list-group-item">
+                    <div class="row align-items-center">
+
+                      {# ── Avatar ── #}
+                      <div class="col-auto">
+                        {% if teacher.avatar_url %}
+                          <img src="{{ teacher.profile.avatar.url|default:'/static/img/default-avatar.png' }}"
+                               class="img-circle elevation-2"
+                               width="50"
+                               height="50"
+                               alt="Teacher Avatar">
+                        {% else %}
+                          {{ teacher.avatar_display|safe }}
+                        {% endif %}
+                      </div>
+
+                      {# ── Info ── #}
+                      <div class="col d-flex justify-content-between align-items-start">
+                        <div>
+                          <strong>{{ teacher.get_full_name }}</strong>
+                          <br>
+                          <small class="text-muted">
+                            <span class="h6 font-weight-bold text-primary">
+                              {{ teacher.teacher_profile.hour_price }} DZD / {% trans "hour" %}
+                            </span>
+                          </small>
+                          <br>
+                          {% if teacher.teacher_profile.is_online %}
+                            <span class="badge badge-success">
+                              <i class="fas fa-circle"></i> {% trans "Online" %}
+                            </span>
+                          {% else %}
+                            <span class="badge badge-secondary">
+                              <i class="fas fa-circle"></i> {% trans "Offline" %}
+                            </span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      {# ── Actions ── #}
+                      <div class="col-auto d-flex flex-wrap gap-1" style="gap:.4rem;">
+
+                        {# Active Zoom session → show Join link directly #}
+                        {% if teacher.zoom_session and teacher.zoom_session.zoom_join_url %}
+                          <a href="{{ teacher.zoom_session.zoom_join_url }}"
+                             class="btn btn-success btn-sm"
+                             target="_blank">
+                            <i class="fas fa-video mr-1"></i>
+                            {% trans "Join Zoom" %}
+                          </a>
+                        {% else %}
+                          {# Schedule a new Zoom session via modal #}
+                          <button type="button"
+                                  class="btn btn-primary btn-sm"
+                                  data-toggle="modal"
+                                  data-target="#zoomModal"
+                                  data-teacher-id="{{ teacher.id }}"
+                                  data-teacher-name="{{ teacher.get_full_name }}">
+                            <i class="fas fa-video mr-1"></i>
+                            {% trans "Zoom" %}
+                          </button>
+                        {% endif %}
+
+                        {# Schedule a Google Meet session via modal #}
+                        <button type="button"
+                                class="btn btn-outline-info btn-sm"
+                                data-toggle="modal"
+                                data-target="#meetModal"
+                                data-teacher-id="{{ teacher.id }}"
+                                data-teacher-name="{{ teacher.get_full_name }}">
+                          <i class="fas fa-calendar-plus mr-1"></i>
+                          {% trans "Meet" %}
+                        </button>
+
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-center p-4 text-muted">
+                <i class="fas fa-user-slash fa-2x mb-2"></i>
+                <p class="mb-0">{{ card.empty_message }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+  </section>
+
+  <div class="modal fade" id="zoomModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="border-radius:16px;">
+
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas fa-video mr-2 text-primary"></i>
+            {% trans "Request a Zoom Session" %}
+          </h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <form method="post" id="zoomForm" action="">
+          {% csrf_token %}
+
+          <div class="modal-body">
+
+            <p class="text-muted small mb-3">
+              {% trans "Propose a time for your Zoom session with" %}
+              <strong id="zoomTeacherName"></strong>.
+              {% trans "The teacher will confirm your request before you are asked to pay." %}
+            </p>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-alt mr-1 text-primary"></i>
+                {% trans "Proposed Start" %}
+              </label>
+              <input type="datetime-local"
+                     name="proposed_start"
+                     id="zoomProposedStart"
+                     class="form-control"
+                     required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-check mr-1 text-primary"></i>
+                {% trans "Proposed End" %}
+              </label>
+              <input type="datetime-local"
+                     name="proposed_end"
+                     id="zoomProposedEnd"
+                     class="form-control"
+                     required>
+              <small class="form-text text-muted" id="zoomDuration"></small>
+            </div>
+
+            <div class="form-group mb-0">
+              <label class="font-weight-bold small">
+                <i class="fas fa-comment-alt mr-1 text-primary"></i>
+                {% trans "Notes" %}
+                <span class="text-muted font-weight-normal">({% trans "optional" %})</span>
+              </label>
+              <textarea name="student_notes"
+                        class="form-control"
+                        rows="2"
+                        placeholder="{% trans 'Anything you want the teacher to know...' %}"></textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-dismiss="modal">
+              {% trans "Cancel" %}
+            </button>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fas fa-paper-plane mr-1"></i>
+              {% trans "Send Request" %}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="meetModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="border-radius:16px;">
+
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas fa-calendar-plus mr-2 text-info"></i>
+            {% trans "Request a Meet Session" %}
+          </h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <form method="post" id="meetForm" action="">
+          {% csrf_token %}
+
+          <div class="modal-body">
+
+            <p class="text-muted small mb-3">
+              {% trans "Propose a time for your session with" %}
+              <strong id="meetTeacherName"></strong>.
+              {% trans "The teacher will confirm your request." %}
+            </p>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-alt mr-1 text-info"></i>
+                {% trans "Proposed Start" %}
+              </label>
+              <input type="datetime-local"
+                     name="proposed_start"
+                     class="form-control"
+                     required>
+            </div>
+
+            <div class="form-group">
+              <label class="font-weight-bold small">
+                <i class="fas fa-calendar-check mr-1 text-info"></i>
+                {% trans "Proposed End" %}
+              </label>
+              <input type="datetime-local"
+                     name="proposed_end"
+                     class="form-control"
+                     required>
+            </div>
+
+            <div class="form-group mb-0">
+              <label class="font-weight-bold small">
+                <i class="fas fa-comment-alt mr-1 text-info"></i>
+                {% trans "Notes" %}
+                <span class="text-muted font-weight-normal">({% trans "optional" %})</span>
+              </label>
+              <textarea name="student_notes"
+                        class="form-control"
+                        rows="2"
+                        placeholder="{% trans 'Anything you want the teacher to know...' %}"></textarea>
+            </div>
+
+          </div>
+
+          <div class="modal-footer border-0 pt-0">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    data-dismiss="modal">
+              {% trans "Cancel" %}
+            </button>
+            <button type="submit" class="btn btn-info btn-sm">
+              <i class="fas fa-paper-plane mr-1"></i>
+              {% trans "Send Request" %}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  {# ── Zoom modal ── #}
+  $('#zoomModal').on('show.bs.modal', function (e) {
+    var btn         = $(e.relatedTarget);
+    var teacherId   = btn.data('teacher-id');
+    var teacherName = btn.data('teacher-name');
+
+    $('#zoomTeacherName').text(teacherName);
+    $('#zoomForm').attr(
+      'action',
+      '/tutoring/student/teachers/' + teacherId + '/zoom/'
+    );
+
+    // Clear previous values
+    $('#zoomProposedStart, #zoomProposedEnd').val('');
+    $('#zoomDuration').text('');
+  });
+
+  // Live duration hint
+  function updateZoomDuration() {
+    var start = new Date($('#zoomProposedStart').val());
+    var end   = new Date($('#zoomProposedEnd').val());
+    if (start && end && end > start) {
+      var mins = Math.round((end - start) / 60000);
+      var h    = Math.floor(mins / 60);
+      var m    = mins % 60;
+      var label = h > 0 ? h + 'h ' : '';
+      label += m > 0 ? m + 'min' : '';
+      $('#zoomDuration').text('Duration: ' + label);
+    } else {
+      $('#zoomDuration').text('');
+    }
+  }
+
+  $('#zoomProposedStart, #zoomProposedEnd').on('change', updateZoomDuration);
+
+  // Auto-fill end = start + 1 hour when user picks a start
+  $('#zoomProposedStart').on('change', function () {
+    if (!$('#zoomProposedEnd').val()) {
+      var start = new Date($(this).val());
+      start.setHours(start.getHours() + 1);
+      var pad = n => String(n).padStart(2, '0');
+      var iso = start.getFullYear() + '-' +
+                pad(start.getMonth() + 1) + '-' +
+                pad(start.getDate()) + 'T' +
+                pad(start.getHours()) + ':' +
+                pad(start.getMinutes());
+      $('#zoomProposedEnd').val(iso);
+      updateZoomDuration();
+    }
+  });
+
+  {# ── Meet modal ── #}
+  $('#meetModal').on('show.bs.modal', function (e) {
+    var btn         = $(e.relatedTarget);
+    var teacherId   = btn.data('teacher-id');
+    var teacherName = btn.data('teacher-name');
+
+    $('#meetTeacherName').text(teacherName);
+    $('#meetForm').attr(
+      'action',
+      '/tutoring/student/teachers/' + teacherId + '/meet/'
+    );
+  });
+</script>
+{% endblock extra_js %}
+
+{% comment %} {% extends "layouts/base.html" %}
+{% load static i18n %}
+{% load breadcrumbs %}
+{% block title %}
+  {% trans "Select an Online Teacher" %}
+{% endblock title %}
+{% block content %}
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>
+            <i class="fas fa-chalkboard-teacher text-primary mr-2"></i>
+            {% trans "Online Teachers" %}
+          </h1>
+          <p class="text-muted mb-0">{% trans "Choose a teacher for your tutoring session" %}</p>
+        </div>
+        <div class="col-sm-6">{% breadcrumb crumbs %}</div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
       <div class="card card-warning card-outline">
         <div class="card-header">
           <h3 class="card-title">
@@ -82,7 +439,7 @@
                           {% csrf_token %}
                           <button type="submit" class="btn btn-primary btn-sm">
                             <i class="fas fa-check mr-1"></i>
-                            {% trans "Select" %}
+                            {% trans "Zoom" %}
                           </button>
                         </form>
                       {% endif %}
@@ -290,4 +647,4 @@
     );
   });
 </script>
-{% endblock extra_js %}
+{% endblock extra_js %} {% endcomment %}

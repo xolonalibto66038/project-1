@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from apps.authentication.decorators import teacher_required
 
 from ..helpers import convert_to_browser_join_url, redirect_back
-from ..models import TutoringSession
+from ..models import ZoomSession
 from ..services import ZoomService  # MeetService
 
 
@@ -27,11 +27,11 @@ def cancel_session_confirm(request, session_id):
     else:
         lookup = {"id": session_id, "student": request.user}
 
-    session = get_object_or_404(TutoringSession, **lookup)
+    session = get_object_or_404(ZoomSession, **lookup)
 
     cancellable_statuses = [
-        TutoringSession.Status.PAYMENT_AUTHORIZED,
-        TutoringSession.Status.CONFIRMED,
+        ZoomSession.Status.PAYMENT_AUTHORIZED,
+        ZoomSession.Status.CONFIRMED,
     ]
 
     if session.status not in cancellable_statuses:
@@ -67,13 +67,13 @@ def cancel_session(request, session_id):
         lookup = {"id": session_id, "student": request.user}
 
     session = get_object_or_404(
-        TutoringSession.objects.select_for_update(),
+        ZoomSession.objects.select_for_update(),
         **lookup,
     )
 
     cancellable_statuses = [
-        TutoringSession.Status.PAYMENT_AUTHORIZED,
-        TutoringSession.Status.CONFIRMED,
+        ZoomSession.Status.PAYMENT_AUTHORIZED,
+        ZoomSession.Status.CONFIRMED,
     ]
 
     if session.status not in cancellable_statuses:
@@ -89,7 +89,7 @@ def cancel_session(request, session_id):
         except Exception as ex:
             print(f"Zoom delete failed: {str(ex)}")
 
-    session.status = TutoringSession.Status.CANCELED
+    session.status = ZoomSession.Status.CANCELED
     session.canceled_by = request.user  # ← who canceled
     session.save(update_fields=["status", "canceled_by", "updated_at"])
 
@@ -115,14 +115,14 @@ def cancel_session(request, session_id):
 #         lookup = {"id": session_id, "student": request.user}
 
 #     session = get_object_or_404(
-#         TutoringSession.objects.select_for_update(),
+#         ZoomSession.objects.select_for_update(),
 #         **lookup,
 #     )
 
 #     # Only cancellable if not already done or canceled
 #     cancellable_statuses = [
-#         TutoringSession.Status.PAYMENT_AUTHORIZED,
-#         TutoringSession.Status.CONFIRMED,
+#         ZoomSession.Status.PAYMENT_AUTHORIZED,
+#         ZoomSession.Status.CONFIRMED,
 #     ]
 
 #     if session.status not in cancellable_statuses:
@@ -137,7 +137,7 @@ def cancel_session(request, session_id):
 #             # Log but don't block cancellation
 #             print(f"Zoom delete failed: {str(ex)}")
 
-#     session.status = TutoringSession.Status.CANCELED
+#     session.status = ZoomSession.Status.CANCELED
 #     session.save(update_fields=["status", "updated_at"])
 
 #     # TODO: trigger refund if session was paid
@@ -156,12 +156,12 @@ def cancel_session(request, session_id):
 # @transaction.atomic
 # def confirm_session(request, session_id):
 
-#     session = TutoringSession.objects.select_for_update().get(
+#     session = ZoomSession.objects.select_for_update().get(
 #         id=session_id,
 #         teacher=request.user,
 #     )
 
-#     if session.status != TutoringSession.Status.PAYMENT_AUTHORIZED:
+#     if session.status != ZoomSession.Status.PAYMENT_AUTHORIZED:
 #         raise ValidationError("Payment not authorized")
 
 #     scheduled_at_str = request.POST["scheduled_at"]
@@ -184,7 +184,7 @@ def cancel_session(request, session_id):
 #     browser_start_url = convert_to_browser_join_url(meeting["start_url"])
 #     session.zoom_start_url = browser_start_url
 
-#     session.status = TutoringSession.Status.CONFIRMED
+#     session.status = ZoomSession.Status.CONFIRMED
 #     session.confirmed_at = timezone.now()
 
 #     session.save()
@@ -197,12 +197,12 @@ def cancel_session(request, session_id):
 @transaction.atomic
 def confirm_session(request, session_id):
 
-    session = TutoringSession.objects.select_for_update().get(
+    session = ZoomSession.objects.select_for_update().get(
         id=session_id,
         teacher=request.user,
     )
 
-    if session.status != TutoringSession.Status.PAYMENT_AUTHORIZED:
+    if session.status != ZoomSession.Status.PAYMENT_AUTHORIZED:
         raise ValidationError("Payment not authorized")
 
     scheduled_at_str = request.POST["scheduled_at"]
@@ -217,11 +217,11 @@ def confirm_session(request, session_id):
     # Each session is 60 min + 30 min buffer = 90 min between sessions
     buffer = timedelta(minutes=90)
     conflict = (
-        TutoringSession.objects.filter(
+        ZoomSession.objects.filter(
             teacher=request.user,
             status__in=[
-                TutoringSession.Status.CONFIRMED,
-                TutoringSession.Status.IN_PROGRESS,
+                ZoomSession.Status.CONFIRMED,
+                ZoomSession.Status.IN_PROGRESS,
             ],
             scheduled_at__range=(
                 scheduled_at - buffer,
@@ -247,7 +247,7 @@ def confirm_session(request, session_id):
     session.zoom_meeting_id = meeting["id"]
     session.zoom_join_url = convert_to_browser_join_url(meeting["join_url"])
     session.zoom_start_url = convert_to_browser_join_url(meeting["start_url"])
-    session.status = TutoringSession.Status.CONFIRMED
+    session.status = ZoomSession.Status.CONFIRMED
     session.confirmed_at = timezone.now()
 
     session.save()
@@ -260,12 +260,12 @@ def confirm_session(request, session_id):
 # @transaction.atomic
 # def confirm_meet_session(request, session_id):
 
-#     session = TutoringSession.objects.select_for_update().get(
+#     session = ZoomSession.objects.select_for_update().get(
 #         id=session_id,
 #         teacher=request.user,
 #     )
 
-#     if session.status != TutoringSession.Status.PAYMENT_AUTHORIZED:
+#     if session.status != ZoomSession.Status.PAYMENT_AUTHORIZED:
 #         raise ValidationError("Payment not authorized")
 
 #     scheduled_at_str = request.POST.get("scheduled_at")
@@ -283,7 +283,7 @@ def confirm_session(request, session_id):
 #     session.meeting_id = meeting["event_id"]
 #     session.meeting_join_url = meeting["join_url"]
 #     session.meeting_start_url = meeting["start_url"]
-#     session.status = TutoringSession.Status.CONFIRMED
+#     session.status = ZoomSession.Status.CONFIRMED
 #     session.confirmed_at = timezone.now()
 #     session.save()
 
@@ -295,7 +295,7 @@ def confirm_session(request, session_id):
 def teacher_sessions(request):
 
     sessions = (
-        TutoringSession.objects.filter(
+        ZoomSession.objects.filter(
             teacher=request.user,
         )
         .select_related("student")
