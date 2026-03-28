@@ -4,48 +4,47 @@
   {% trans "Social Login" %} | WN
 {% endblock title %}
 {% block extra_css %}
-  <style>
-.provider-icon {
-    font-size: 40px;
-}
+<style>
+  .provider-icon {
+      font-size: 40px;
+  }
 
-.btn-provider-google {
-    background-color: #db4437;
-    border-color: #db4437;
-    color: #fff;
-}
+  .btn-provider-google {
+      background-color: #db4437;
+      border-color: #db4437;
+      color: #fff;
+  }
 
-.btn-provider-github {
-    background-color: #24292e;
-    border-color: #24292e;
-    color: #fff;
-}
+  .btn-provider-github {
+      background-color: #24292e;
+      border-color: #24292e;
+      color: #fff;
+  }
 
-.btn-provider-facebook {
-    background-color: #1877f2;
-    border-color: #1877f2;
-    color: #fff;
-}
+  .btn-provider-facebook {
+      background-color: #1877f2;
+      border-color: #1877f2;
+      color: #fff;
+  }
 
-.btn-provider-google:hover,
-.btn-provider-github:hover,
-.btn-provider-facebook:hover {
-    opacity: .9;
-    color: #fff;
-}
-
-  </style>
+  .btn-provider-google:hover,
+  .btn-provider-github:hover,
+  .btn-provider-facebook:hover {
+      opacity: .9;
+      color: #fff;
+  }
+</style>
 {% endblock %}
 {% block auth_card %}
+  <div class="login-logo">
+    <a href="/">
+      <i class="fas fa-graduation-cap text-primary"></i>
+      <span>{% trans "EMS" %}</span>
+    </a>
+  </div>
   <div class="login-box">
     <div class="card shadow-lg">
       <div class="card-body login-card-body text-center">
-        <!-- Logo -->
-        <div class="login-logo mb-4">
-          <a href="/">
-            <b>W</b>onder<b>N</b>et
-          </a>
-        </div>
         <!-- Provider Icon -->
         <div class="mb-3">
           <i class="fab fa-{{ provider.id }} provider-icon provider-{{ provider.id }}"></i>

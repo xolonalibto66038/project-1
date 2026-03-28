@@ -3,9 +3,9 @@
 {% load breadcrumbs %}
 {% block title %}
   {% trans "Educational Levels" %}
-{% endblock %}
+{% endblock title %}
 {% block extra_css %}
-  <style>
+<style>
   .level-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
@@ -38,8 +38,8 @@
   .card-header[aria-expanded="true"] .chevron-icon {
     transform: rotate(180deg);
   }
-  </style>
-{% endblock %}
+</style>
+{% endblock extra_css %}
 {% block content %}
   {# ── Breadcrumb ── #}
   <section class="content-header">
@@ -61,7 +61,7 @@
       <div class="row mb-4">
         <div class="col-12">
           <div class="card shadow-sm border-0">
-            <div class="card-header bg-gradient-info text-white text-center"
+            <div class="card-header bg-gradient-primary text-white text-center"
                  style="cursor: pointer"
                  data-toggle="collapse"
                  data-target="#emsCollapse"
@@ -149,9 +149,9 @@
       {% endif %}
     </div>
   </section>
-{% endblock %}
+{% endblock content %}
 {% block extra_js %}
-  <script>
+<script>
   // Rotate chevron on accordion toggle
   $('#emsCollapse')
     .on('show.bs.collapse', function () {
@@ -160,5 +160,5 @@
     .on('hide.bs.collapse', function () {
       $(this).prev('.card-header').find('.chevron-icon').css('transform', 'rotate(0deg)');
     });
-  </script>
-{% endblock %}
+</script>
+{% endblock extra_js %}

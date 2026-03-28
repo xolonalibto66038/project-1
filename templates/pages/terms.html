@@ -32,7 +32,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-3 d-none d-md-block">
-          <div class="card card-outline card-primary sticky-top" style="top: 70px;">
+          <div class="card card-outline sticky-top" style="top: 70px;">
             <div class="card-header">
               <h3 class="card-title">
                 <i class="fas fa-list mr-2"></i>{% trans "Contents" %}
@@ -43,7 +43,7 @@
                 {% for section in sections %}
                   <li class="nav-item">
                     <a href="#{{ section.id }}"
-                       class="nav-link py-2 toc-link text-{{ section.color }}">
+                       class="nav-link py-2 toc-link">
                       <i class="{{ section.icon }} mr-2"></i>
                       {{ forloop.counter }}. {{ section.title }}
                     </a>
@@ -61,7 +61,7 @@
             <strong>{% trans "Last Updated:" %}</strong> {{ last_updated }}
           </div>
           {# ── Intro ── #}
-          <div class="card card-outline card-primary mb-4">
+          <div class="card card-outline mb-4">
             <div class="card-body">
               <p class="mb-0">
                 {% blocktrans %}
@@ -75,7 +75,7 @@
           </div>
           {# ── Sections ── #}
           {% for section in sections %}
-            <div class="card card-outline card-{{ section.color }} mb-4"
+            <div class="card card-outline mb-4"
                  id="{{ section.id }}">
               <div class="card-header">
                 <h3 class="card-title font-weight-bold">
@@ -87,7 +87,7 @@
                 <ul class="list-unstyled mb-0">
                   {% for item in section.content %}
                     <li class="mb-2 d-flex align-items-start">
-                      <i class="fas fa-angle-right text-{{ section.color }} mt-1 mr-2 flex-shrink-0"></i>
+                      <i class="fas fa-angle-right mt-1 mr-2 flex-shrink-0"></i>
                       <span>{{ item }}</span>
                     </li>
                   {% endfor %}

@@ -7,14 +7,34 @@
 {% block body_class %}register-page{% endblock %}
 {% block auth_card %}
   <div class="register-box">
-    <div class="register-logo">
-      <a href="/"><b>W</b>onder<b>N</b>et</a>
+    <div class="login-logo">
+      <a href="/">
+        <i class="fas fa-graduation-cap text-primary"></i>
+        <span>{% trans "EMS" %}</span>
+      </a>
     </div>
     <div class="card">
       <div class="card-body register-card-body">
-        <p class="login-box-msg">
-          👋 {% trans "Welcome" %}, <strong>{{ user.first_name }}</strong>!
-          {% trans "Tell us which grade you're in." %}
+        <!-- Onboarding Icon -->
+        <div class="text-center mb-3">
+          <div style="
+            width:70px;
+            height:70px;
+            margin:auto;
+            border-radius:50%;
+            background:rgba(0,123,255,0.1);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          ">
+            <i class="fas fa-user-graduate text-primary" style="font-size:28px;"></i>
+          </div>
+        </div>
+        <p class="login-box-msg mb-2">
+          {% trans "Welcome" %}, <strong>{{ user.first_name }}</strong> 👋
+        </p>
+        <p class="text-center text-muted">
+          {% trans "Tell us which grade you're in to personalize your experience." %}
         </p>
         <form method="post" id="student-onboarding-form">
           {% csrf_token %}

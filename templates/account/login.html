@@ -1,20 +1,18 @@
 {% extends "layouts/auth.html" %}
 {% load static i18n allauth account socialaccount %}
 {% block title %}
-  {% trans "Sign In" %} | WN
+  {% trans "Sign In" %}
 {% endblock title %}
 {% block auth_card %}
   <div class="login-box">
     <!-- Logo -->
     <div class="login-logo">
-      <a href="{% url 'pages:landing' %}" class="nav-link">
-        <img src="{% static 'dist/img/wnlogo.png' %}"
-             alt="{% trans 'WN Logo' %}"
-             class="brand-image img-circle elevation-3">
+      <a href="/">
+        <i class="fas fa-graduation-cap text-primary"></i>
+        <span>{% trans "EMS" %}</span>
       </a>
-      <a href="/"><b>W</b>onder<b>N</b>et</a>
     </div>
-    <div class="card card-outline card-primary">
+    <div class="card card-outline">
       <div class="card-header text-center">
         <h4 class="mb-0">{% trans "Sign in to your account" %}</h4>
       </div>
